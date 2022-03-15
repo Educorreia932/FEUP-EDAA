@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Data
+map.xml
+*.edges
+*.nodes
+*.points
