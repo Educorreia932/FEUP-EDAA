@@ -8,6 +8,8 @@ namespace fs = std::filesystem;
 #include "DWGraph.h"
 #include "point.h"
 
+#include "dir.h"
+
 using namespace std;
 using namespace rapidxml;
 
@@ -161,36 +163,40 @@ edge_type_t get_edge_type(xml_node<> *it) {
 
 int main(int argc, char *argv[]) {
     assert(argc == 2);
+    
+    const string prefix = string(argv[1]);
+
+    const string dir = getDirectory(prefix);
+
+    const string nodesFilepath  = prefix + ".nodes";
+    const string edgesFilepath  = prefix + ".edges";
+    const string pointsFilepath = prefix + ".points";
+
     // Create destination directory
-    {
-        string s = string(argv[1]);
-        long i = long(s.size()-1) - long(find(s.rbegin(), s.rend(), '/') - s.rbegin());
-        if(i >= 0) {
-            s = s.substr(0, i);
-            if(fs::exists(s)){
-                cout << "Directory already exists: " + s + "; proceeding" << endl;
-            } else {
-                cout << "Creating directory " + s << endl;
-                assert(fs::create_directories(s));
-            }
+    if(dir != ""){
+        if(fs::exists(prefix)){
+            cout << "Directory already exists: " + prefix + "; proceeding" << endl;
+        } else {
+            cout << "Creating directory " + prefix << endl;
+            assert(fs::create_directories(prefix));
         }
     }
+
     // Check if files already exist
-    {
-        if(fs::exists(string(argv[1]) + ".nodes")){
-            cout << "Files already exist, exiting" << endl;
-            return 0;
-        }
+    if(fs::exists(nodesFilepath)){
+        cout << "Files already exist, exiting" << endl;
+        return 0;
     }
+    
     //
     char *text = nullptr; {
-        string all = "";
+        stringstream ss;
         string buf;
         while (getline(cin, buf)) {
-            all += buf + "\n";
+            ss << buf << "\n";
         }
-        text = new char[all.size() + 1];
-        strcpy(text, all.c_str());
+        text = new char[ss.str().size()+1];
+        strcpy(text, ss.str().c_str());
     }
     xml_document<> doc;
     doc.parse<0>(text);
