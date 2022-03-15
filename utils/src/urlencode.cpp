@@ -18,6 +18,22 @@ std::string urlencode(const std::string &s){
     return os.str();
 }
 
+std::string urlencode(const std::string &s, const std::string &encode){
+    std::stringstream os;
+    os.fill('0');
+    os << std::hex;
+    for(const char &c:s){
+        if(encode.find(c) == std::string::npos) {
+            os << c;
+        }else{
+            os << std::uppercase << '%'
+               << std::setw(2) << int((unsigned char)c)
+               << std::nouppercase;
+        }
+    }
+    return os.str();
+}
+
 std::string urldecode(const std::string &str){
     std::string s = "";
     size_t i = 0;

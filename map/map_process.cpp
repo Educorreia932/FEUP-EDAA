@@ -23,6 +23,22 @@ xml_node<> *find_tag(xml_node<> *p, const string &k) {
 
 typedef int speed_t;
 
+/**
+ * @brief A way is a sequence of nodes that are connected by one type of
+ * transport infrastructure, like a road or a path.
+ * 
+ * A way generally describes a single road, where all edges are connected by the
+ * same type of road/path (highway, road, path, ...), and the speed limit is the
+ * same between consecutive edges in a way.
+ * 
+ * A way may be one-way if transit can only flow in the direction of the nodes
+ * (a way that is one-way with nodes 1,2,3,4 can only be traversed 1->2->3->4,
+ * not 4->3->2->1). A way may also be two-way, or both-way, in which case it can
+ * be traversed in both directions. A way may also be a roundabout, in which
+ * case it is similar in working as one-way.
+ * 
+ * Note that a way is NOT an edge, but rather a list of edges.
+ */
 class way_t : public list<DWGraph::node_t> {
 public:
     enum dir_t {
@@ -111,6 +127,10 @@ ostream& operator<<(ostream &os, const way_t &w){
     return os;
 }
 
+/**
+ * @brief Way types we are accepting from OpenStreetMap, and how we map each OSM
+ * way type into our own edge types.
+ */
 unordered_map<string, edge_type_t> edge_accept = {
     {"motorway"         , edge_type_t::MOTORWAY         },
     {"motorway_link"    , edge_type_t::MOTORWAY_LINK    },
@@ -129,13 +149,21 @@ unordered_map<string, edge_type_t> edge_accept = {
     {"bus_stop"         , edge_type_t::SERVICE          },
     {"track"            , edge_type_t::SERVICE          }
 };
+/**
+ * @brief Set of way types we are explicitly rejecting.
+ * 
+ * This is so that new edge types can be printed on screen so the user can judge
+ * if they are worth including or not. Anyway, way types not in edge_accept are
+ * rejected, except those that are not in edge_reject trigger a warning.
+ */
 unordered_set<string> edge_reject = {
     "steps",        "pedestrian", "footway",   "cycleway",
     "construction", "path",       "bridleway", "platform", "raceway",
-    "elevator",     "proposed",   "planned",   "bus_stop", "services"};
-unordered_set<string> service_accept = {"driveway", "parking_aisle", "alley"};
-unordered_set<string> service_reject = {"campground", "emergency_access",
-                                        "drive-through"};
+    "elevator",     "proposed",   "planned",   "bus_stop", "services",
+    "crossing", "corridor"};
+// unordered_set<string> service_accept = {"driveway", "parking_aisle", "alley"};
+// unordered_set<string> service_reject = {"campground", "emergency_access",
+//                                         "drive-through"};
 edge_type_t get_edge_type(xml_node<> *it) {
     auto parea = find_tag(it, "area");
     if (parea != nullptr && string(parea->first_attribute("v")->value()) == "yes") return edge_type_t::NO;
@@ -174,21 +202,23 @@ int main(int argc, char *argv[]) {
 
     // Create destination directory
     if(dir != ""){
-        if(fs::exists(prefix)){
-            cout << "Directory already exists: " + prefix + "; proceeding" << endl;
+        if(fs::exists(dir)){
+            cout << "Directory already exists: " + dir << endl;
         } else {
-            cout << "Creating directory " + prefix << endl;
-            assert(fs::create_directories(prefix));
+            cout << "Creating directory: " + dir << endl;
+            assert(fs::create_directories(dir));
         }
     }
 
+    /*
     // Check if files already exist
     if(fs::exists(nodesFilepath)){
         cout << "Files already exist, exiting" << endl;
         return 0;
     }
+    */
     
-    //
+    // Read XML
     char *text = nullptr; {
         stringstream ss;
         string buf;
@@ -201,54 +231,53 @@ int main(int argc, char *argv[]) {
     xml_document<> doc;
     doc.parse<0>(text);
 
-    unordered_map<long long, coord_t> nodes, nodes_all;
-
+    // Get ways
     list<way_t> ways;
-    
-    {
-        for (auto it = doc.first_node()->first_node("way"); string(it->name()) == "way"; it = it->next_sibling()) {
-            edge_type_t t = get_edge_type(it);
-            if (t == edge_type_t::NO) continue;
-            way_t way(it, t); ways.push_back(way);
-            for(const DWGraph::node_t &u: way) nodes[u];
-        }
+    unordered_set<long long> nodesInWays;
+    for (
+        auto it = doc.first_node()->first_node("way");
+        string(it->name()) == "way";
+        it = it->next_sibling()
+    ) {
+        edge_type_t t = get_edge_type(it);
+        if (t == edge_type_t::NO) continue;
+        way_t way(it, t); ways.push_back(way);
+        for(const DWGraph::node_t &u: way) nodesInWays.insert(u);
     }
 
-    /** Insert missing coordinates in nodes */ {
-        for (auto it = doc.first_node()->first_node("node");
-          string(it->name()) == "node";
-          it = it->next_sibling()) {
-            DWGraph::node_t u = atoll(it->first_attribute("id")->value());
-            coord_t coord(atof(it->first_attribute("lat")->value()),
-                          atof(it->first_attribute("lon")->value()));
-            nodes_all[u] = coord;
-            if(nodes.count(u)) nodes[u] = coord;
-        }
+    // Get nodes
+    unordered_map<long long, coord_t> nodes;
+    for (
+        auto it = doc.first_node()->first_node("node");
+        string(it->name()) == "node";
+        it = it->next_sibling()
+    ) {
+        DWGraph::node_t u = atoll(it->first_attribute("id")->value());
+        coord_t c(
+            atof(it->first_attribute("lat")->value()),
+            atof(it->first_attribute("lon")->value())
+        );
+        nodes[u] = c;
     }
 
     // Print nodes
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        try {
-            os.open(string(argv[1]) + ".nodes");
-        } catch(ofstream::failure e) {
-            cerr << "ERROR: Failed to open file " << string(argv[1]) + ".nodes" << endl;
-            return 1;
-        }
+        os.precision(7);
+        os.open(nodesFilepath);
         os << nodes.size() << "\n";
-        for(const pair<DWGraph::node_t, coord_t> &u: nodes) os << u.first << " " << u.second.getLat() << " " << u.second.getLon() << "\n";
+        for(const long long nodeId: nodesInWays){
+            coord_t c = nodes[nodeId];
+            os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
+        }
     }
+
     // Print ways/edges
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        try {
-            os.open(string(argv[1]) + ".edges");
-        } catch(ofstream::failure e) {
-            cerr << "ERROR: Failed to open file " << string(argv[1]) + ".edges" << endl;
-            return 1;
-        }
+        os.open(edgesFilepath);
         size_t sz = 0;
         for(const way_t &w: ways){
             sz += w.getNumWays();
@@ -259,8 +288,9 @@ int main(int argc, char *argv[]) {
         }
     }
     
+    // Get points of interest
     list<point_t> points; {
-        // Nodes
+        // Nodes that may be points of interest
         for (auto it = doc.first_node()->first_node("node"); string(it->name()) == "node"; it = it->next_sibling()) {
             auto pname = find_tag(it, "name");
             if(pname != NULL){
@@ -271,16 +301,15 @@ int main(int argc, char *argv[]) {
                 points.push_back(p);
             }
         }
-        // Ways
+        // Ways that may be points of interest (e.g., buildings are described as ways)
         for (auto it = doc.first_node()->first_node("way"); string(it->name()) == "way"; it = it->next_sibling()) {
             auto pname = find_tag(it, "name");
             if(pname != NULL){
                 point_t p;
                 p.setName(pname->first_attribute("v")->value());
                 way_t way(it, edge_type_t::NO);
-                p.setCoord(way.get_mean_coord(nodes_all));
-                if(p.getName() == "Porto - Campanhã") points.push_front(p);
-                else points.push_back(p);
+                p.setCoord(way.get_mean_coord(nodes));
+                points.push_back(p);
             }
         }
     }
@@ -288,15 +317,11 @@ int main(int argc, char *argv[]) {
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        try {
-            os.open(string(argv[1]) + ".points");
-        } catch(ofstream::failure e) {
-            cerr << "ERROR: Failed to open file " << string(argv[1]) + ".points" << endl;
-            return 1;
-        }
+        os.precision(7);
+        os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << p.getName() << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+            os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
         }
     }
     return 0;
