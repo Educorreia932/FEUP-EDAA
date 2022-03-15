@@ -5,7 +5,6 @@ namespace fs = std::filesystem;
 #include "rapidxml.hpp"
 #include "EdgeType.h"
 #include "coord.h"
-#include "encoded_string.h"
 #include "DWGraph.h"
 #include "point.h"
 
@@ -84,7 +83,7 @@ public:
             default: throw invalid_argument("");
         }
     }
-    coord_t get_mean_coord(const std::unordered_map<DWGraph::node_t, coord_t> &nodes) const{
+    coord_t get_mean_coord(const unordered_map<DWGraph::node_t, coord_t> &nodes) const{
         coord_t ret(0,0);
         for(auto it = begin(); it != end(); ++it){
             ret = ret + nodes.at(*it);
@@ -224,23 +223,23 @@ int main(int argc, char *argv[]) {
     // Print nodes
     {
         ofstream os;
-        os.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        os.exceptions(ifstream::failbit | ifstream::badbit);
         try {
             os.open(string(argv[1]) + ".nodes");
-        } catch(std::ofstream::failure e) {
+        } catch(ofstream::failure e) {
             cerr << "ERROR: Failed to open file " << string(argv[1]) + ".nodes" << endl;
             return 1;
         }
         os << nodes.size() << "\n";
-        for(const std::pair<DWGraph::node_t, coord_t> &u: nodes) os << u.first << " " << u.second << "\n";
+        for(const pair<DWGraph::node_t, coord_t> &u: nodes) os << u.first << " " << u.second.getLat() << " " << u.second.getLon() << "\n";
     }
     // Print ways/edges
     {
         ofstream os;
-        os.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        os.exceptions(ifstream::failbit | ifstream::badbit);
         try {
             os.open(string(argv[1]) + ".edges");
-        } catch(std::ofstream::failure e) {
+        } catch(ofstream::failure e) {
             cerr << "ERROR: Failed to open file " << string(argv[1]) + ".edges" << endl;
             return 1;
         }
@@ -282,16 +281,16 @@ int main(int argc, char *argv[]) {
     // Print points of interest
     {
         ofstream os;
-        os.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        os.exceptions(ifstream::failbit | ifstream::badbit);
         try {
             os.open(string(argv[1]) + ".points");
-        } catch(std::ofstream::failure e) {
+        } catch(ofstream::failure e) {
             cerr << "ERROR: Failed to open file " << string(argv[1]) + ".points" << endl;
             return 1;
         }
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << p << "\n";
+            os << p.getName() << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
         }
     }
     return 0;
