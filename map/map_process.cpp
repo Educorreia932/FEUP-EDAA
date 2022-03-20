@@ -48,6 +48,7 @@ public:
     };
 private:
     void get_way(xml_node<> *it){
+        id = atoll(it->first_attribute("id")->value());
         for(auto j = it->first_node("nd"); string(j->name()) == "nd"; j = j->next_sibling()){
             this->push_back(atoll(j->first_attribute("ref")->value()));
         }
@@ -81,6 +82,7 @@ private:
         return s;
     }
 public:
+    long long id;
     dir_t dir;
     speed_t speed;
     edge_type_t edgeType;
@@ -112,13 +114,13 @@ public:
 
 ostream& operator<<(ostream &os, const way_t &w){
     if(w.dir == way_t::dir_t::Front || w.dir == way_t::dir_t::Both){
-        os << char(w.edgeType) << " " << w.speed << " " << w.size();
+        os << w.id << " " << char(w.edgeType) << " " << w.speed << " " << w.size();
         for(auto it = w.begin(); it != w.end(); ++it){
             os << "\n" << *it;
         }
     }
     if(w.dir == way_t::dir_t::Back || w.dir == way_t::dir_t::Both){
-        os << "\n" << char(w.edgeType) << " " << w.speed << " " << w.size();
+        os << "\n" << w.id + 1000000000000L << " " << char(w.edgeType) << " " << w.speed << " " << w.size();
         for(auto it = w.rbegin(); it != w.rend(); ++it){
             os << "\n" << *it;
         }
@@ -210,13 +212,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /*
     // Check if files already exist
     if(fs::exists(nodesFilepath)){
         cout << "Files already exist, exiting" << endl;
         return 0;
     }
-    */
     
     // Read XML
     char *text = nullptr; {
@@ -239,6 +239,7 @@ int main(int argc, char *argv[]) {
         string(it->name()) == "way";
         it = it->next_sibling()
     ) {
+        if (find_tag(it, "area") != nullptr) continue;
         edge_type_t t = get_edge_type(it);
         if (t == edge_type_t::NO) continue;
         way_t way(it, t); ways.push_back(way);
@@ -266,7 +267,7 @@ int main(int argc, char *argv[]) {
         os.exceptions(ifstream::failbit | ifstream::badbit);
         os.precision(7);
         os.open(nodesFilepath);
-        os << nodes.size() << "\n";
+        os << nodesInWays.size() << "\n";
         for(const long long nodeId: nodesInWays){
             coord_t c = nodes[nodeId];
             os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
@@ -317,7 +318,7 @@ int main(int argc, char *argv[]) {
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        os.precision(7);
+        os << fixed << setprecision(7);
         os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){

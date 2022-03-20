@@ -48,7 +48,7 @@ bool DWGraph::DWGraph::hasNode(node_t u) const{
 
 void DWGraph::DWGraph::addEdge(node_t u, node_t v, weight_t w){
     Edge e(v, w);
-    if(adj.at(u).count(e)) throw std::invalid_argument("Edge already exists");
+    if(adj.at(u).count(e)) throw std::invalid_argument("Edge already exists: " + std::to_string(u) + "," + std::to_string(v));
     adj.at(u).insert(e);
     pred.at(v).insert(u);
 }
