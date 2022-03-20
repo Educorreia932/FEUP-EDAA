@@ -17,8 +17,8 @@ set(CMAKE_CXX_STANDARD 14)
 add_subdirectory("lib/GraphViewerCpp")
 include_directories("lib/GraphViewerCpp/include")
 
-include_directories("include" "algorithms/include" "structures/include" "utils/include")
-file(GLOB_RECURSE SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
+include_directories("include" "structures/include" "utils/include")
+file(GLOB_RECURSE SRC "structures/src/*.cpp" "utils/src/*.cpp")
 file(GLOB_RECURSE SRC_DRIVERS "src/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
