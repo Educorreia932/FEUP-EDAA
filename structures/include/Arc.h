@@ -1,9 +1,20 @@
+#pragma once
+
 #include "Event.h"
+#include "VoronoiDiagram.h"
 
 class Arc {
-    private:
-        Event* event;
-
     public:
-        Arc();
+        Arc* left;
+        Arc* right;
+        Arc* previous;
+        Arc* next;
+
+        Segment leftHalfEdge;
+        Segment rightHalfEdge;
+
+        Site* site;
+
+        Arc(Site* site);
+        Arc(Site* site, Arc* previous, Arc* next);
 };

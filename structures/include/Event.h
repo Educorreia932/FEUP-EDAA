@@ -1,4 +1,4 @@
-#include "Site.h"
+#include "Arc.h"
 
 class Event {
 private:
@@ -10,15 +10,18 @@ public:
     };
 
     Type type;
+    bool valid = true;
 
     // Site event
-    Site site;
+    Site* site;
+
+    Event(int x, int y);
+    Event(Site site);
 
     // Circle event
     Arc arc;
 
-    Event(int x, int y);
-    Event(Site site);
+    Event(Arc arc);
 
     bool operator<(const Event& site) {
         return y < site.y;
