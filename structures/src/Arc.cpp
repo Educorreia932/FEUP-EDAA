@@ -2,8 +2,8 @@
 
 Arc::Arc(Site* site) : site(site) {
 
-};
+}
 
-Arc::Arc(Site* site, Arc* previous, Arc* next) : previous(previous), next(next), site(site) {
+Arc::Arc(Site* site, Arc* left, Arc* right) : left(left), right(right), site(site) {
 
-};
+}

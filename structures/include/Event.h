@@ -5,6 +5,7 @@
 #include "VoronoiDiagram.h"
 
 class Arc;
+class Site;
 
 class Event {
 public:
@@ -18,17 +19,17 @@ public:
     double y;
 
     // Site event
-    Site *site;
+    Site* site;
 
     Event(int x, int y);
-    Event(Site *site);
+    Event(Site* site);
 
     // Circle event
     Vector2 point;
-    Arc *arc;
+    Arc* arc;
 
-    Event(Arc *arc);
-    Event(double y, Vector2 point, Arc *arc);
+    Event(Arc* arc);
+    Event(double y, Vector2 point, Arc* arc);
 
     bool operator<(const Event &event) const;
 };

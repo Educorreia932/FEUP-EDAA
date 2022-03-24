@@ -4,6 +4,9 @@
 #include "Vector2.h"
 
 #include <list>
+#include <vector>
+
+class FortuneAlgorithm;
 
 struct Face;
 
@@ -15,13 +18,13 @@ struct Site {
 struct Segment {
     Site start;
     Site end;
-    Segment *twin = nullptr;
-    Face *incident_face;
+    Segment* twin = nullptr;
+    Face* incident_face;
 };
 
 struct Face {
-    Site *site;
-    Segment *outer_component;
+    Site* site;
+    Segment* outer_component;
 };
 
 struct Vertex {
@@ -31,13 +34,17 @@ struct Vertex {
 
 class VoronoiDiagram {
 private:
+    friend FortuneAlgorithm;
+
+    std::vector<Site> sites;
+    std::vector<Face> faces;
     std::list<Vertex> vertices;
     std::list<Segment> half_edges;
 public:
-    VoronoiDiagram();
+    VoronoiDiagram(const std::vector<Vector2> points);
 
-    Segment *createHalfEdge(Face *face);
-    Vertex *createVertex(Vector2 point);
+    Segment* createHalfEdge(Face* face);
+    Vertex* createVertex(Vector2 point);
 };
 
 #endif

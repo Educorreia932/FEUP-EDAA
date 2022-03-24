@@ -8,19 +8,18 @@ class Event;
 
 class Arc {
 public:
-    Arc *left;
-    Arc *right;
-    Arc *previous;
-    Arc *next;
+    Arc* parent;
+    Arc* left;
+    Arc* right;
 
-    Segment *leftHalfEdge;
-    Segment *rightHalfEdge;
+    Segment* leftHalfEdge;
+    Segment* rightHalfEdge;
 
-    Site *site;
-    Event *event;
+    Site* site;
+    Event* event;
 
-    Arc(Site *site);
-    Arc(Site *site, Arc *previous, Arc *next);
+    Arc(Site* site);
+    Arc(Site* site, Arc* left, Arc* right);
 };
 
 #endif

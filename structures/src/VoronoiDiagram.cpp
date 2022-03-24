@@ -1,10 +1,15 @@
 #include "VoronoiDiagram.h"
 
-VoronoiDiagram::VoronoiDiagram() {
+VoronoiDiagram::VoronoiDiagram(const std::vector<Vector2> points) {
+    for (Vector2 point: points) {
+        sites.push_back(Site{point, nullptr});
+        faces.push_back(Face{&sites.back(), nullptr});
 
+        sites.back().face = &faces.back();
+    }
 }
 
-Segment *VoronoiDiagram::createHalfEdge(Face *face) {
+Segment* VoronoiDiagram::createHalfEdge(Face* face) {
     half_edges.emplace_back();
     half_edges.back().incident_face = face;
 //    half_edges.back().it = std::prev(half_edges.end());
@@ -15,7 +20,7 @@ Segment *VoronoiDiagram::createHalfEdge(Face *face) {
     return &half_edges.back();
 }
 
-Vertex *VoronoiDiagram::createVertex(Vector2 point) {
+Vertex* VoronoiDiagram::createVertex(Vector2 point) {
     vertices.push_back(Vertex{point});
 
     return &vertices.back();
