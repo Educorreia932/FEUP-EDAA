@@ -1,29 +1,36 @@
+#ifndef EVENT
+#define EVENT
+
 #include "Arc.h"
+#include "VoronoiDiagram.h"
+
+class Arc;
 
 class Event {
-private:
-    int y;
 public:
     enum Type {
         SITE,
         CIRCLE
     };
 
-    Type type;
     bool valid = true;
+    Type type;
+    double y;
 
     // Site event
-    Site* site;
+    Site *site;
 
     Event(int x, int y);
-    Event(Site site);
+    Event(Site *site);
 
     // Circle event
-    Arc arc;
+    Vector2 point;
+    Arc *arc;
 
-    Event(Arc arc);
+    Event(Arc *arc);
+    Event(double y, Vector2 point, Arc *arc);
 
-    bool operator<(const Event& site) {
-        return y < site.y;
-    }
+    bool operator<(const Event &event) const;
 };
+
+#endif

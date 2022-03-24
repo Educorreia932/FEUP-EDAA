@@ -44,4 +44,6 @@ map.xml
 *.nodes
 *.points
 
+.idea/
+cmake-build-debug/
 .ccls-cache/

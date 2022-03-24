@@ -3,17 +3,24 @@
 #include "VoronoiDiagram.h"
 
 #include <set>
+#include <vector>
+#include <queue>
 
 class FortuneAlgorithm {
-    private:
-        Arc* root = nullptr;
-        float beach_line_y = 0.0f;
-        VoronoiDiagram diagram = VoronoiDiagram();
+private:
+    std::priority_queue<Event> events; // Site events sorted by y coordinate
+    Arc *root = nullptr;
+    double beach_line_y = 0.0f;
+    VoronoiDiagram diagram = VoronoiDiagram();
 
-        VoronoiDiagram handleSiteEvent(Event event);
-        VoronoiDiagram handleCircleEvent(Event event);
-        Arc* locateArcAbove(Site* site);
-        float computeBreakpoint(Site& p1, Site& p2) const;
-    public:
-        VoronoiDiagram construct(std::vector<Site> sites);
+    void handleSiteEvent(Event event);
+    VoronoiDiagram handleCircleEvent(Event event);
+    void addEdge(Arc *left, Arc *right);
+    void addEvent(Arc *left, Arc *middle, Arc *right);
+    Vector2 computeConvergencePoint(Vector2 point1, Vector2 point2, Vector2 point3, double &y);
+public:
+    VoronoiDiagram construct(std::vector<Site> sites);
+    Arc *locateArcAbove(Vector2 point);
+    void removeArc(Arc *pArc, Vertex *pVertex);
+    double computeBreakpoint(Site site, Site site1);
 };
