@@ -16,10 +16,12 @@ struct Site {
 };
 
 struct Segment {
-    Site start;
-    Site end;
+    Site* start;
+    Site* end;
     Segment* twin = nullptr;
     Face* incident_face;
+    Segment* previous;
+    Segment* next;
 };
 
 struct Face {
@@ -45,6 +47,8 @@ public:
 
     Segment* createHalfEdge(Face* face);
     Vertex* createVertex(Vector2 point);
+    size_t getNumberSites();
+    Site* getSite(size_t i);
 };
 
 #endif

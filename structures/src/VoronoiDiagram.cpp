@@ -25,3 +25,11 @@ Vertex* VoronoiDiagram::createVertex(Vector2 point) {
 
     return &vertices.back();
 }
+
+size_t VoronoiDiagram::getNumberSites() {
+    return sites.size();
+}
+
+Site* VoronoiDiagram::getSite(size_t i) {
+    return &sites[i];
+}
