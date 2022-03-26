@@ -81,14 +81,13 @@ void QuadTreeClosestPoint::search(const coord_t &p, size_t r, coord_t &cbest, de
         search(p, i, cbest, dbest);
         
         deg_t median = split[r];
-        // coord_t median_coord = (xAxisActive ?
-        //     coord_t(median, p.getLat()) :
-        //     coord_t(p.getLon(), median)
-        // );
+        coord_t median_coord = (xAxisActive ?
+            coord_t(p.getLat(), median) :
+            coord_t(median, p.getLon())
+        );
         // If there's a chance the closest point is on the brother of the
         // current tree node
-        if(abs(v - median) < dbest){
-        // if(coord_t::getDistanceDeg(p, median_coord) < dbest){
+        if(coord_t::getDistanceDeg(p, median_coord) < dbest){
             // The brother of current tree node i is i^1, because we just flip
             // the least significant bit
             search(p, i^1, cbest, dbest);
