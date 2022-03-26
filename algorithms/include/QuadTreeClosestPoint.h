@@ -1,5 +1,4 @@
-#ifndef QuadTreeClosestPoint
-#define QuadTreeClosestPoint
+#pragma once
 
 #include "ClosestPoint.h"
 
@@ -11,6 +10,11 @@
  * 
  */
 class QuadTreeClosestPoint: public ClosestPoint{
+private:
+    std::vector<coord_t> c;
+    std::vector<coord_t::deg_t> split;
+
+    void search(const coord_t &p, size_t r, coord_t &cbest, coord_t::deg_t &dbest) const;
 public:
     /**
      * @brief Construct from degrees
@@ -34,5 +38,3 @@ public:
 
     coord_t getClosestPoint(const coord_t p) const;
 };
-
-#endif //QuadTreeClosestPoint
