@@ -11,8 +11,8 @@ jobs:
 
     - name: Install SFML
       run: |
-        sudo apt update
-        sudo apt install -y libsfml-dev
+        sudo apt-get update
+        sudo apt-get install -y libsfml-dev
 
     - name: Checkout submodules
       shell: bash
