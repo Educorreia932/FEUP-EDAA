@@ -29,6 +29,7 @@ endif()
 
 # ################ DATA ################
 add_subdirectory("map")
+add_subdirectory("data")
 # add_executable(data IMPORTED)
 # set_property(TARGET data PROPERTY IMPORTED_LOCATION "map")
 

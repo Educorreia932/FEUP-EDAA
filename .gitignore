@@ -45,3 +45,5 @@ map.xml
 *.points
 
 *.zip
+data/*/*.csv
+*.runs
