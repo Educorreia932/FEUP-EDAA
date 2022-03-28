@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(cal_proj)
+project(da_proj)
 
 set(GCC_FLAGS_OPTIMIZE "-Ofast -fno-signed-zeros -fno-trapping-math -frename-registers -funroll-loops")
 set(GCC_FLAGS_PARANOID "-pthread -g -O -Wall -pedantic -Wunused-result -pedantic-errors -Wextra -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wconversion -Wdisabled-optimization \
@@ -22,7 +22,7 @@ file(GLOB_RECURSE SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*
 file(GLOB_RECURSE SRC_DRIVERS "src/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    message("Detected GNU GCC, adding some compilation flags for cal_proj algorithms")
+    message("Detected GNU GCC, adding some compilation flags for da_proj algorithms")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_OPTIMIZE}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_PARANOID}")
 endif()
@@ -33,9 +33,9 @@ add_subdirectory("map")
 # set_property(TARGET data PROPERTY IMPORTED_LOCATION "map")
 
 # ################ MAIN ################
-add_executable(cal_proj ${SRC} ${SRC_DRIVERS})
+add_executable(da_proj ${SRC} ${SRC_DRIVERS})
 target_link_libraries(${PROJECT_NAME} graphviewer)
-add_dependencies(cal_proj data)
+add_dependencies(da_proj data)
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")

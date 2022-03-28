@@ -36,7 +36,7 @@ void QuadTreeClosestPoint::run(){
     const size_t N = c.size();
     for(size_t i = 1; i < N; ++i){
         size_t level = size_bits(N) - size_bits(i);
-        size_t prefix = i & (~(1L << (size_bits(i) - 1)));
+        size_t prefix = i & (~(1uL << (size_bits(i) - 1)));
         size_t l = (prefix  ) << level;
         size_t r = (prefix+1) << level;
         bool xAxisActive = (level%2 == 1); // Active axis is X if level is odd
@@ -59,14 +59,14 @@ coord_t QuadTreeClosestPoint::getClosestPoint(const coord_t p) const {
 }
 
 void QuadTreeClosestPoint::search(const coord_t &p, size_t r, coord_t &cbest, deg_t &dbest) const {
-    const size_t N = c.size();
+    const size_t &N = c.size();
     size_t level = size_bits(N) - size_bits(r);
     bool xAxisActive = (level%2 == 1);
 
     if(level <= 0){
         // If bin only has 1 element
-        coord_t candidate = c[r & ~(1L << (size_bits(r)-1))];
-        deg_t d = coord_t::getDistanceDeg(p, candidate);
+        const coord_t &candidate = c[r & ~(1uL << (size_bits(r)-1))];
+        deg_t d = coord_t::getDistanceDegSqr(p, candidate);
         if(d < dbest){
             cbest = candidate;
             dbest = d;
@@ -87,7 +87,7 @@ void QuadTreeClosestPoint::search(const coord_t &p, size_t r, coord_t &cbest, de
         );
         // If there's a chance the closest point is on the brother of the
         // current tree node
-        if(coord_t::getDistanceDeg(p, median_coord) < dbest){
+        if(coord_t::getDistanceDegSqr(p, median_coord) < dbest){
             // The brother of current tree node i is i^1, because we just flip
             // the least significant bit
             search(p, i^1, cbest, dbest);

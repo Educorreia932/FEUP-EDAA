@@ -20,6 +20,12 @@ coord_t::deg_t coord_t::getDistanceDeg(const coord_t &p1, const coord_t &p2){
     return sqrt(dlat*dlat + dlon*dlon);
 }
 
+coord_t::deg_t coord_t::getDistanceDegSqr(const coord_t &p1, const coord_t &p2){
+    double dlat = p2.lat - p1.lat;
+    double dlon = p2.lon - p1.lon;
+    return dlat*dlat + dlon*dlon;
+}
+
 coord_t coord_t::operator+(const coord_t &p) const{
     return coord_t(lat+p.lat, lon+p.lon);
 }

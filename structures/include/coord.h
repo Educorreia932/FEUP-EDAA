@@ -47,6 +47,15 @@ public:
      */
     static deg_t getDistanceDeg(const coord_t &p1, const coord_t &p2);
 
+    /**
+     * @brief Get squared distance between two positions in degrees.
+     * 
+     * @param p1        First position
+     * @param p2        Second position
+     * @return deg_t    Squared distance between them in degrees
+     */
+    static deg_t getDistanceDegSqr(const coord_t &p1, const coord_t &p2);
+
     coord_t operator+(const coord_t &p) const;
     coord_t operator/(double d) const;
     bool operator==(const coord_t &c) const;
