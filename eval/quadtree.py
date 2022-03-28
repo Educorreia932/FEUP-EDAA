@@ -34,6 +34,6 @@ dt = pd.read_csv('quadtree.csv', index_col=0, header=None).T
 print(dt)
 
 ax = dt.boxplot(figsize=(15,7.5), rot=60, showmeans=True, whis=1000)
-ax.set_ylim(0, 4000)
+ax.set_ylim(0, 1000)
 # ax.set_yscale('log')
 plt.show()

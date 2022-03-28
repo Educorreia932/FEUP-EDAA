@@ -53,6 +53,13 @@ void evalQuadTree(const MapGraph &M){
 
     std::list<coord_t> test_coords;
     for(size_t n = 0; n < N; ++n){
+        // size_t i = rand()%coords.size(),
+        //        j = rand()%coords.size();
+        // float x = (double(rand())/double(RAND_MAX));
+        // test_coords.push_back(coord_t(
+        //     coords[i].getLat() * x + coords[j].getLat() * (1.0-x),
+        //     coords[i].getLon() * x + coords[j].getLon() * (1.0-x)
+        // ));
         test_coords.push_back(coord_t(
             minLat + (double(rand())/double(RAND_MAX))*(maxLat-minLat),
             minLon + (double(rand())/double(RAND_MAX))*(maxLon-minLon)
@@ -60,24 +67,36 @@ void evalQuadTree(const MapGraph &M){
     }
 
     std::vector<size_t> szs = {
-        // 1<<1,
-        // 1<<2,
-        // 1<<3,
-        // 1<<4,
-        // 1<<5,
-        // 1<<6,
-        // 1<<7,
-        // 1<<8,
-        // 1<<9,
-        // 1<<10,
-        // 1<<11,
-        // 1<<12,
-        // 1<<13,
-        // 1<<14,
-        // 1<<15,
-        // 1<<16,
-        // 1<<17,
-        1<<18
+         10000,
+         20000,
+         30000,
+         40000,
+         50000,
+         60000,
+         70000,
+         80000,
+         90000,
+        100000,
+        110000,
+        120000,
+        130000,
+        140000,
+        150000,
+        160000,
+        170000,
+        180000,
+        190000,
+        200000,
+        210000,
+        220000,
+        230000,
+        240000,
+        250000,
+        260000,
+        270000,
+        280000,
+        290000,
+        300000
     };
 
     for(const size_t &sz: szs){
@@ -89,7 +108,7 @@ void evalQuadTree(const MapGraph &M){
 
         QuadTreeClosestPoint t;
         t.initialize(l);
-        t.run();auto begin1 = std::chrono::high_resolution_clock::now();
+        t.run();//auto begin1 = std::chrono::high_resolution_clock::now();
         for(const coord_t &u: test_coords){
             auto begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
@@ -98,7 +117,7 @@ void evalQuadTree(const MapGraph &M){
             auto end = std::chrono::high_resolution_clock::now();
             double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT);
             os << "," << dt;
-        }auto end1 = std::chrono::high_resolution_clock::now(); std::cout << double(std::chrono::duration_cast<std::chrono::nanoseconds>(end1-begin1).count()) << std::endl;
+        }//auto end1 = std::chrono::high_resolution_clock::now(); std::cout << double(std::chrono::duration_cast<std::chrono::nanoseconds>(end1-begin1).count()) << std::endl;
         os << "\n";
     }
 }
