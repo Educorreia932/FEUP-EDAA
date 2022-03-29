@@ -13,12 +13,14 @@
 
 #include "graphviewer.h"
 
+void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs);
+
 void eval2DTree(const MapGraph &M, const std::vector<Run> &runs){
     eval2DTree_QueryTime(M, runs);
 }
 
 void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
-    std::ofstream os("eval/quadtree.csv");
+    std::ofstream os("eval/2d-tree-time.csv");
     os << std::fixed << std::setprecision(3);
 
     std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
@@ -30,67 +32,87 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(0));
     
-    coord_t::deg_t minLat = +180.0L, maxLat = -180.0L, minLon = +180.0L, maxLon = -180.0L;
-    for(const coord_t &c: coords){
-        minLat = std::min(minLat, c.getLat());
-        maxLat = std::max(maxLat, c.getLat());
-        minLon = std::min(minLon, c.getLon());
-        maxLon = std::max(maxLon, c.getLon());
-    }
+    std::vector<coord_t> candidates;
+    for(const Run &r: runs)
+        for(const coord_t &c: r.coords)
+            candidates.push_back(c);
 
-    const size_t N = 100;
-    const size_t REPEAT = 1000;
+    const size_t N = 100000;
+    const size_t REPEAT = 10;
 
-    std::list<coord_t> test_coords;
-    for(size_t n = 0; n < N; ++n){
-        // size_t i = rand()%coords.size(),
-        //        j = rand()%coords.size();
-        // float x = (double(rand())/double(RAND_MAX));
-        // test_coords.push_back(coord_t(
-        //     coords[i].getLat() * x + coords[j].getLat() * (1.0-x),
-        //     coords[i].getLon() * x + coords[j].getLon() * (1.0-x)
-        // ));
-        test_coords.push_back(coord_t(
-            minLat + (double(rand())/double(RAND_MAX))*(maxLat-minLat),
-            minLon + (double(rand())/double(RAND_MAX))*(maxLon-minLon)
-        ));
+    std::vector<coord_t> test_coords(N);
+    std::set<size_t> indexes;
+    while(indexes.size() < N) indexes.insert(rand()%candidates.size());
+    size_t j = 0;
+    for(const size_t &i: indexes){
+        test_coords[j++] = candidates[i];
     }
 
     std::vector<size_t> szs = {
-         10000,
-         20000,
-         30000,
-         40000,
-         50000,
-         60000,
-         70000,
-         80000,
-         90000,
-        100000,
-        110000,
-        120000,
-        130000,
-        140000,
-        150000,
-        160000,
-        170000,
-        180000,
-        190000,
-        200000,
-        210000,
-        220000,
-        230000,
-        240000,
-        250000,
-        260000,
-        270000,
-        280000,
-        290000,
-        300000
+             1,
+          1000,
+          2000,
+          3000,
+          4000,
+          5000,
+          6000,
+          7000,
+          8000,
+          9000,
+         10000, 12500, 15000, 17500,
+         20000, 22500, 25000, 27500,
+         30000, 32500, 35000, 37500,
+         40000, 42500, 45000, 47500,
+         50000, 52500, 55000, 57500,
+         60000, 62500, 65000, 67500,
+         70000, 72500, 75000, 77500,
+         80000, 82500, 85000, 87500,
+         90000, 92500, 95000, 97500,
+        100000,102500,105000,107500,
+        110000,112500,115000,117500,
+        120000,122500,125000,127500,
+        130000,132500,135000,137500,
+        140000,142500,145000,147500,
+        150000,152500,155000,157500,
+        160000,162500,165000,167500,
+        170000,172500,175000,177500,
+        180000,182500,185000,187500,
+        190000,192500,195000,197500,
+        200000,202500,205000,207500,
+        210000,212500,215000,217500,
+        220000,222500,225000,227500,
+        230000,232500,235000,237500,
+        240000,242500,245000,247500,
+        250000,252500,255000,257500,
+        260000,262500,265000,267500,
+        270000,272500,275000,277500,
+        280000,282500,285000,287500,
+        290000,292500,295000,297500,
+        300000,
+        (1<< 1),(1<< 1)+1,
+        (1<< 2),(1<< 2)+1,
+        (1<< 3),(1<< 3)+1,
+        (1<< 4),(1<< 4)+1,
+        (1<< 5),(1<< 5)+1,
+        (1<< 6),(1<< 6)+1,
+        (1<< 7),(1<< 7)+1,
+        (1<< 8),(1<< 8)+1,
+        (1<< 9),(1<< 9)+1,
+        (1<<10),(1<<10)+1,
+        (1<<11),(1<<11)+1,
+        (1<<12),(1<<12)+1,
+        (1<<13),(1<<13)+1,
+        (1<<14),(1<<14)+1,
+        (1<<15),(1<<15)+1,
+        (1<<16),(1<<16)+1,
+        (1<<17),(1<<17)+1,
+        (1<<18),(1<<18)+1,
     };
+    sort(szs.begin(), szs.end());
 
     for(const size_t &sz: szs){
         os << sz;
+        std::cout << "Size: " << sz << std::endl;
 
         std::list<coord_t> l;
         for(size_t i = 0; i < sz; ++i)
@@ -98,16 +120,17 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
 
         QuadTreeClosestPoint t;
         t.initialize(l);
-        t.run();//auto begin1 = std::chrono::high_resolution_clock::now();
+        t.run();
         for(const coord_t &u: test_coords){
-            auto begin = std::chrono::high_resolution_clock::now();
+            std::chrono::_V2::system_clock::time_point begin, end;
+            begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
-                coord_t v = t.getClosestPoint(u);
+                t.getClosestPoint(u);
             }
-            auto end = std::chrono::high_resolution_clock::now();
+            end = std::chrono::high_resolution_clock::now();
             double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT);
             os << "," << dt;
-        }//auto end1 = std::chrono::high_resolution_clock::now(); std::cout << double(std::chrono::duration_cast<std::chrono::nanoseconds>(end1-begin1).count()) << std::endl;
+        }
         os << "\n";
     }
 }
@@ -115,8 +138,15 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
 int main(int argc, char *argv[]){
     try {
         if(argc < 2) throw std::invalid_argument("at least one argument must be provided");
+
+        std::cout << "Loading map..." << std::endl;
         MapGraph M("res/map/processed/AMP");
+        std::cout << "Loaded map" << std::endl;
+
+        std::cout << "Loading runs..." << std::endl;
         std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
+        std::cout << "Loaded runs" << std::endl;
+
         std::string opt = argv[1];
         if(opt == "2d-tree") eval2DTree(M, runs);
     } catch(const std::invalid_argument &e){
