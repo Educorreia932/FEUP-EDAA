@@ -17,11 +17,11 @@ TIMESTAMP_IDX    = cols.index("TIMESTAMP")
 MISSING_DATA_IDX = cols.index("MISSING_DATA")
 POLYLINE_IDX     = cols.index("POLYLINE")
 
-total, missing, speedErrors, coordErrors, total_points = 0, 0, 0, 0, 0
+total, missing, speedErrors, coordErrors, totalPoints = 0, 0, 0, 0, 0
 
 start = time.time()
 
-notgood = set()
+notGoodSet = set()
 
 # MINLON, MINLAT, MAXLON, MAXLAT = -9.5,38.5,-6.5,43.0
 MINLON, MINLAT, MAXLON, MAXLAT = -8.7863,40.9980,-8.4718,41.3722
@@ -38,11 +38,11 @@ for row in r1:
 
     if missing_data != "False":
         missing += 1
-        notgood.add(id)
+        notGoodSet.add(id)
         continue
 
     prevLat, prevLon = 0, 0
-    isgood = True
+    isGood = True
 
     for c in polyline:
         lat, lon = c[1], c[0]
@@ -54,43 +54,54 @@ for row in r1:
             if d > 0.0005*15*4: # 0.0005 deg/s = 200kph, 15s, 4 is a margin factor
                 # print(f"DANGER! {id}: {prevLat}, {prevLon} and {lat},{lon} are too far appart to be correct", file=sys.stderr)
                 speedErrors += 1
-                isgood = False
+                isGood = False
                 break
 
         if lat < MINLAT or lat > MAXLAT or lon < MINLON or lon > MAXLON:
             # print(f"DANGER! {id}: {lat},{lon} outside ordinary bounds", file=sys.stderr)
             coordErrors += 1
-            isgood = False
+            isGood = False
             break
 
         prevLat, prevLon = lat, lon
 
-    if not isgood:
-        notgood.add(id)
+    if not isGood:
+        notGoodSet.add(id)
         continue
 
-    total_points += len(polyline)
-
-print(total - len(notgood))
-print("Number of runs: ", total - len(notgood), file=sys.stderr)
-print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
-print(f"Total number of coordinates: {total_points}", file=sys.stderr)
+    totalPoints += len(polyline)
 
 f2 = open(input_filename, "r")
 r2 = csv.reader(f2)
-
 cols = next(r2)
+totalGood = 0
+for row in r2:
+    id = row[TRIP_ID_IDX]
+    if(id in notGoodSet):
+        continue
+    totalGood += 1
+
+print(totalGood)
+print("Number of runs: ", totalGood, file=sys.stderr)
+print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
+print(f"Total number of coordinates: {totalPoints}", file=sys.stderr)
+
+f3 = open(input_filename, "r")
+r3 = csv.reader(f3)
+
+cols = next(r3)
 
 minLat, maxLat, minLon, maxLon = +INF, -INF, +INF, -INF
 
 i = 0
-for row in r2:
-    i += 1
+for row in r3:
     id           = row[TRIP_ID_IDX]
     timestamp    = row[TIMESTAMP_IDX]
     polyline     = json.loads(row[POLYLINE_IDX])
-    if(id in notgood):
+    if(id in notGoodSet):
         continue
+
+    i += 1
 
     for c in polyline:
         lat, lon = c[1], c[0]
@@ -103,6 +114,9 @@ for row in r2:
     print("\n".join(map(lambda c: f"{c[1]} {c[0]}", polyline)))
     if i%20000 == 0:
         print(f"i={i} ({100.0 * i/total:.2f}%)", file=sys.stderr)
+
+
+print(f"totalGood: {totalGood}; i: {i}", file=sys.stderr)
 
 end = time.time()
 print(f"Lat: [{minLat}, {maxLat}]; Lon: [{minLon}, {maxLon}]", file=sys.stderr)
