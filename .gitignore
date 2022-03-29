@@ -47,3 +47,4 @@ map.xml
 *.zip
 train.csv
 *.runs
+*.svg
