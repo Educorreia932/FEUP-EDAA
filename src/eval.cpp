@@ -13,9 +13,11 @@
 
 #include "graphviewer.h"
 
-#include <X11/Xlib.h>
-
 void eval2DTree(const MapGraph &M, const std::vector<Run> &runs){
+    eval2DTree_QueryTime(M, runs);
+}
+
+void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
     std::ofstream os("eval/quadtree.csv");
     os << std::fixed << std::setprecision(3);
 
