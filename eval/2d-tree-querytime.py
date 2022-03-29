@@ -30,7 +30,7 @@ import seaborn as sns
 
 # dt = pd.DataFrame(res)
 
-df = pd.read_csv('2d-tree-time.csv', index_col=0, header=None)
+df = pd.read_csv('2d-tree-querytime.csv', index_col=0, header=None)
 df['median'] = df.quantile(axis=1)        .ewm(span=8).mean()
 df['q1'    ] = df.quantile(axis=1, q=0.25).ewm(span=8).mean()
 df['q3'    ] = df.quantile(axis=1, q=0.75).ewm(span=8).mean()
@@ -59,6 +59,6 @@ ax.get_xaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: 
 plt.grid()
 fig.tight_layout()
 
-plt.savefig("2d-tree-time.svg")
+plt.savefig("2d-tree-querytime.svg")
 
 plt.show()

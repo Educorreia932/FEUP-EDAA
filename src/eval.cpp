@@ -13,14 +13,9 @@
 
 #include "graphviewer.h"
 
-void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs);
-
-void eval2DTree(const MapGraph &M, const std::vector<Run> &runs){
-    eval2DTree_QueryTime(M, runs);
-}
 
 void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
-    std::ofstream os("eval/2d-tree-time.csv");
+    std::ofstream os("eval/2d-tree-querytime.csv");
     os << std::fixed << std::setprecision(3);
 
     std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
@@ -148,7 +143,7 @@ int main(int argc, char *argv[]){
         std::cout << "Loaded runs" << std::endl;
 
         std::string opt = argv[1];
-        if(opt == "2d-tree") eval2DTree(M, runs);
+        if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, runs);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;
