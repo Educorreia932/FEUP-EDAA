@@ -48,3 +48,4 @@ map.xml
 train.csv
 *.runs
 *.svg
+*.csv
