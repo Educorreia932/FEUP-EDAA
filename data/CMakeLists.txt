@@ -21,6 +21,6 @@ endif()
 # ################ DATA ################
 add_custom_target(
     pkdd15-i
-    COMMAND python3 process.py < train.csv > pkdd15-i.runs
+    COMMAND python3 process.py train.csv > pkdd15-i.runs
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pkdd15-i
 )

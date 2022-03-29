@@ -6,11 +6,33 @@
 #include "MapGraph.h"
 #include "MapViewer.h"
 
+#include "Run.h"
+
 #include "QuadTreeClosestPoint.h"
 
 #include "graphviewer.h"
 
 #include <X11/Xlib.h>
+
+std::list<Run> loadRuns(const std::string &filepath){
+    std::list<Run> ret;
+
+    std::ifstream is(filepath);
+    size_t N; is >> N;
+    for(size_t i = 0; i < N; ++i){
+        ret.push_back(Run());
+        Run &r = *ret.rbegin();
+        size_t M;
+        is >> r.id >> r.timestamp >> M;
+        coord_t c;
+        for(size_t j = 0; j < M; ++j){
+            is >> c.lat >> c.lon;
+            r.coords.push_back(c);
+        }
+    }
+
+    return ret;
+}
 
 void view(int argc, const char *argv[], const MapGraph &M){
     if(argc != 4) throw std::invalid_argument("invalid number of arguments");
@@ -20,14 +42,14 @@ void view(int argc, const char *argv[], const MapGraph &M){
     M.drawRoads(fraction, display);
 }
 
-void evalQuadTree(const MapGraph &M);
+void evalQuadTree(const MapGraph &M, const std::list<Run> &runs);
 
-void eval(int argc, const char *argv[], const MapGraph &M){
-    srand(1);
-    evalQuadTree(M);
+void eval(int argc, const char *argv[], const MapGraph &M, const std::list<Run> &runs){
+    srand(0);
+    evalQuadTree(M, runs);
 }
 
-void evalQuadTree(const MapGraph &M){
+void evalQuadTree(const MapGraph &M, const std::list<Run> &runs){
     std::ofstream os("eval/quadtree.csv");
     os << std::fixed << std::setprecision(3);
 
@@ -128,9 +150,10 @@ int main(int argc, char *argv[]){
     try {
         if(argc < 2) throw std::invalid_argument("at least one argument must be provided");
         MapGraph M("map/processed/AMP");
+        std::list<Run> runs = loadRuns("data/pkdd-i/pkdd-i.runs");
         std::string opt = argv[1];
         if(opt == "view"      ) view      (argc, const_cast<const char **>(argv), M);
-        if(opt == "eval"      ) eval      (argc, const_cast<const char **>(argv), M);
+        if(opt == "eval"      ) eval      (argc, const_cast<const char **>(argv), M, runs);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         std::cout << "Usage: ./main (view | ...)\n";

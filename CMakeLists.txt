@@ -36,7 +36,7 @@ add_subdirectory("data")
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_DRIVERS})
 target_link_libraries(${PROJECT_NAME} graphviewer)
-add_dependencies(da_proj data)
+add_dependencies(da_proj map pkdd15-i)
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")

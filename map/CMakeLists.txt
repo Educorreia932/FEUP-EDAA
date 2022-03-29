@@ -28,4 +28,4 @@ else()
 endif()
 
 # ################ DATA ################
-add_custom_target(data COMMAND map_process ${CMAKE_CURRENT_SOURCE_DIR}/processed/AMP < ${CMAKE_CURRENT_SOURCE_DIR}/original/map.xml)
+add_custom_target(map COMMAND map_process ${CMAKE_CURRENT_SOURCE_DIR}/processed/AMP < ${CMAKE_CURRENT_SOURCE_DIR}/original/map.xml)

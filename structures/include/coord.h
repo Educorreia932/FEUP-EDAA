@@ -10,8 +10,8 @@
 class coord_t {
 public:
     typedef double deg_t;
-private:
     double lat = 0, lon = 0;
+private:
     double getMetersPerLatDeg() const;
     double getMetersPerLonDeg() const;
 public:
