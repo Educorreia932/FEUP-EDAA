@@ -6,5 +6,5 @@ class Run {
 public:
     long long id;
     long long timestamp;
-    std::list<coord_t> coords;
+    std::vector<coord_t> coords;
 };

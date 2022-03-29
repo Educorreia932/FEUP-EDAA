@@ -27,16 +27,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_PARANOID}")
 endif()
 
-# ################ DATA ################
-add_subdirectory("map")
-add_subdirectory("data")
-# add_executable(data IMPORTED)
-# set_property(TARGET data PROPERTY IMPORTED_LOCATION "map")
-
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_DRIVERS})
 target_link_libraries(${PROJECT_NAME} graphviewer)
-add_dependencies(da_proj map pkdd15-i)
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")

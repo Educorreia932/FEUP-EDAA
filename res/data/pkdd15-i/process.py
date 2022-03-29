@@ -21,7 +21,7 @@ total, missing, speedErrors, coordErrors, total_points = 0, 0, 0, 0, 0
 
 start = time.time()
 
-good = set()
+notgood = set()
 
 # MINLON, MINLAT, MAXLON, MAXLAT = -9.5,38.5,-6.5,43.0
 MINLON, MINLAT, MAXLON, MAXLAT = -8.7863,40.9980,-8.4718,41.3722
@@ -38,6 +38,7 @@ for row in r1:
 
     if missing_data != "False":
         missing += 1
+        notgood.add(id)
         continue
 
     prevLat, prevLon = 0, 0
@@ -65,13 +66,13 @@ for row in r1:
         prevLat, prevLon = lat, lon
 
     if not isgood:
+        notgood.add(id)
         continue
 
-    good.add(id)
     total_points += len(polyline)
 
-print(len(good))
-print("Number of runs: ", len(good), file=sys.stderr)
+print(total - len(notgood))
+print("Number of runs: ", total - len(notgood), file=sys.stderr)
 print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
 print(f"Total number of coordinates: {total_points}", file=sys.stderr)
 
@@ -88,7 +89,7 @@ for row in r2:
     id           = row[TRIP_ID_IDX]
     timestamp    = row[TIMESTAMP_IDX]
     polyline     = json.loads(row[POLYLINE_IDX])
-    if(id not in good):
+    if(id in notgood):
         continue
 
     for c in polyline:

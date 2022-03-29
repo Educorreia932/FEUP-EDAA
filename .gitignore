@@ -36,7 +36,7 @@
 
 # Build folders (where CMake does its magic)
 build
-map/build
+res/map/map_process
 
 # Data
 map.xml
@@ -45,5 +45,5 @@ map.xml
 *.points
 
 *.zip
-data/*/*.csv
+train.csv
 *.runs
