@@ -4,6 +4,7 @@
 
 #include "EdgeType.h"
 #include "MapGraph.h"
+#include "MapGraphView.h"
 #include "MapViewer.h"
 
 #include "Run.h"
@@ -17,7 +18,9 @@
 std::vector<Run> loadRuns(const std::string &filepath){
     std::vector<Run> ret;
 
-    std::ifstream is(filepath);
+    std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    is.open(filepath);
+
     size_t N; is >> N;
     ret.reserve(N);
     for(size_t i = 0; i < N; ++i){
@@ -41,7 +44,8 @@ void view(int argc, const char *argv[], const MapGraph &M){
     int fraction = atoi(argv[2]);
     int display  = atoi(argv[3]);
 
-    M.drawRoads(fraction, display);
+    MapGraphView view(M);
+    view.drawRoads(fraction, display);
 }
 
 void evalQuadTree(const MapGraph &M, const std::vector<Run> &runs);

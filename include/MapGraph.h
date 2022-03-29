@@ -13,7 +13,6 @@
 class MapGraph {
 public:
     typedef double speed_t;
-private:
     struct way_t {
         std::list<DWGraph::node_t> nodes;
         speed_t speed;
@@ -31,19 +30,7 @@ private:
          */
         speed_t getRealSpeed() const;
     };
-    enum Display {
-        MOTORWAY    = 1,
-        TRUNK       = 2,
-        PRIMARY     = 4,
-        SECONDARY   = 8,
-        TERTIARY    = 16,
-        ROAD        = 32,
-        RESIDENTIAL = 64,
-        SLOW        = 128
-    };
-    static const std::unordered_map<edge_type_t, Display> display_map;
-
-    DWGraph::node_t station = DWGraph::INVALID_NODE;
+private:
     DWGraph::DWGraph fullGraph;
     DWGraph::DWGraph connectedGraph;
     // ClosestPoint *closestPoint = nullptr;
@@ -60,20 +47,14 @@ public:
      */
     MapGraph(const std::string &path);
     ~MapGraph();
-    DWGraph::node_t getStationNode() const;
     DWGraph::DWGraph getFullGraph() const;
     DWGraph::DWGraph getConnectedGraph() const;
     DWGraph::DWGraph getReducedGraph() const;
     DWGraph::node_t getClosestNode(coord_t c) const;
-    std::unordered_map<DWGraph::node_t, coord_t> getNodes() const;
-    void drawRoads (int fraction, int display) const;
-    void drawSpeeds(int fraction, int display) const;
-    void drawSCC   (int fraction, int display) const;
-    class DistanceHeuristic;
-    void drawPath  (int fraction, int display, DWGraph::node_t src, DWGraph::node_t dst, bool visited) const;
-    void drawPath  (int fraction, int display, coord_t src, coord_t dst, bool visited) const;
-    void drawReduced() const;
-    // void drawRide(int fraction, int display, const Ride &r) const;
+    const std::unordered_map<DWGraph::node_t, coord_t>& getNodes() const;
+    coord_t getMinCoord() const;
+    coord_t getMaxCoord() const;
+    const std::list<way_t> &getWays() const;
 };
 
 #endif //MAPGRAPH_H_INCLUDED
