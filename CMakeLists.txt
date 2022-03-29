@@ -39,3 +39,6 @@ target_link_libraries(tests PRIVATE Catch2WithMain)
 include(CTest)
 include(test/Catch2/extras/Catch.cmake)
 catch_discover_tests(tests)
+
+# ################ EVAL ################
+add_executable(eval ${SRC} "src/eval.cpp")
