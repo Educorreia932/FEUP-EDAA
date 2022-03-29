@@ -22,23 +22,6 @@
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
 
-std::string color2str(const GraphViewer::Color &color){
-    if(color == GraphViewer::BLACK     ) return "BLACK"     ;
-    if(color == GraphViewer::WHITE     ) return "WHITE"     ;
-    if(color == GraphViewer::RED       ) return "RED"       ;
-    if(color == GraphViewer::GREEN     ) return "GREEN"     ;
-    if(color == GraphViewer::BLUE      ) return "BLUE"      ;
-    if(color == GraphViewer::YELLOW    ) return "YELLOW"    ;
-    if(color == GraphViewer::MAGENTA   ) return "MAGENTA"   ;
-    if(color == GraphViewer::CYAN      ) return "CYAN"      ;
-    if(color == GraphViewer::PINK      ) return "PINK"      ;
-    if(color == GraphViewer::ORANGE    ) return "ORANGE"    ;
-    if(color == GraphViewer::GRAY      ) return "GRAY"      ;
-    if(color == GraphViewer::LIGHT_GRAY) return "LIGHT_GRAY";
-    if(color == GraphViewer::DARK_GRAY ) return "DARK_GRAY" ;
-    return "UNKNOWN";
-}
-
 MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
     
     #pragma GCC diagnostic push
