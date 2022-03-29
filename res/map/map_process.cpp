@@ -212,12 +212,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Check if files already exist
-    if(fs::exists(nodesFilepath)){
-        cout << "Files already exist, exiting" << endl;
-        return 0;
-    }
-    
     // Read XML
     char *text = nullptr; {
         stringstream ss;
