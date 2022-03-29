@@ -15,3 +15,5 @@ map.xml: map.zip
 
 map.zip:
 	curl https://dl.dropboxusercontent.com/s/8hjnkr47u8f5x6v/map.zip --output $@
+
+.DELETE_ON_ERROR :

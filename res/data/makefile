@@ -9,3 +9,5 @@ pkdd15-i/train.csv: pkdd15-i/train.zip
 
 pkdd15-i/train.zip:
 	curl https://dl.dropboxusercontent.com/s/7culexod1kn5xxr/train.zip --output $@
+
+.DELETE_ON_ERROR :
