@@ -151,8 +151,8 @@ int main(int argc, char *argv[]){
 
     try {
         if(argc < 2) throw std::invalid_argument("at least one argument must be provided");
-        MapGraph M("map/processed/AMP");
-        std::vector<Run> runs = loadRuns("data/pkdd-i/pkdd-i.runs");
+        MapGraph M("res/map/processed/AMP");
+        std::vector<Run> runs = loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
         std::string opt = argv[1];
         if(opt == "view"      ) view      (argc, const_cast<const char **>(argv), M);
         if(opt == "eval"      ) eval      (argc, const_cast<const char **>(argv), M, runs);
