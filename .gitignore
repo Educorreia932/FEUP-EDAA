@@ -49,3 +49,5 @@ train.csv
 *.runs
 *.svg
 *.csv
+*.emf
+*.png

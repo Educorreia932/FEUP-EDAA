@@ -28,6 +28,7 @@ void QuadTreeClosestPoint::initialize(const list<coord_t> &points){
     c.resize(N);
     split.resize(N);
     copy(points.begin(), points.end(), c.begin());
+    sort(c.begin(), c.begin() + points.size());
     fill(c.begin() + points.size(), c.end(), *(c.begin() + points.size() - 1));
 }
 
