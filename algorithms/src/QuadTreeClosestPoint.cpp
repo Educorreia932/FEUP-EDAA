@@ -40,8 +40,8 @@ void QuadTreeClosestPoint::run(){
         size_t l = (prefix  ) << level;
         size_t r = (prefix+1) << level;
         bool xAxisActive = (level%2 == 1); // Active axis is X if level is odd
-        if(xAxisActive) sort(c.begin() + l, c.begin() + r, compx);
-        else            sort(c.begin() + l, c.begin() + r, compy);
+        if(xAxisActive) stable_sort(c.begin() + l, c.begin() + r, compx);
+        else            stable_sort(c.begin() + l, c.begin() + r, compy);
 
         size_t m1 = l + (r-l)/2 - 1;
         size_t m2 = l + (r-l)/2;

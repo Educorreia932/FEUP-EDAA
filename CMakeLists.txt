@@ -17,9 +17,9 @@ set(CMAKE_CXX_STANDARD 14)
 add_subdirectory("lib/GraphViewerCpp")
 include_directories("lib/GraphViewerCpp/include")
 
-include_directories("include" "algorithms/include" "structures/include" "utils/include")
+include_directories("include" "algorithms/include" "structures/include" "utils/include" "ui/include")
 file(GLOB_RECURSE SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
-file(GLOB_RECURSE SRC_DRIVERS "src/*.cpp")
+file(GLOB_RECURSE SRC_UI "ui/src/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message("Detected GNU GCC, adding some compilation flags for da_proj algorithms")
@@ -28,7 +28,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # ################ MAIN ################
-add_executable(da_proj ${SRC} ${SRC_DRIVERS})
+add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
 target_link_libraries(${PROJECT_NAME} graphviewer)
 
 # ################ TESTS ################
@@ -39,3 +39,6 @@ target_link_libraries(tests PRIVATE Catch2WithMain)
 include(CTest)
 include(test/Catch2/extras/Catch.cmake)
 catch_discover_tests(tests)
+
+# ################ EVAL ################
+add_executable(eval ${SRC} "src/eval.cpp")
