@@ -320,11 +320,8 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
 
     std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
     std::list<coord_t> coords(nodes.size());
-    {
-        size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
-            coords.push_back(p.second);
-    }
+    for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        coords.push_back(p.second);
 
     std::vector<coord_t> candidates;
     for(const Run &r: runs)
@@ -405,8 +402,6 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
 
         os << d;
         std::cout << "d: " << d << std::endl;
-
-        std::chrono::_V2::system_clock::time_point begin, end;
 
         DeepVStripes t(d, n);
         t.initialize(coords);
@@ -500,7 +495,7 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs)
     sort(szs.begin(), szs.end());
 
     const coord_t::deg_t X_AMPLITUDE = 0.35;
-    const coord_t::deg_t d = 0.0004;
+    const coord_t::deg_t d = 0.0003;
 
     for(const size_t &sz: szs){
         os << sz;
@@ -527,6 +522,129 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs)
     }
 }
 
+void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Run> &runs){
+    std::ofstream os("eval/deepvstripes-querytime-nd.csv");
+    os << std::fixed;
+
+    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
+    std::vector<coord_t> coords(nodes.size());
+    {
+        size_t i = 0;
+        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+            coords[i++] = p.second;
+    }
+    std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
+    
+    std::vector<coord_t> candidates;
+    for(const Run &r: runs)
+        for(const coord_t &c: r.coords)
+            candidates.push_back(c);
+
+    const size_t N = 100000;
+    const size_t REPEAT = 10;
+
+    std::vector<coord_t> test_coords(N);
+    std::set<size_t> indexes;
+    while(indexes.size() < N) indexes.insert(rand()%candidates.size());
+    size_t j = 0;
+    for(const size_t &i: indexes){
+        test_coords[j++] = candidates[i];
+    }
+
+    std::vector<coord_t::deg_t> ds = {
+        0.0001,
+        0.0002,
+        0.0003,
+        0.0004,
+        0.0005,
+        0.0006,
+        0.0007,
+        0.0008,
+        0.0009,
+        0.0010,
+    };
+
+    std::vector<size_t> szs = {
+             1,
+           200,
+           400,
+           600,
+           800,
+          1000,
+          2000,
+          4000,
+          6000,
+          8000,
+         10000,
+         12500,
+         15000,
+         17500,
+         20000,
+         25000,
+         30000,
+         40000,
+         50000,
+         60000,
+         70000,
+         80000,
+         90000,
+        100000,
+        120000,
+        140000,
+        160000,
+        180000,
+        200000,
+        220000,
+        240000,
+        260000,
+        280000,
+        300000,
+    };
+    sort(szs.begin(), szs.end());
+
+    const coord_t::deg_t X_AMPLITUDE = 0.35;
+
+    os << "d";
+    for(const size_t &sz: szs){
+        os << "," << sz;
+    }
+    os << "\n";
+
+    for(const coord_t::deg_t &d: ds){
+        os << std::setprecision(4) << d << std::setprecision(9);
+        std::cout << "d: " << d << std::endl;
+
+        DeepVStripes t(d, long(log2(X_AMPLITUDE/d))+2);
+
+        std::list<coord_t> l;
+
+        for(const size_t &sz: szs){
+            std::cout << "Size: " << sz << std::endl;
+
+            for(size_t i = l.size(); i < sz; ++i)
+                l.push_back(coords[i]);
+
+            t.initialize(l);
+            t.run();
+            
+            std::chrono::_V2::system_clock::time_point begin, end;
+
+            begin = std::chrono::high_resolution_clock::now();
+            for(const coord_t &u: test_coords){
+                for(size_t i = 0; i < REPEAT; ++i){
+                    t.getClosestPoint(u);
+                }
+            }
+            end = std::chrono::high_resolution_clock::now();
+            
+            double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT * test_coords.size());
+            os << "," << dt;
+
+        }
+        os << "\n";
+    }
+}
+
 int main(int argc, char *argv[]){
     srand(1234);
     try {
@@ -548,6 +666,7 @@ int main(int argc, char *argv[]){
         if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, runs);
         if(opt == "deepvstripes-querytime-d") evalDeepVStripes_QueryTime_d(M, runs);
         if(opt == "deepvstripes-querytime") evalDeepVStripes_QueryTime(M, runs);
+        if(opt == "deepvstripes-querytime-nd") evalDeepVStripes_QueryTime_nd(M, runs);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;
