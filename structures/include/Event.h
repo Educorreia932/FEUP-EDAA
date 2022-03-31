@@ -5,7 +5,6 @@
 #include "VoronoiDiagram.h"
 
 class Arc;
-class Site;
 
 class Event {
 public:
@@ -14,24 +13,29 @@ public:
         CIRCLE
     };
 
-    bool valid = true;
     Type type;
-    double y;
-
-    // Site event
-    Site* site;
-
-    Event(int x, int y);
-    Event(Site* site);
-
-    // Circle event
+    bool valid = true;
     Vector2 point;
-    Arc* arc;
 
-    Event(Arc* arc);
-    Event(double y, Vector2 point, Arc* arc);
+    virtual ~Event();
 
     bool operator<(const Event &event) const;
+protected:
+    Event(Type type);
+};
+
+class SiteEvent : public Event {
+public:
+    Site site;
+
+    SiteEvent(Site site);
+};
+
+class CircleEvent : public Event {
+public:
+    Arc* arc;
+
+    CircleEvent(Arc* arc);
 };
 
 #endif

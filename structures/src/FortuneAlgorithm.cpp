@@ -1,217 +1,168 @@
 #include "FortuneAlgorithm.h"
+#include "Event.h"
 
-#include <cmath>
-#include <limits>
+VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
+    // Generate site events
+    for (Site site: sites)
+        events.push(SiteEvent(site));
 
-FortuneAlgorithm::FortuneAlgorithm(std::vector<Vector2> points) : diagram(points) {
-
-}
-
-Arc* FortuneAlgorithm::locateArcAbove(Vector2 point) const {
-    Arc* arc = root;
-
-    while (true) {
-        double breakpointLeft = -std::numeric_limits<double>::infinity();
-        double breakpointRight = std::numeric_limits<double>::infinity();
-
-        if (arc->left != nullptr)
-            breakpointLeft = computeBreakpoint(*arc->left->site, *arc->site);
-
-        if (arc->right != nullptr)
-            breakpointRight = computeBreakpoint(*arc->site, *arc->right->site);
-
-        if (point.x < breakpointLeft)
-            arc = arc->left;
-
-        else if (point.x > breakpointRight)
-            arc = arc->right;
-
-        else
-            return arc;
-    }
-}
-
-Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
-    // Create the new subtree
-    Arc* middleArc = new Arc(site, root, root);
-    Arc* leftArc = new Arc(arc->site, root, root);
-    Arc* rightArc = new Arc(arc->site, root, root);
-
-    leftArc->leftHalfEdge = arc->leftHalfEdge;
-    rightArc->rightHalfEdge = arc->rightHalfEdge;
-
-    // Insert the subtree in the beachline
-    middleArc->left = leftArc;
-    middleArc->right = rightArc;
-
-    return middleArc;
-}
-
-VoronoiDiagram FortuneAlgorithm::construct() {
-    // Initialize event queue
-    for (Site site: diagram.sites)
-        events.push(Event(&site));
-
-    // Process events
     while (!events.empty()) {
         Event event = events.top();
-
         events.pop();
 
-        if (event.type == Event::Type::SITE)
-            handleSiteEvent(event);
+        if (event.type == Event::SITE) {
+            // Update sweep line position
+            sweep_line = event.point.y;
 
-        else
-            handleCircleEvent(event);
+            handleSiteEvent(*dynamic_cast<SiteEvent*>(&event));
+        }
+
+        else if (event.valid) {
+            // Update sweep line position
+            sweep_line = event.point.y;
+
+            handleCircleEvent(*dynamic_cast<CircleEvent*>(&event));
+        }
     }
+
+    // TODO: Bounding box
 
     return diagram;
 }
 
-void FortuneAlgorithm::handleSiteEvent(Event event) {
-    Site* site = event.site;
-
-    // Check if beachline is empty
+void FortuneAlgorithm::handleSiteEvent(SiteEvent event) {
     if (root == nullptr) {
-        root = new Arc(site, root, root);
+        root = new Arc(event.site);
 
         return;
     }
 
-    // Look for the arc above the site
-    Arc* arc_to_break = locateArcAbove(site->point);
+    // Create arcs at intersections
+    Arc* current_arc = root;
 
-    // Replace this arc by the new arcs
-    Arc* middle_arc = breakArc(arc_to_break, site);
-    Arc* left_arc = middle_arc->left;
-    Arc* right_arc = middle_arc->right;
+    // Traverse all arcs
+    while (current_arc != nullptr) {
+        Vector2 intersection_1;
+        Vector2 intersection_2;
 
-    // Add an edge in the diagram
-    addEdge(left_arc, middle_arc);
+        if (checkIntersection(event.site, current_arc, intersection_1)) {
+            bool intersect = checkIntersection(event.site, current_arc->right, intersection_2);
 
-    middle_arc->leftHalfEdge = middle_arc->rightHalfEdge;
-    middle_arc->rightHalfEdge = middle_arc->leftHalfEdge;
+            if (current_arc->right != nullptr && !intersect) {
+                current_arc->right->left = new Arc(event.site, current_arc, current_arc->right);
+                current_arc->right = current_arc->right->left;
+            }
 
-    // Check circle events
-    if (left_arc->right != nullptr)
-        addEvent(left_arc->left, left_arc, middle_arc);
+            else
+                current_arc->right = new Arc(current_arc->site, current_arc);
 
-    if (right_arc->right != nullptr)
-        addEvent(middle_arc, right_arc, right_arc->right);
-};
+            current_arc->right->left_segment = current_arc->right_segment;
 
-void FortuneAlgorithm::handleCircleEvent(Event event) {
-    if (event.valid) {
-        Vector2 point = event.point;
-        Arc* arc = event.arc;
+            current_arc->right->left = new Arc(event.site, current_arc, current_arc->right);
+            current_arc->right = current_arc->right->left;
 
-        // Add vertex
-        Vertex* vertex = diagram.createVertex(point);
+            current_arc = current_arc->right;
 
-        // Mark all the events involving this arc as invalid
-        Arc* leftArc = arc->left;
-        Arc* rightArc = arc->right;
+            // Add new edges connected to current arc's endpoints
+            Segment segment = Segment{intersection_1};
+            diagram.addEdge(segment);
+            current_arc->left->right_segment = current_arc->right_segment = segment;
 
-        leftArc->event->valid = false;
-        rightArc->event->valid = false;
+            segment = Segment{intersection_1};
+            diagram.addEdge(segment);
+            current_arc->right->left_segment = current_arc->right_segment = segment;
 
-        // Update the beachline and the diagram
-        removeArc(arc, vertex);
+            // Check for circle events around the new arc
+            checkCircleEvents(current_arc, event.point.x);
+            checkCircleEvents(current_arc->left, event.point.x);
+            checkCircleEvents(current_arc->right, event.point.x);
 
-        // Add new circle events
-        if (leftArc->left != nullptr)
-            addEvent(leftArc->left, leftArc, rightArc);
+            return;
+        }
 
-        if (rightArc->right != nullptr)
-            addEvent(leftArc, rightArc, rightArc->right);
+        current_arc = current_arc->right; // Advance arc
+    }
+
+    // If site never intersects an arc, append it to the list
+    current_arc = root;
+
+    while (current_arc->right != nullptr)
+        current_arc = current_arc->right;
+
+    current_arc->right = new Arc(event.site, current_arc);
+
+    // Insert new segment between p and i
+    double x = 0;
+    double y = (current_arc->right->site.point.y + current_arc->site.point.y) / 2.0;
+    Vector2 start = Vector2(x, y);
+
+    Segment segment = Segment{start};
+    current_arc->right_segment = current_arc->right->left_segment = segment;
+    diagram.addEdge(segment);
+}
+
+void FortuneAlgorithm::handleCircleEvent(CircleEvent event) {
+    Arc* arc = event.arc;
+    Arc* left_arc = arc->left;
+    Arc* right_arc = arc->right;
+
+    // If either have circle events, remove from queue
+
+    // replace xl, p, xr by new edge x that starts at circumcenter of l,p and r sites.
+
+    // Check circle events for left and right arcs
+    checkCircleEvents(left_arc, event.point.x);
+    checkCircleEvents(right_arc, event.point.x);
+}
+
+void FortuneAlgorithm::checkCircleEvents(Arc* arc, double x0) {
+    // Look for a new circle event for arc
+//    if (arc->event != nullptr && arc->event->)
+//        arc->event->valid = false;
+
+    arc->event = nullptr;
+
+    if (arc->left == nullptr || arc->right == nullptr)
+        return;
+
+    double x;
+    Vector2 o;
+    bool flag = circle(arc->left->site.point, arc->site.point, arc->right->site.point, x, o);
+
+    if (flag and x > x0) {
+//        arc->event = new Event(x, o, arc);
+        events.push(*arc->event);
     }
 }
 
-void FortuneAlgorithm::addEdge(Arc* left, Arc* right) {
-    // Create two new half-edges
-    left->rightHalfEdge = diagram.createHalfEdge(left->site->face);
-    right->leftHalfEdge = diagram.createHalfEdge(right->site->face);
+bool FortuneAlgorithm::circle(Vector2 a, Vector2 b, Vector2 c, double &x, Vector2 &o) {
 
-    // Set the two half edges twins
-    left->rightHalfEdge->twin = right->leftHalfEdge;
-    right->leftHalfEdge->twin = left->rightHalfEdge;
+
+    return false;
 }
 
-void FortuneAlgorithm::addEvent(Arc* left, Arc* middle, Arc* right) {
-    double y;
-    Vector2 convergence_point = computeConvergencePoint(left->site->point, middle->site->point, right->site->point, y);
+bool FortuneAlgorithm::checkIntersection(Site site, Arc* arc, Vector2 &intersection) {
+    // Check whether a new arc at given site will intersect with the given arc
+    if (arc->site.point.y == site.point.y)
+        return false;
 
-    bool is_below = y <= beach_line_y;
-    bool left_breakpoint_moving_right = left->site->point.y < middle->site->point.y;
-    bool right_breakpoint_moving_right = middle->site->point.y < right->site->point.y;
+    // Get boundaries
+    double a = 0.0;
+    double b = 0.0;
 
-    double left_initial_x = left_breakpoint_moving_right ? left->site->point.x : middle->site->point.x;
-    double right_initial_x = right_breakpoint_moving_right ? middle->site->point.x : right->site->point.x;
+    if (arc->left != nullptr)
+        a = arc->intersect(arc->left, site.point.y).x;
 
-    bool is_valid =
-            ((left_breakpoint_moving_right && left_initial_x < convergence_point.x) ||
-             (!left_breakpoint_moving_right && left_initial_x > convergence_point.x)) &&
-            ((right_breakpoint_moving_right && right_initial_x < convergence_point.x) ||
-             (!right_breakpoint_moving_right && right_initial_x > convergence_point.x));
+    if (arc->right != nullptr)
+        b = arc->intersect(arc->right, site.point.y).x;
 
-    if (is_valid && is_below) {
-        Event* event = new Event(y, convergence_point, middle);
-        middle->event = event;
-        events.push(*event);
-    }
-}
+    if (((arc->left == nullptr) || (a <= site.point.x)) && ((arc->right == nullptr) || (site.point.x <= b))) {
+        intersection = arc->intersect(new Arc(site), site.point.y);
 
-Vector2 FortuneAlgorithm::computeConvergencePoint(Vector2 point1, Vector2 point2, Vector2 point3, double &y) {
-    Vector2 v1 = (point1 - point2).getOrthogonal();
-    Vector2 v2 = (point2 - point3).getOrthogonal();
-    Vector2 delta = 0.5 * (point3 - point1);
-    double t = delta.getDet(v2) / v1.getDet(v2);
-    Vector2 center = 0.5 * (point1 + point2) + t * v1;
-    double r = center.getDistance(point1);
-    y = center.y - r;
-
-    return center;
-}
-
-void FortuneAlgorithm::removeArc(Arc* pArc, Vertex* pVertex) {
-
-}
-
-double FortuneAlgorithm::computeBreakpoint(Site site, Site site1) const {
-    return 0;
-}
-
-
-Vector2 intersect(Vector2 p0, Vector2 p1, double sweep_line_y) {
-    // Calculate the intersection of two parabolas
-    Vector2 p = p0;
-    double y;
-
-    if (p0.x == p1.x)
-        y = (p0.y + p1.y) / 2.0;
-
-    else if (p1.x == sweep_line_y)
-        y = p1.y;
-
-    else if (p0.x == sweep_line_y) {
-        y = p0.y;
-        p = p1;
+        return true;
     }
 
-    else {
-        double z0 = 2 * (p0.x - sweep_line_y);
-        double z1 = 2 * (p1.x - sweep_line_y);
-
-        double a = 1 / z0 - 1 / z1;
-        double b = -2 * (p0.y / z0 - p1.y / z1);
-        double c = (pow(p0.y, 2) + pow(p0.x, 2)) / z0 - (pow(p1.y, 2) + pow(p1.x, 2) - pow(sweep_line_y, 2)) / z1;
-
-        // Quadratic formula
-        y = (-b - sqrt(pow(b, 2) - 4 * a * c)) / (2 * a);
-    }
-
-    double x = (pow(p.x, 2) + pow(p.y - y, 2) - pow(sweep_line_y, 2)) / (2 * p.x - 2 * sweep_line_y);
-
-    return Vector2(x, y);
+    return false;
 }
+
 

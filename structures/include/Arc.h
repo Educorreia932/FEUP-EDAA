@@ -8,18 +8,18 @@ class Event;
 
 class Arc {
 public:
-    Arc* parent;
+    Site site;
     Arc* left;
     Arc* right;
-
-    Segment* leftHalfEdge;
-    Segment* rightHalfEdge;
-
-    Site* site;
+    Segment left_segment;
+    Segment right_segment;
     Event* event;
 
-    Arc(Site* site);
-    Arc(Site* site, Arc* left, Arc* right);
+    Arc(Site site);
+    Arc(Site site, Arc* left);
+    Arc(Site site, Arc* left, Arc* right);
+
+    Vector2 intersect(Arc* arc, double y);
 };
 
 #endif

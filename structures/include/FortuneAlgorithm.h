@@ -1,29 +1,20 @@
-#include "Arc.h"
 #include "Event.h"
 #include "VoronoiDiagram.h"
 
-#include <set>
 #include <vector>
-#include <queue>
 
 class FortuneAlgorithm {
 private:
-    std::priority_queue<Event> events; // Site events sorted by y coordinate
-    Arc *root = nullptr;
-    double beach_line_y = 0.0f;
     VoronoiDiagram diagram;
+    std::priority_queue<Event> events;
+    Arc* root = nullptr; // Binary tree for parabola arcs
+    double sweep_line = 0;
 
-    void handleSiteEvent(Event event);
-    void handleCircleEvent(Event event);
-    void addEdge(Arc *left, Arc *right);
-    void addEvent(Arc *left, Arc *middle, Arc *right);
-    Vector2 computeConvergencePoint(Vector2 point1, Vector2 point2, Vector2 point3, double &y);
+    void handleSiteEvent(SiteEvent event);
+    void handleCircleEvent(CircleEvent event);
+    void checkCircleEvents(Arc* arc, double x0);
+    bool checkIntersection(Site site, Arc* arc, Vector2 &intersection);
 public:
-    FortuneAlgorithm(std::vector<Vector2> points);
-
-    VoronoiDiagram construct();
-    Arc *locateArcAbove(Vector2 point) const;
-    void removeArc(Arc *pArc, Vertex *pVertex);
-    double computeBreakpoint(Site site, Site site1) const;
-    Arc* breakArc(Arc* arc, Site* site);
+    VoronoiDiagram construct(std::vector<Site> sites);
+    bool circle(Vector2 a, Vector2 b, Vector2 c, double &x, Vector2 &o);
 };
