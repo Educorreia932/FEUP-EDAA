@@ -334,7 +334,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
     std::cout << "Candidates size: " << candidates.size() << std::endl;
 
     const size_t N = 100000;
-    // const size_t REPEAT = 10;
+    const size_t REPEAT = 10;
 
     std::vector<coord_t> test_coords(N);
     std::set<size_t> indexes;
@@ -347,50 +347,58 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
     const coord_t::deg_t X_AMPLITUDE = 0.35;
 
     std::vector<std::pair<coord_t::deg_t, size_t>> params = {
-          std::make_pair(0.00001, long(log2(X_AMPLITUDE/0.00001))+1),
-          std::make_pair(0.00002, long(log2(X_AMPLITUDE/0.00002))+1),
-          std::make_pair(0.00003, long(log2(X_AMPLITUDE/0.00003))+1),
-          std::make_pair(0.00004, long(log2(X_AMPLITUDE/0.00004))+1),
-          std::make_pair(0.00005, long(log2(X_AMPLITUDE/0.00005))+1),
-          std::make_pair(0.00006, long(log2(X_AMPLITUDE/0.00006))+1),
-          std::make_pair(0.00007, long(log2(X_AMPLITUDE/0.00007))+1),
-          std::make_pair(0.00008, long(log2(X_AMPLITUDE/0.00008))+1),
-          std::make_pair(0.00009, long(log2(X_AMPLITUDE/0.00009))+1),
+        std::make_pair(0.000001, long(log2(X_AMPLITUDE/0.000001))+1),
 
-          std::make_pair(0.00010, long(log2(X_AMPLITUDE/0.00010))+1),std::make_pair(0.000125, long(log2(X_AMPLITUDE/0.000125))+1),std::make_pair(0.00015, long(log2(X_AMPLITUDE/0.00015))+1),std::make_pair(0.000175, long(log2(X_AMPLITUDE/0.000175))+1),
-          std::make_pair(0.00020, long(log2(X_AMPLITUDE/0.00020))+1),std::make_pair(0.000225, long(log2(X_AMPLITUDE/0.000225))+1),std::make_pair(0.00025, long(log2(X_AMPLITUDE/0.00025))+1),std::make_pair(0.000275, long(log2(X_AMPLITUDE/0.000275))+1),
-          std::make_pair(0.00030, long(log2(X_AMPLITUDE/0.00030))+1),std::make_pair(0.000325, long(log2(X_AMPLITUDE/0.000325))+1),std::make_pair(0.00035, long(log2(X_AMPLITUDE/0.00035))+1),std::make_pair(0.000375, long(log2(X_AMPLITUDE/0.000375))+1),
-          std::make_pair(0.00040, long(log2(X_AMPLITUDE/0.00040))+1),std::make_pair(0.000425, long(log2(X_AMPLITUDE/0.000425))+1),std::make_pair(0.00045, long(log2(X_AMPLITUDE/0.00045))+1),std::make_pair(0.000475, long(log2(X_AMPLITUDE/0.000475))+1),
-          std::make_pair(0.00050, long(log2(X_AMPLITUDE/0.00050))+1),std::make_pair(0.000525, long(log2(X_AMPLITUDE/0.000525))+1),std::make_pair(0.00055, long(log2(X_AMPLITUDE/0.00055))+1),std::make_pair(0.000575, long(log2(X_AMPLITUDE/0.000575))+1),
-          std::make_pair(0.00060, long(log2(X_AMPLITUDE/0.00060))+1),std::make_pair(0.000625, long(log2(X_AMPLITUDE/0.000625))+1),std::make_pair(0.00065, long(log2(X_AMPLITUDE/0.00065))+1),std::make_pair(0.000675, long(log2(X_AMPLITUDE/0.000675))+1),
-          std::make_pair(0.00070, long(log2(X_AMPLITUDE/0.00070))+1),std::make_pair(0.000725, long(log2(X_AMPLITUDE/0.000725))+1),std::make_pair(0.00075, long(log2(X_AMPLITUDE/0.00075))+1),std::make_pair(0.000775, long(log2(X_AMPLITUDE/0.000775))+1),
-          std::make_pair(0.00080, long(log2(X_AMPLITUDE/0.00080))+1),std::make_pair(0.000825, long(log2(X_AMPLITUDE/0.000825))+1),std::make_pair(0.00085, long(log2(X_AMPLITUDE/0.00085))+1),std::make_pair(0.000875, long(log2(X_AMPLITUDE/0.000875))+1),
-          std::make_pair(0.00090, long(log2(X_AMPLITUDE/0.00090))+1),std::make_pair(0.000925, long(log2(X_AMPLITUDE/0.000925))+1),std::make_pair(0.00095, long(log2(X_AMPLITUDE/0.00095))+1),std::make_pair(0.000975, long(log2(X_AMPLITUDE/0.000975))+1),
-          std::make_pair(0.00100, long(log2(X_AMPLITUDE/0.00100))+1),
-          std::make_pair(0.00200, long(log2(X_AMPLITUDE/0.00200))+1),
-          std::make_pair(0.00300, long(log2(X_AMPLITUDE/0.00300))+1),
-          std::make_pair(0.00400, long(log2(X_AMPLITUDE/0.00400))+1),
-          std::make_pair(0.00500, long(log2(X_AMPLITUDE/0.00500))+1),
-        //   std::make_pair(0.00600, long(log2(X_AMPLITUDE/0.00600))+1),
-        //   std::make_pair(0.00700, long(log2(X_AMPLITUDE/0.00700))+1),
-        //   std::make_pair(0.00800, long(log2(X_AMPLITUDE/0.00800))+1),
-        //   std::make_pair(0.00900, long(log2(X_AMPLITUDE/0.00900))+1),
-        //   std::make_pair(0.01000, long(log2(X_AMPLITUDE/0.01000))+1),
-        //   std::make_pair(0.020, long(log2(X_AMPLITUDE/0.020))+1),
-        //   std::make_pair(0.030, long(log2(X_AMPLITUDE/0.030))+1),
-        //   std::make_pair(0.040, long(log2(X_AMPLITUDE/0.040))+1),
-        //   std::make_pair(0.050, long(log2(X_AMPLITUDE/0.050))+1),
-        //   std::make_pair(0.060, long(log2(X_AMPLITUDE/0.060))+1),
-        //   std::make_pair(0.070, long(log2(X_AMPLITUDE/0.070))+1),
-        //   std::make_pair(0.080, long(log2(X_AMPLITUDE/0.080))+1),
-        //   std::make_pair(0.090, long(log2(X_AMPLITUDE/0.090))+1),
-        //   std::make_pair(0.100, long(log2(X_AMPLITUDE/0.100))+1),
-        //   std::make_pair(0.200, long(log2(X_AMPLITUDE/0.200))+1),
-        //   std::make_pair(0.300, long(log2(X_AMPLITUDE/0.300))+1),
+        std::make_pair(0.00001, long(log2(X_AMPLITUDE/0.00001))+1),
+        std::make_pair(0.00002, long(log2(X_AMPLITUDE/0.00002))+1),
+        std::make_pair(0.00004, long(log2(X_AMPLITUDE/0.00004))+1),
+        std::make_pair(0.00006, long(log2(X_AMPLITUDE/0.00006))+1),
+        std::make_pair(0.00008, long(log2(X_AMPLITUDE/0.00008))+1),
+
+        std::make_pair(0.00010, long(log2(X_AMPLITUDE/0.00010))+1),
+        std::make_pair(0.00012, long(log2(X_AMPLITUDE/0.00012))+1),
+        std::make_pair(0.00014, long(log2(X_AMPLITUDE/0.00014))+1),
+        std::make_pair(0.00016, long(log2(X_AMPLITUDE/0.00016))+1),
+        std::make_pair(0.00018, long(log2(X_AMPLITUDE/0.00018))+1),
+
+
+        std::make_pair(0.000200, long(log2(X_AMPLITUDE/0.000200))+1),
+        std::make_pair(0.000225, long(log2(X_AMPLITUDE/0.000225))+1),
+        std::make_pair(0.000250, long(log2(X_AMPLITUDE/0.000250))+1),
+        std::make_pair(0.000275, long(log2(X_AMPLITUDE/0.000275))+1),
+        
+        std::make_pair(0.00030, long(log2(X_AMPLITUDE/0.00030))+1),std::make_pair(0.00035, long(log2(X_AMPLITUDE/0.00035))+1),
+        std::make_pair(0.00040, long(log2(X_AMPLITUDE/0.00040))+1),std::make_pair(0.00045, long(log2(X_AMPLITUDE/0.00045))+1),
+        std::make_pair(0.00050, long(log2(X_AMPLITUDE/0.00050))+1),std::make_pair(0.00055, long(log2(X_AMPLITUDE/0.00055))+1),
+        std::make_pair(0.00060, long(log2(X_AMPLITUDE/0.00060))+1),std::make_pair(0.00065, long(log2(X_AMPLITUDE/0.00065))+1),
+        std::make_pair(0.00070, long(log2(X_AMPLITUDE/0.00070))+1),std::make_pair(0.00075, long(log2(X_AMPLITUDE/0.00075))+1),
+        std::make_pair(0.00080, long(log2(X_AMPLITUDE/0.00080))+1),std::make_pair(0.00085, long(log2(X_AMPLITUDE/0.00085))+1),
+        std::make_pair(0.00090, long(log2(X_AMPLITUDE/0.00090))+1),std::make_pair(0.00095, long(log2(X_AMPLITUDE/0.00095))+1),
+        std::make_pair(0.00100, long(log2(X_AMPLITUDE/0.00100))+1),
+        std::make_pair(0.00110, long(log2(X_AMPLITUDE/0.00110))+1),
+        std::make_pair(0.00120, long(log2(X_AMPLITUDE/0.00120))+1),
+        std::make_pair(0.00130, long(log2(X_AMPLITUDE/0.00130))+1),
+        std::make_pair(0.00140, long(log2(X_AMPLITUDE/0.00140))+1),
+        std::make_pair(0.00150, long(log2(X_AMPLITUDE/0.00150))+1),
+        std::make_pair(0.00160, long(log2(X_AMPLITUDE/0.00160))+1),
+        std::make_pair(0.00170, long(log2(X_AMPLITUDE/0.00170))+1),
+        std::make_pair(0.00180, long(log2(X_AMPLITUDE/0.00180))+1),
+        std::make_pair(0.00190, long(log2(X_AMPLITUDE/0.00190))+1),
+        std::make_pair(0.00200, long(log2(X_AMPLITUDE/0.00200))+1),
+        std::make_pair(0.00210, long(log2(X_AMPLITUDE/0.00210))+1),
+        std::make_pair(0.00220, long(log2(X_AMPLITUDE/0.00220))+1),
+        std::make_pair(0.00230, long(log2(X_AMPLITUDE/0.00230))+1),
+        std::make_pair(0.00240, long(log2(X_AMPLITUDE/0.00240))+1),
+        std::make_pair(0.00250, long(log2(X_AMPLITUDE/0.00250))+1),
+        // std::make_pair(0.00260, long(log2(X_AMPLITUDE/0.00100))+1),
+        // std::make_pair(0.00270, long(log2(X_AMPLITUDE/0.00100))+1),
+        // std::make_pair(0.00280, long(log2(X_AMPLITUDE/0.00100))+1),
+        // std::make_pair(0.00290, long(log2(X_AMPLITUDE/0.00100))+1),
+        // std::make_pair(0.00300, long(log2(X_AMPLITUDE/0.00300))+1),
     };
     sort(params.begin(), params.end());
 
-    os << ",t\n";
+
     for(const auto &pr: params){
         const coord_t::deg_t &d = pr.first;
         const size_t &n = pr.second;
@@ -404,15 +412,117 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
         t.initialize(coords);
         t.run();
 
-        begin = std::chrono::high_resolution_clock::now();
-        for(const coord_t &c: test_coords){
-            auto ret = t.getClosestPoint(c);
+        for(const coord_t &u: test_coords){
+            std::chrono::_V2::system_clock::time_point begin, end;
+            begin = std::chrono::high_resolution_clock::now();
+            for(size_t i = 0; i < REPEAT; ++i){
+                t.getClosestPoint(u);
+            }
+            end = std::chrono::high_resolution_clock::now();
+            double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT);
+            os << "," << dt;
         }
-        end = std::chrono::high_resolution_clock::now();
-        
-        double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(test_coords.size());
-        os << "," << dt;
+        os << "\n";
+    }
+}
 
+void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
+    std::ofstream os("eval/deepvstripes-querytime.csv");
+    os << std::fixed << std::setprecision(3);
+
+    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
+    std::vector<coord_t> coords(nodes.size());
+    {
+        size_t i = 0;
+        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+            coords[i++] = p.second;
+    }
+    std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
+    
+    std::vector<coord_t> candidates;
+    for(const Run &r: runs)
+        for(const coord_t &c: r.coords)
+            candidates.push_back(c);
+
+    const size_t N = 100000;
+    const size_t REPEAT = 10;
+
+    std::vector<coord_t> test_coords(N);
+    std::set<size_t> indexes;
+    while(indexes.size() < N) indexes.insert(rand()%candidates.size());
+    size_t j = 0;
+    for(const size_t &i: indexes){
+        test_coords[j++] = candidates[i];
+    }
+
+    std::vector<size_t> szs = {
+             1,
+           200,
+           400,
+           600,
+           800,
+          1000,
+          2000,
+          4000,
+          6000,
+          8000,
+         10000, 12500, 15000, 17500,
+         20000, 22500, 25000, 27500,
+         30000, 32500, 35000, 37500,
+         40000, 45000,
+         50000, 55000,
+         60000, 65000,
+         70000, 75000,
+         80000, 85000,
+         90000, 95000,
+        100000,105000,
+        110000,115000,
+        120000,125000,
+        130000,135000,
+        140000,145000,
+        150000,155000,
+        160000,165000,
+        170000,175000,
+        180000,185000,
+        190000,195000,
+        200000,205000,
+        210000,215000,
+        220000,225000,
+        230000,235000,
+        240000,245000,
+        250000,255000,
+        260000,265000,
+        270000,275000,
+        280000,285000,
+        290000,295000,
+        300000,
+    };
+    sort(szs.begin(), szs.end());
+
+    const coord_t::deg_t X_AMPLITUDE = 0.35;
+    const coord_t::deg_t d = 0.0004;
+
+    for(const size_t &sz: szs){
+        os << sz;
+        std::cout << "Size: " << sz << std::endl;
+
+        std::list<coord_t> l;
+        for(size_t i = 0; i < sz; ++i)
+            l.push_back(coords.at(i));
+
+        DeepVStripes t(d, long(log2(X_AMPLITUDE/d))+2);
+        t.initialize(l);
+        t.run();
+        for(const coord_t &u: test_coords){
+            std::chrono::_V2::system_clock::time_point begin, end;
+            begin = std::chrono::high_resolution_clock::now();
+            for(size_t i = 0; i < REPEAT; ++i){
+                t.getClosestPoint(u);
+            }
+            end = std::chrono::high_resolution_clock::now();
+            double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT);
+            os << "," << dt;
+        }
         os << "\n";
     }
 }
@@ -437,6 +547,7 @@ int main(int argc, char *argv[]){
 
         if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, runs);
         if(opt == "deepvstripes-querytime-d") evalDeepVStripes_QueryTime_d(M, runs);
+        if(opt == "deepvstripes-querytime") evalDeepVStripes_QueryTime(M, runs);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;

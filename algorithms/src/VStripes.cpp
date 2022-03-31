@@ -68,8 +68,7 @@ pair<bool,coord_t> VStripes::getClosestPoint_success(coord_t p) const {
 void VStripes::checkStripe(const coord_t &p, size_t i, coord_t::deg_t &dBest, coord_t &cBest) const {
     const vector<coord_t> &stripe = stripes[i];
     auto l = lower_bound(stripe.begin(), stripe.end(), p.getLat()-d, [](const coord_t &c, const double &y){ return c.getLat() < y; });
-    auto r = lower_bound(stripe.begin(), stripe.end(), p.getLat()+d, [](const coord_t &c, const double &y){ return c.getLat() < y; });
-    for(; l != r; ++l){
+    for(; l->getLat() < p.getLat()+d; ++l){
         const coord_t &c = *l;
         deg_t d = coord_t::getDistanceDeg(c, p);
         if(d < dBest){
