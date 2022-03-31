@@ -68,3 +68,11 @@ double coord_t::getMetersPerLonDeg() const{
 
 coord_t::deg_t coord_t::getLat() const{ return lat; }
 coord_t::deg_t coord_t::getLon() const{ return lon; }
+
+bool coord_t::compx(const coord_t &lhs, const coord_t &rhs){
+    return (lhs.getLon() < rhs.getLon());
+}
+
+bool coord_t::compy(const coord_t &lhs, const coord_t &rhs){
+    return (lhs.getLat() < rhs.getLat());
+}

@@ -62,6 +62,9 @@ public:
     bool operator< (const coord_t &c) const;
     deg_t getLat() const;
     deg_t getLon() const;
+
+    static bool compx(const coord_t &lhs, const coord_t &rhs);
+    static bool compy(const coord_t &lhs, const coord_t &rhs);
 };
 
 #endif //COORD_H_INCLUDED

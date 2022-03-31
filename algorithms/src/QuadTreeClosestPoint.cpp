@@ -10,13 +10,6 @@ typedef coord_t::deg_t deg_t;
 
 const deg_t INF = 1000000000.0L;
 
-bool compx(const coord_t &lhs, const coord_t &rhs){
-    return (lhs.getLon() < rhs.getLon());
-}
-bool compy(const coord_t &lhs, const coord_t &rhs){
-    return (lhs.getLat() < rhs.getLat());
-}
-
 size_t size_bits(size_t n){
     return 32 - __builtin_clz(uint32_t(n));
 }
@@ -40,8 +33,8 @@ void QuadTreeClosestPoint::run(){
         size_t l = (prefix  ) << level;
         size_t r = (prefix+1) << level;
         bool xAxisActive = (level%2 == 1); // Active axis is X if level is odd
-        if(xAxisActive) stable_sort(c.begin() + l, c.begin() + r, compx);
-        else            stable_sort(c.begin() + l, c.begin() + r, compy);
+        if(xAxisActive) stable_sort(c.begin() + l, c.begin() + r, coord_t::compx);
+        else            stable_sort(c.begin() + l, c.begin() + r, coord_t::compy);
 
         size_t m1 = l + (r-l)/2 - 1;
         size_t m2 = l + (r-l)/2;
