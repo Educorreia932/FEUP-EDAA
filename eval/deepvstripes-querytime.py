@@ -1,8 +1,6 @@
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from math import log2
 
 df = pd.read_csv('deepvstripes-querytime.csv', index_col=0, header=None)
 df2 = pd.DataFrame(index = df.index)
@@ -13,13 +11,6 @@ df2['q3'    ] = df.quantile(axis=1, q=0.75).ewm(span=8).mean()
 df2['min'   ] = df.min(axis=1)             .ewm(span=8).mean()
 df2['max'   ] = df.max(axis=1)             .ewm(span=8).mean()
 df2['mean'  ] = df.mean(axis=1)            .ewm(span=8).mean()
-
-# X = df2['x-adjusted'].values.reshape(-1,1) # this  has shape (XXX, 1) - it's 2D
-# Y = df2['mean'].values.reshape(-1,1) # this  has shape (XXX, 1) - it's 2D
-# linear_regressor = LinearRegression()  # create object for the class
-# linear_regressor.fit(X,Y)  # perform linear regression
-# r2 = linear_regressor.score(X, Y, sample_weight=None)
-# df2['linreg'] = linear_regressor.predict(X)
 
 print(df)
 print(df2)
@@ -36,7 +27,7 @@ ax = df2['q3'    ].plot(ax=ax         , color=(196/255, 145/255, 22/255))
 # ax.fill_between(df2.index, df2['min'], df2['max'], color=(1,0,0,0.2))
 ax.set_xlim(-2000, 300000)
 ax.set_ylim(0, 350)
-ax.set_title("2-d tree query execution time ($d=0.0003$)")
+ax.set_title("DeepVStripes query execution time ($d=0.0003$)")
 ax.set_xlabel("Number of points in set ($N$)")
 ax.set_ylabel("Query time ($t$/ns)")
 plt.xticks(range(0, 300000+1, 20000))

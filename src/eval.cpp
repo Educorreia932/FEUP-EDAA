@@ -314,6 +314,110 @@ void eval2DTree_BuildMemory(){
     }
 }
 
+void evalDeepVStripes_BuildTime(const MapGraph &M){
+    std::ofstream os("eval/deepvstripes-buildtime.csv");
+    os << std::fixed;
+
+    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
+    std::vector<coord_t> coords(nodes.size());
+    {
+        size_t i = 0;
+        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+            coords[i++] = p.second;
+    }
+    std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
+
+    const size_t REPEAT = 5;
+
+    std::vector<size_t> Ls = {
+        1,
+        3,
+        6,
+        9,
+        12,
+        15,
+        18,
+        21,
+        24,
+    };
+
+    std::vector<size_t> szs = {
+             1,
+           200,
+           400,
+           600,
+           800,
+          1000,
+          2000,
+          4000,
+          6000,
+          8000,
+         10000,
+         12500,
+         15000,
+         17500,
+         20000,
+         25000,
+         30000,
+         40000,
+         50000,
+         60000,
+         70000,
+         80000,
+         90000,
+        100000,
+        120000,
+        140000,
+        160000,
+        180000,
+        200000,
+        220000,
+        240000,
+        260000,
+        280000,
+        300000,
+    };
+    sort(szs.begin(), szs.end());
+
+    const coord_t::deg_t d = 0.0003;
+
+    os << "L";
+    for(const size_t &sz: szs){
+        os << "," << sz;
+    }
+    os << "\n";
+
+    for(const size_t &L: Ls){
+        os << std::setprecision(0) << L << std::setprecision(9);
+        std::cout << "L: " << L << std::endl;
+
+        DeepVStripes t(d, L);
+
+        std::list<coord_t> l;
+
+        for(const size_t &sz: szs){
+            std::cout << "Size: " << sz << std::endl;
+
+            for(size_t i = l.size(); i < sz; ++i)
+                l.push_back(coords[i]);
+            
+            std::chrono::_V2::system_clock::time_point begin, end;
+
+            begin = std::chrono::high_resolution_clock::now();
+            for(size_t i = 0; i < REPEAT; ++i){
+                t.initialize(l);
+                t.run();
+            }
+            end = std::chrono::high_resolution_clock::now();
+            
+            double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())/double(REPEAT);
+            os << "," << dt;
+
+        }
+        os << "\n";
+    }
+}
+
 void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &runs){
     std::ofstream os("eval/deepvstripes-querytime-d.csv");
     os << std::fixed << std::setprecision(9);
@@ -658,6 +762,7 @@ int main(int argc, char *argv[]){
         std::cout << "Loaded map" << std::endl;
 
         if(opt == "2d-tree-buildtime"){ eval2DTree_BuildTime  (M); return 0; }
+        if(opt == "deepvstripes-buildtime"){ evalDeepVStripes_BuildTime(M); return 0; }
         
         std::cout << "Loading runs..." << std::endl;
         std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");

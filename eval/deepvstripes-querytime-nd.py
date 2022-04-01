@@ -32,7 +32,7 @@ for i in range(len(l)):
     plt.plot(df2['d'], df2[l[i]], color=colors[i])
 plt.xlim(-2000, 300000)
 plt.ylim(0, 300)
-plt.title("2-d tree query execution time")
+plt.title("DeepVStripes query execution time")
 plt.xlabel("Number of points in set ($N$)")
 plt.ylabel("Query time ($t$/ns)")
 plt.xticks(range(0, 300000+1, 20000))

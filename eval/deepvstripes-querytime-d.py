@@ -14,6 +14,8 @@ df2['mean'  ] = df.mean(axis=1)            .ewm(span=8).mean()
 print(df)
 print(df2)
 
+print(df2[["mean"]].idxmin())
+
 fig = plt.figure()
 ax = df2['median'].plot(figsize=(10,6), color=(0,0,0))
 ax.plot(df2.index, df2['mean'], '--', color=(0,0,0), lw=0.85)
