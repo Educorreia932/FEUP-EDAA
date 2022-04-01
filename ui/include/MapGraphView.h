@@ -23,4 +23,5 @@ public:
 
     void drawRoads () const;
     void drawSpeeds() const;
+    void drawVoronoi() const;
 };

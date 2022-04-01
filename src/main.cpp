@@ -16,6 +16,11 @@
 
 #include <X11/Xlib.h>
 
+void view(const MapGraph &M){
+    MapGraphView view(M);
+    view.drawRoads();
+}
+
 void voronoi(const MapGraph &M) {
     std::vector<Site> sites;
 
@@ -25,9 +30,9 @@ void voronoi(const MapGraph &M) {
     VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
 }
 
-void view(const MapGraph &M){
+void voronoi_display(const MapGraph &M) {
     MapGraphView view(M);
-    view.drawRoads();
+    view.drawVoronoi();
 }
 
 int main(int argc, char *argv[]){
@@ -42,6 +47,8 @@ int main(int argc, char *argv[]){
         std::cout << "Loaded map" << std::endl;
 
         if(opt == "view"){ view(M); return 0; }
+        if(opt == "voronoi"){ voronoi(M); return 0; }
+        if(opt == "voronoi-display"){ voronoi_display(M); return 0; }
         
         std::cout << "Loading runs..." << std::endl;
         std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");

@@ -27,4 +27,6 @@ public:
     void addEdge(edge_t i, node_t u, node_t v, GraphViewer::Edge::EdgeType edge_type, const sf::Color &color, window_t width, bool dashed = false);
     void createWindow();
     void join();
+
+    sf::Vector2f coord2vector(const coord_t &c) const;
 };
