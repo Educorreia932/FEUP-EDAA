@@ -1,14 +1,14 @@
 #include "Event.h"
 
 bool Event::operator<(const Event &event) const {
-    return this->y < event.y;
+    return this->point.y < event.point.y;
 }
 
-Event::Event(Site site) : type(SITE), y(site.point.y), site(site) {
+Event::Event(Site site) : type(SITE), point(site.point), site(site) {
 
 }
 
-Event::Event(Arc* arc, double y) : type(CIRCLE), y(y), arc(arc) {
+Event::Event(Arc* arc, Vector2 point) : type(CIRCLE), point(point), arc(arc) {
 
 }
 

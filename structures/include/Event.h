@@ -15,7 +15,7 @@ public:
 
     Type type;
     bool valid = true;
-    double y;
+    Vector2 point;
 
     // Site event
     Site site;
@@ -26,7 +26,7 @@ public:
     bool operator<(const Event &event) const;
 public:
     Event(Site site);           // Site event
-    Event(Arc* arc, double y);  // Circle event
+    Event(Arc* arc, Vector2 point);  // Circle event
 };
 
 #endif

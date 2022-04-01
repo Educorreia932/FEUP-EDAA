@@ -20,7 +20,7 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
             handleCircleEvent(event);
 
         // Update sweep line position
-        sweep_line = event.y;
+        sweep_line = event.point.y;
     }
 
     // TODO: Bounding box
@@ -45,26 +45,46 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     // Starting point for the two new edges
     Vector2 start = middle_arc->get_point(event.site.point.x, sweep_line);
 
-    middle_arc->s0 = Edge(start, arc_above->site.point, event.site.point);
-    middle_arc->s1 = Edge(start, event.site.point, arc_above->site.point);
+    middle_arc->s0 = new Edge(start, arc_above->site.point, event.site.point);
+    middle_arc->s1 = new Edge(start, event.site.point, arc_above->site.point);
 
     // Link up the two edges
-    middle_arc->s0.adjacent = &middle_arc->s1;
-    middle_arc->s1.adjacent = &middle_arc->s0;
+    middle_arc->s0->adjacent = middle_arc->s1;
+    middle_arc->s1->adjacent = middle_arc->s0;
 
     left_arc->s1 = middle_arc->s0;
     right_arc->s0 = middle_arc->s1;
 
     // TODO: Invalidate circle events
 
-
-    // TODO: Check for new circle events
+    // Check for new circle events
     checkCircleEvents(middle_arc);
 }
 
 // Remove parabola
 void FortuneAlgorithm::handleCircleEvent(Event event) {
+    Arc* arc = event.arc;
+    Arc* left_arc = arc->previous;
+    Arc* right_arc = arc->next;
 
+    left_arc->next = right_arc;
+    right_arc->previous = left_arc;
+
+    delete arc;
+
+    // Set end points for edges
+    Edge* left_edge = left_arc->s1;
+    Edge* right_edge = right_arc->s0;
+
+    left_edge->end = event.point;
+    right_edge->end = event.point;
+
+    // Add finished edges to diagram
+    diagram.addEdge(*left_edge);
+    diagram.addEdge(*right_edge);
+
+    // TODO: Remove any circle events now not needed
+    // TODO: Check to see if we need to create new circle events
 }
 
 Arc* FortuneAlgorithm::locateArcAbove(Site site) {
@@ -118,7 +138,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     Vector2 intersection;
     Vector2 focus = arc->site.point;
 
-    if (arc->s0.intersect(arc->s1, intersection))
+    if (arc->s0->intersect(*arc->s1, intersection))
         return;
 
     // Calculate radius of circle
@@ -126,7 +146,10 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     double dx = focus.x - intersection.x;
     double radius = sqrt(pow(dx, 2) + pow(dy, 2));
 
-    Event circle_event = Event(arc, intersection.y - radius);
-    events.push(circle_event);
+    // Check if sweepline hasn't passed possible circle event location
+    if (intersection.y - radius > sweep_line) {
+        Event circle_event = Event(arc, intersection.y - radius);
+        events.push(circle_event);
+    }
 }
 

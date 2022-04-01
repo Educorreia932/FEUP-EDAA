@@ -12,8 +12,8 @@ public:
     Arc* previous;
     Arc* next;
 
-    Edge s0; // Left edge
-    Edge s1; // Right edge
+    Edge* s0; // Left edge
+    Edge* s1; // Right edge
 
     Site site;
     Event* event;
