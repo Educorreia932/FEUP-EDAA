@@ -33,6 +33,6 @@ ax.set_ylabel("Query time ($t$/ns)")
 plt.grid()
 fig.tight_layout()
 
-# plt.savefig("deepvstripes-querytime-d.png", dpi=600)
+plt.savefig("deepvstripes-querytime-d.png", dpi=600)
 
 plt.show()
