@@ -16,6 +16,8 @@ public:
     Vector2 end;
     double m; // Gradient
     Edge* adjacent = nullptr;
+    Site* site_up;
+    Site* site_down;
 
     Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint);
 
