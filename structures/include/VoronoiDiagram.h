@@ -15,6 +15,8 @@ public:
     Vector2 start;
     Vector2 end;
     double m; // Gradient
+    double c; // Y-axis intercept
+    Vector2 direction;
     Edge* adjacent = nullptr;
     Site* site_up;
     Site* site_down;
