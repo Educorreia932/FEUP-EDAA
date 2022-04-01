@@ -15,13 +15,9 @@
 
 #include <X11/Xlib.h>
 
-void view(int argc, const char *argv[], const MapGraph &M){
-    if(argc != 4) throw std::invalid_argument("invalid number of arguments");
-    int fraction = atoi(argv[2]);
-    int display  = atoi(argv[3]);
-
+void view(const MapGraph &M){
     MapGraphView view(M);
-    view.drawRoads(fraction, display);
+    view.drawRoads();
 }
 
 int main(int argc, char *argv[]){
@@ -29,14 +25,21 @@ int main(int argc, char *argv[]){
 
     try {
         if(argc < 2) throw std::invalid_argument("at least one argument must be provided");
-        MapGraph M("res/map/processed/AMP");
-        std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
         std::string opt = argv[1];
-        if(opt == "view"      ) view      (argc, const_cast<const char **>(argv), M);
+
+        std::cout << "Loading map..." << std::endl;
+        MapGraph M("res/map/processed/AMP");
+        std::cout << "Loaded map" << std::endl;
+
+        if(opt == "view"){ view(M); return 0; }
+        
+        std::cout << "Loading runs..." << std::endl;
+        std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
+        std::cout << "Loaded runs" << std::endl;
+        
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         std::cout << "Usage: ./main (view | ...)\n";
-                    //  "       ./main path FRACTION FLAGS [-v]\n";
         return EXIT_FAILURE;
     }
     return 0;
