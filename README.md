@@ -15,7 +15,7 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
-./da_proj view 1 255
+./da_proj view
 ```
 
 XML file was obtained from: https://overpass-api.de/api/map?bbox=-8.7863,40.9980,-8.4718,41.3722
