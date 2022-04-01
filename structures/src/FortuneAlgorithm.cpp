@@ -1,6 +1,8 @@
-#include <limits>
 #include "FortuneAlgorithm.h"
 #include "Event.h"
+
+#include <cmath>
+#include <limits>
 
 VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
     // Generate site events
@@ -57,6 +59,7 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
 
 
     // TODO: Check for new circle events
+    checkCircleEvents(middle_arc);
 }
 
 // Remove parabola
@@ -111,7 +114,19 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site site) {
     return middle_arc;
 }
 
-void FortuneAlgorithm::checkCircleEvents() {
+void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
+    Vector2 intersection;
+    Vector2 focus = arc->site.point;
 
+    if (arc->s0.intersect(arc->s1, intersection))
+        return;
+
+    // Calculate radius of circle
+    double dy = focus.y - intersection.y;
+    double dx = focus.x - intersection.x;
+    double radius = sqrt(pow(dx, 2) + pow(dy, 2));
+
+    Event circle_event = Event(arc, intersection.y - radius);
+    events.push(circle_event);
 }
 

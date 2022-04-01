@@ -11,26 +11,28 @@ Edge::Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint) : start(start) 
     this->direction = Vector2(-1.0 * (leftpoint.y - rightpoint.y), leftpoint.x - rightpoint.x);
 }
 
-Vector2 Edge::intersect(Edge edge) {
+bool Edge::intersect(Edge edge, Vector2 &intersection) {
     // Edges are parallel
     if (this->m == edge.m)
-        return NULL;
+        return false;
 
     double x = (this->c - edge.c) / (this->m - edge.m);
     double y = this->m * x + this->c;
 
     // Edges have a direction, intersection is on that side of the edge
     if ((x - this->start.x) / this->direction.x < 0)
-        return NULL;
+        return false;
 
     if ((y - this->start.y) / this->direction.y < 0)
-        return NULL;
+        return false;
 
     if ((x - edge.start.x) / edge.direction.x < 0)
-        return NULL;
+        return false;
 
     if ((y - this->start.y) / edge.direction.y < 0)
-        return NULL;
+        return false;
 
-    return Vector2(x, y);
+    intersection = Vector2(x, y);
+
+    return true;
 }

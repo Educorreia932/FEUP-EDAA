@@ -23,7 +23,7 @@ public:
 
     Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint);
 
-    Vector2 intersect(Edge edge);
+    bool intersect(Edge edge, Vector2 &intersection);
 };
 
 class VoronoiDiagram {

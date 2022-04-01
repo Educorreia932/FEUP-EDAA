@@ -16,7 +16,7 @@ private:
     Arc* breakArc(Arc* arc, Site site);
     void addEdge(Arc* left, Arc* right);
     void invalidateCircleEvent();
-    void checkCircleEvents();
+    void checkCircleEvents(Arc* arc);
 public:
     VoronoiDiagram construct(std::vector<Site> sites);
 };
