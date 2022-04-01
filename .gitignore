@@ -36,13 +36,21 @@
 
 # Build folders (where CMake does its magic)
 build
-map/build
+res/map/map_process
 
 # Data
 map.xml
 *.edges
 *.nodes
 *.points
+
+*.zip
+train.csv
+*.runs
+*.svg
+*.csv
+*.emf
+*.png
 
 .idea/
 cmake-build-debug/

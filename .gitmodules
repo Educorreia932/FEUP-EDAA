@@ -1,9 +1,9 @@
 [submodule "lib/GraphViewerCpp"]
 	path = lib/GraphViewerCpp
 	url = https://github.com/dmfrodrigues/GraphViewerCpp.git
-[submodule "map/rapidxml"]
-	path = map/rapidxml
-	url = https://github.com/dwd/rapidxml.git
 [submodule "test/Catch2"]
 	path = test/Catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "res/map/rapidxml"]
+	path = res/map/rapidxml
+	url = https://github.com/dwd/rapidxml.git
