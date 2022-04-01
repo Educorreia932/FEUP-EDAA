@@ -5,9 +5,9 @@ using namespace std;
 typedef coord_t::deg_t deg_t;
 
 DeepVStripes::DeepVStripes(deg_t d, size_t n){
-    vstripes_vtr.reserve(n);
+    vstripes_vtr.clear();
     for(size_t i = 0; i < n; ++i, d *= 2.0){
-        vstripes_vtr.emplace_back(d);
+        vstripes_vtr.push_back(VStripes(d));
     }
 }
 

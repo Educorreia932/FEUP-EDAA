@@ -32,14 +32,13 @@ void QuadTreeClosestPoint::run(){
         size_t prefix = i & (~(1uL << (size_bits(i) - 1)));
         size_t l = (prefix  ) << level;
         size_t r = (prefix+1) << level;
+        size_t m = l + (r-l)/2;
         bool xAxisActive = (level%2 == 1); // Active axis is X if level is odd
-        if(xAxisActive) stable_sort(c.begin() + l, c.begin() + r, coord_t::compx);
-        else            stable_sort(c.begin() + l, c.begin() + r, coord_t::compy);
+        if(xAxisActive) nth_element(c.begin() + l, c.begin() + m, c.begin() + r, coord_t::compx);
+        else            nth_element(c.begin() + l, c.begin() + m, c.begin() + r, coord_t::compy);
 
-        size_t m1 = l + (r-l)/2 - 1;
-        size_t m2 = l + (r-l)/2;
-        coord_t medianCoord = (c[m1] + c[m2])/2;
-        deg_t median = (xAxisActive ? medianCoord.getLon() : medianCoord.getLat());
+        const coord_t &medianCoord = c[m];
+        const deg_t &median = (xAxisActive ? medianCoord.getLon() : medianCoord.getLat());
         split[i] = median;
     }
 }

@@ -12,9 +12,10 @@ VStripes::VStripes(deg_t width):
 d(width){}
 
 void VStripes::initialize(const list<coord_t> &points){
-    v = vector<coord_t>();
-    v.reserve(points.size());
-    for(const coord_t &c: points) v.push_back(c);
+    stripes.clear();
+
+    v.resize(points.size());
+    copy(points.begin(), points.end(), v.begin());
 }
 
 void VStripes::run(){
@@ -68,8 +69,7 @@ pair<bool,coord_t> VStripes::getClosestPoint_success(coord_t p) const {
 void VStripes::checkStripe(const coord_t &p, size_t i, coord_t::deg_t &dBest, coord_t &cBest) const {
     const vector<coord_t> &stripe = stripes[i];
     auto l = lower_bound(stripe.begin(), stripe.end(), p.getLat()-d, [](const coord_t &c, const double &y){ return c.getLat() < y; });
-    auto r = lower_bound(stripe.begin(), stripe.end(), p.getLat()+d, [](const coord_t &c, const double &y){ return c.getLat() < y; });
-    for(; l != r; ++l){
+    for(; l != stripe.end() && l->getLat() < p.getLat()+d; ++l){
         const coord_t &c = *l;
         deg_t d = coord_t::getDistanceDeg(c, p);
         if(d < dBest){
