@@ -8,18 +8,21 @@ class Event;
 
 class Arc {
 public:
+    // Double linked list
+    Arc* previous;
+    Arc* next;
+
+    Edge s0; // Left edge
+    Edge s1; // Right edge
+
     Site site;
-    Arc* left;
-    Arc* right;
-    Segment left_segment;
-    Segment right_segment;
     Event* event;
 
     Arc(Site site);
-    Arc(Site site, Arc* left);
-    Arc(Site site, Arc* left, Arc* right);
+    Arc(Site site, Arc* previous, Arc* next);
 
-    Vector2 intersect(Arc* arc, double y);
+    Vector2 get_point(double x, double sweep_line);
+    Vector2 intersect(Arc arc, double sweep_line);
 };
 
 #endif

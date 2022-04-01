@@ -15,27 +15,18 @@ public:
 
     Type type;
     bool valid = true;
-    Vector2 point;
+    double y;
 
-    virtual ~Event();
-
-    bool operator<(const Event &event) const;
-protected:
-    Event(Type type);
-};
-
-class SiteEvent : public Event {
-public:
+    // Site event
     Site site;
 
-    SiteEvent(Site site);
-};
-
-class CircleEvent : public Event {
-public:
+    // Circle event
     Arc* arc;
 
-    CircleEvent(Arc* arc);
+    bool operator<(const Event &event) const;
+public:
+    Event(Site site); // Site event
+    Event(Arc* arc);  // Circle event
 };
 
 #endif
