@@ -33,6 +33,9 @@ ax.set_ylabel("Query time ($t$/ns)")
 # ax.get_xaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'{x/1000:.0f}k' if x >= 1000 else '0'))
 # ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'{x/1000000:.0f}'))
 plt.grid()
+
+plt.gcf().text(0.01, 0.02, "100,000 queries, averaged 10 runs,\n8-points exponential moving average", fontsize=8)
+
 fig.tight_layout()
 
 plt.savefig("deepvstripes-querytime-d.png", dpi=600)

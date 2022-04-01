@@ -34,8 +34,9 @@ plt.xticks(range(0, 300000+1, 20000))
 ax.get_xaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'{x/1000:.0f}k' if x >= 1000 else '0'))
 plt.grid()
 ax.legend(["Median", "Mean", "IQR", "Minimum"])
-# ax.text(170000, 115, f'$y = {linear_regressor.coef_[0][0]:.3f} x\' {linear_regressor.intercept_[0]:+.3f}$\n$r^2={r2:.3f}$', fontsize=10)
-# ax.text(50000, 325, f'$x\'=\log_2{{x}}$', fontsize=10)
+
+plt.gcf().text(0.01, 0.02, "100,000 queries, averaged 10 runs,\n8-points exponential moving average", fontsize=8)
+
 fig.tight_layout()
 
 plt.savefig("deepvstripes-querytime.png", dpi=600)

@@ -43,6 +43,9 @@ ax.text(220000, 0.100*1e9, f'$y = 22.5 x\'$', fontsize=10)
 ax.text(230000, 0.050*1e9, f'$y = 14.4 x\'$', fontsize=10)
 ax.text(180000, 0.075*1e9, f'$y = {linear_regressor.coef_[0][0]:.3f} x\' {linear_regressor.intercept_[0]/1000000:+.3f}$\n$r^2={r2:.3f}$', fontsize=10)
 ax.text(5000, 0.132*1e9, f'$x\'=x \log_2{{x}}$', fontsize=10)
+
+plt.gcf().text(0.01, 0.02, "Averaged 5 samples, 2-points exponential moving average", fontsize=8)
+
 fig.tight_layout()
 
 plt.savefig("2d-tree-buildtime.png", dpi=600)

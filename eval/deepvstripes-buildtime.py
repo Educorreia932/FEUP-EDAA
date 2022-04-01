@@ -39,6 +39,9 @@ plt.gca().get_xaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda
 plt.gca().get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, p: f'{y/1000000000:.1f}' if y > 0 else '0'))
 plt.grid()
 plt.legend([f"$L={L}$" for L in Ls], ncol=2)
+
+plt.gcf().text(0.01, 0.02, "Averaged 5 samples, 4-points exponential moving average", fontsize=8)
+
 fig.tight_layout()
 
 plt.savefig("deepvstripes-buildtime.png", dpi=600)
