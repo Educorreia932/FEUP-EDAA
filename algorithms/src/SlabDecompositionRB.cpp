@@ -42,8 +42,8 @@ void SlabDecompositionRB::run(){
         deg_t xm = xl + (xr-xl)/2.0;
 
         RBTree<const Edge*> &cur = slabs[xl] = prev;
-        for(const Event &ev: it1->second) if(!ev.start) cur.remove(ev.e, cmp_t{xm});
-        for(const Event &ev: it1->second) if( ev.start) cur.insert(ev.e, cmp_t{xm});
+        for(const Event &ev: it1->second) if(!ev.start) cur = cur.remove(ev.e, cmp_t{xm});
+        for(const Event &ev: it1->second) if( ev.start) cur = cur.insert(ev.e, cmp_t{xm});
 
         ++it1; ++it2; prev = cur;
     }

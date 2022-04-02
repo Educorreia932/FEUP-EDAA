@@ -8,15 +8,20 @@
 
 using namespace std;
 
-TEST_CASE("Slab decomposition", "[slab-1]"){
-    unordered_map<string, Site> sites = {
+unordered_map<string, Site> sites;
+list<Edge> edges;
+
+void initializeVoronoiDecomposition(VoronoiDecomposition &s){
+    sites.clear();
+    sites = {
         {"A", {{5,10}}},
         {"B", {{9,10}}},
         {"C", {{5,6}}},
         {"D", {{1,2}}},
         {"E", {{5,2}}},
     };
-    list<Edge> edges;
+    
+    edges.clear();
     Edge e = Edge({0,0},{1,1},{-1,-1});
     e.start = { 0,12}; e.end = { 7,12}; e.site_up = nullptr       ; e.site_down = &sites.at("A"); edges.push_back(e);
     e.start = { 0,12}; e.end = { 0, 8}; e.site_up = &sites.at("A"); e.site_down = nullptr       ; edges.push_back(e);
@@ -35,29 +40,11 @@ TEST_CASE("Slab decomposition", "[slab-1]"){
     e.start = { 0, 7}; e.end = { 3, 4}; e.site_up = &sites.at("C"); e.site_down = &sites.at("D"); edges.push_back(e);
     e.start = { 0, 7}; e.end = { 0, 8}; e.site_up = &sites.at("C"); e.site_down = nullptr       ; edges.push_back(e);
 
-    SlabDecomposition s;
     s.initialize(edges);
     s.run();
+}
 
-    // for(const auto &p: s.events){
-    //     std::cout << "x = " << p.first << std::endl;
-    //     for(const SlabDecomposition::Event &ev: p.second){
-    //         std::cout << "    " << ev.start << " "
-    //                   << "(" << ev.e->start.x << "," << ev.e->start.y << ")" << "--"
-    //                   << "(" << ev.e->end  .x << "," << ev.e->end  .y << ")" << std::endl;
-    //     }
-    // }
-
-    // std::cout << "\n\n";
-
-    // for(const auto &p: s.slabs){
-    //     std::cout << "xl = " << p.first << std::endl;
-    //     for(const Edge *e: p.second){
-    //         std::cout << "    " << "(" << e->start.x << "," << e->start.y << ")"
-    //                   << "--"   << "(" << e->end  .x << "," << e->end  .y << ")" << std::endl;
-    //     }
-    // }
-
+void evaluateVoronoiDecomposition(const VoronoiDecomposition &s){
     REQUIRE(s.getClosestPoint({1  ,11}) == sites.at("A").point);
     REQUIRE(s.getClosestPoint({2  ,11}) == sites.at("A").point);
     REQUIRE(s.getClosestPoint({3  ,11}) == sites.at("A").point);
@@ -189,6 +176,33 @@ TEST_CASE("Slab decomposition", "[slab-1]"){
     REQUIRE(s.getClosestPoint({9  , 1  }) == sites.at("E").point);
 }
 
+TEST_CASE("Slab decomposition", "[slab-1]"){
+    
+    SlabDecomposition s;
+    initializeVoronoiDecomposition(s);
+
+    // for(const auto &p: s.events){
+    //     std::cout << "x = " << p.first << std::endl;
+    //     for(const SlabDecomposition::Event &ev: p.second){
+    //         std::cout << "    " << ev.start << " "
+    //                   << "(" << ev.e->start.x << "," << ev.e->start.y << ")" << "--"
+    //                   << "(" << ev.e->end  .x << "," << ev.e->end  .y << ")" << std::endl;
+    //     }
+    // }
+
+    // std::cout << "\n\n";
+
+    // for(const auto &p: s.slabs){
+    //     std::cout << "xl = " << p.first << std::endl;
+    //     for(const Edge *e: p.second){
+    //         std::cout << "    " << "(" << e->start.x << "," << e->start.y << ")"
+    //                   << "--"   << "(" << e->end  .x << "," << e->end  .y << ")" << std::endl;
+    //     }
+    // }
+
+    evaluateVoronoiDecomposition(s);
+}
+
 TEST_CASE("Persistent Red-Black Tree", "[persistent-rbtree-1]"){
     RBTree<int> t0;
     auto t1 = t0.insert(0);
@@ -214,4 +228,10 @@ TEST_CASE("Persistent Red-Black Tree", "[persistent-rbtree-1]"){
     REQUIRE(*t3.lower_bound( 0) == 1);
     REQUIRE(*t3.lower_bound(+1) == 1);
     REQUIRE( t3.lower_bound(+2) == nullptr);
+}
+
+TEST_CASE("Slab decomposition RB", "[slab-rb-1]"){
+    SlabDecompositionRB s;
+    initializeVoronoiDecomposition(s);
+    evaluateVoronoiDecomposition(s);
 }

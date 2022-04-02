@@ -591,7 +591,7 @@ public:
             } else {
                 node = s.top();
                 s.pop();
-                out.emplace(node->entry->key, node->entry->value);
+                out.emplace(node->entry->key);
                 node = node->right;
             }
         }
