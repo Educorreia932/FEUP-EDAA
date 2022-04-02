@@ -8,7 +8,7 @@
 #include <set>
 
 class SlabDecompositionRB : public VoronoiDecomposition {
-public:
+private:
     struct cmp_t {
         coord_t::deg_t x;
         bool operator()(const Edge *lhs, const Edge *rhs) const {
