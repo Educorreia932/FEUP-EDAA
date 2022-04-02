@@ -25,7 +25,7 @@ const std::unordered_map<edge_type_t, MapGraphView::Display> MapGraphView::displ
 
 MapGraphView::MapGraphView(const MapGraph &g):graph(g){}
 
-MapViewer* createMapViewer(coord_t min_coord, coord_t max_coord, int w = 1800, int h = 900){
+static MapViewer* createMapViewer(coord_t min_coord, coord_t max_coord, int w = 1800, int h = 900){
     MapViewer *gv = new MapViewer(w, h, min_coord, max_coord);
     return gv;
 }

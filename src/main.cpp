@@ -5,6 +5,7 @@
 #include "EdgeType.h"
 #include "MapGraph.h"
 #include "MapGraphView.h"
+#include "MapRunsView.h"
 #include "MapViewer.h"
 
 #include "Run.h"
@@ -35,6 +36,38 @@ void voronoi_display(const MapGraph &M) {
     view.drawVoronoi();
 }
 
+void view_runs(const MapGraph &M, const std::vector<Run> &runs){
+    std::cout << "Building graph from runs..." << std::endl;
+    const size_t N = 50000;
+    MapGraph R;
+    {
+        std::map<coord_t, DWGraph::node_t> points;
+        auto it = runs.begin();
+        for(size_t i = 0; i < N; ++i, ++it){
+            for(const coord_t &c: it->coords){
+                if(!points.count(c)){
+                    size_t u = points.size();
+                    points[c] = u;
+                    R.addNode(u, c);
+                }
+            }
+        }
+        std::cout << "Gathered run coords..." << std::endl;
+        it = runs.begin();
+        for(size_t i = 0; i < N; ++i, ++it){
+            MapGraph::way_t w;
+            for(const coord_t &c: it->coords){
+                w.nodes.push_back(points.at(c));
+            }
+            R.addWay(w);
+        }
+        std::cout << "Built graph from runs" << std::endl;
+    }
+
+    MapRunsView view(R);
+    view.drawRuns();
+}
+
 int main(int argc, char *argv[]){
     XInitThreads();
 
@@ -53,6 +86,8 @@ int main(int argc, char *argv[]){
         std::cout << "Loading runs..." << std::endl;
         std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
         std::cout << "Loaded runs" << std::endl;
+
+        if(opt == "view-runs"){ view_runs(M, runs); return 0; }
         
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
