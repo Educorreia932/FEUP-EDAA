@@ -82,7 +82,7 @@ template <
                         return std::make_pair(new_node, is_new_key);
                     }
 
-                } else if (key > node->entry->key) {
+                } else if (node->entry->key < key) {
                     const auto [new_right, is_new_key] = insert(node->right, key);
                     const auto new_node = node->copyWithRight(new_right);
                     if (is_new_key) {
@@ -509,7 +509,7 @@ template <
             if (node) {
                 if (key < node->entry->key) {
                     return remove_left(node, key);
-                } else if (key > node->entry->key) {
+                } else if (node->entry->key < key) {
                     return remove_right(node, key);
                 } else {
                     const auto new_node = fuse(node->left, node->right);
@@ -557,7 +557,7 @@ template <
     //     while (cur) {
     //         if (key < cur->entry->key) {
     //             cur = cur->left;
-    //         } else if (key > cur->entry->key) {
+    //         } else if (cur->entry->key < key) {
     //             cur = cur->right;
     //         } else {
     //             return std::make_pair(cur->entry->key, cur->entry->value);
