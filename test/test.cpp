@@ -6,6 +6,7 @@
 #include "DeepVStripes.h"
 #include "VoronoiDiagram.h"
 #include "SlabDecomposition.h"
+#include "SlabDecompositionRB.h"
 
 using namespace std;
 
@@ -374,4 +375,10 @@ TEST_CASE("Slab decomposition", "[slab-1]"){
     REQUIRE(s.getClosestPoint({7  , 1  }) == sites.at("E").point);
     REQUIRE(s.getClosestPoint({8  , 1  }) == sites.at("E").point);
     REQUIRE(s.getClosestPoint({9  , 1  }) == sites.at("E").point);
+}
+
+TEST_CASE("Slab decomposition RB", "[slab-rb-1]"){
+    RBTree<int, int> t;            // t is empty
+    auto t0 = t.insert(0, 0);    // t0 contains {0,0}
+    auto t1 = t0.insert(1, 1);   // t1 contains {0,0}, {1,1}   
 }
