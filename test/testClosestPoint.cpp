@@ -1,5 +1,7 @@
 #include <catch2/catch_all.hpp>
 
+#include <bits/stdc++.h>
+
 #include "QuadTreeClosestPoint.h"
 #include "DeepVStripes.h"
 
@@ -190,4 +192,3 @@ TEST_CASE("DeepVStripes 3", "[deepvstripes-3]"){
         REQUIRE(q.getClosestPoint(u) == findClosestBruteForce(l, u));
     }
 }
-

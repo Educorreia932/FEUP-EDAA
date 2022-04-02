@@ -9,23 +9,24 @@ set(GCC_FLAGS_PARANOID "-pthread -g -O -Wall -pedantic -Wunused-result -pedantic
     -Wunknown-pragmas  -Wunreachable-code -Wunused -Wunused-function  -Wunused-label  -Wunused-parameter -Wunused-value  -Wunused-variable  -Wvariadic-macros \
     -Wvolatile-register-var  -Wwrite-strings") # -Weffc++ -Wpadded
 
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory("lib/GraphViewerCpp")
 include_directories("lib/GraphViewerCpp/include")
 
 include_directories("include" "algorithms/include" "structures/include" "utils/include" "ui/include")
-file(GLOB_RECURSE SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
-file(GLOB_RECURSE SRC_UI "ui/src/*.cpp")
+file(GLOB SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
+file(GLOB SRC_UI "ui/src/*.cpp")
+file(GLOB SRC_TEST "test/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message("Detected GNU GCC, adding some compilation flags for da_proj algorithms")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_OPTIMIZE}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_PARANOID}")
-endif()
+endif ()
 
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
@@ -34,7 +35,7 @@ target_link_libraries(${PROJECT_NAME} graphviewer)
 # ################ TESTS ################
 add_subdirectory("test/Catch2")
 include_directories("test/Catch2/src")
-add_executable(tests test/test.cpp ${SRC})
+add_executable(tests ${SRC_TEST} ${SRC})
 target_link_libraries(tests PRIVATE Catch2WithMain)
 include(CTest)
 include(test/Catch2/extras/Catch.cmake)

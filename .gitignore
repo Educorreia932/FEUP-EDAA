@@ -51,3 +51,7 @@ train.csv
 *.csv
 *.emf
 *.png
+
+.idea/
+cmake-build-debug/
+.ccls-cache/
