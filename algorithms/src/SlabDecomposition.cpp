@@ -65,8 +65,10 @@ Vector2 SlabDecomposition::getClosestPoint(Vector2 p) const {
     auto it2 = lower_bound(slab.begin(), slab.end(), p.y, [x](const Edge *e, double y){
         return e->evaluateY(x) < y;
     });
-    if(it2 == slab.begin()) throw runtime_error("y-coordinate too low");
+    if(it2 == slab.end()) throw runtime_error("y-coordinate too high");
 
     const Edge *eRet = *it2;
+    if(eRet->site_down == nullptr) throw runtime_error("y-coordinate too low");
+
     return eRet->site_down->point;
 }

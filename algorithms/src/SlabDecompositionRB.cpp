@@ -32,7 +32,7 @@ void SlabDecompositionRB::run(){
     }
 
     // map<deg_t, set<const Edge*, cmp_t>> slabs;
-    set<const Edge*, cmp_t> prev, cur;
+    RBTree<const Edge*> prev;
 
     auto it1 = events.begin(),
          it2 = ++events.begin();
@@ -41,14 +41,9 @@ void SlabDecompositionRB::run(){
               xr = it2->first;
         deg_t xm = xl + (xr-xl)/2.0;
 
-        set<const Edge*, cmp_t> cur = set<const Edge*, cmp_t>({xm});
-        cur.insert(prev.begin(), prev.end());
-
-        for(const Event &ev: it1->second) if(!ev.start) cur.erase(ev.e);
-        for(const Event &ev: it1->second) if(ev.start) cur.insert(ev.e);
-
-        auto &slab = slabs[xl] = vector<const Edge*>(cur.begin(), cur.end());
-        sort(slab.begin(), slab.end(), cmp_t{xm});
+        RBTree<const Edge*> &cur = slabs[xl] = prev;
+        for(const Event &ev: it1->second) if(!ev.start) cur.remove(ev.e, cmp_t{xm});
+        for(const Event &ev: it1->second) if( ev.start) cur.insert(ev.e, cmp_t{xm});
 
         ++it1; ++it2; prev = cur;
     }
@@ -62,11 +57,13 @@ Vector2 SlabDecompositionRB::getClosestPoint(Vector2 p) const {
 
     double x = p.x;
     auto slab = it1->second;
-    auto it2 = lower_bound(slab.begin(), slab.end(), p.y, [x](const Edge *e, double y){
+    auto it2 = slab.lower_bound(p.y, [x](const Edge *e, double y){
         return e->evaluateY(x) < y;
     });
-    if(it2 == slab.begin()) throw runtime_error("y-coordinate too low");
+    if(it2 == nullptr) throw runtime_error("y-coordinate too high");
 
     const Edge *eRet = *it2;
+    if(eRet->site_down == nullptr) throw runtime_error("y-coordinate too low");
+
     return eRet->site_down->point;
 }

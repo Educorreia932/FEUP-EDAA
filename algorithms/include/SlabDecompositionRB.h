@@ -23,7 +23,7 @@ public:
 
     std::vector<const Edge*> edges;
     std::map<coord_t::deg_t, std::list<Event>> events;
-    std::map<coord_t::deg_t, std::vector<const Edge*>> slabs;
+    std::map<coord_t::deg_t, RBTree<const Edge*>> slabs;
 public:
     void initialize(const std::list<Edge> &edges);
     void run();

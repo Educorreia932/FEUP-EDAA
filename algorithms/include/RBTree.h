@@ -615,15 +615,15 @@ public:
     }
 
     template <
-        class Compare = std::less<T>
-    > const key_type *lower_bound(const T &val, Compare comp = Compare()) const {
+        class U,
+        class Compare = std::less<U>
+    > const key_type *lower_bound(const U &val, Compare comp = Compare()) const {
         const key_type *ret = nullptr;
 
         node_ptr_type u = root_;
         while(u){
-            if     (comp(val, u->entry->key)){ ret = &u->entry->key; u = u->left ; }
-            else if(comp(u->entry->key, val)){                       u = u->right; }
-            else                               return &u->entry->key;
+            if   (comp(u->entry->key, val)){                       u = u->right; }
+            else                           { ret = &u->entry->key; u = u->left ; }
         }
 
         return ret;
