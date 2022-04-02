@@ -25,7 +25,7 @@ public:
 
     bool operator<(const Event &event) const;
 public:
-    Event(Site site);           // Site event
+    Event(Site site);                // Site event
     Event(Arc* arc, Vector2 point);  // Circle event
 };
 

@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
     // Generate site events
@@ -10,6 +11,7 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
         events.push(Event(site));
 
     while (!events.empty()) {
+        std::cout << ":c" << std::endl;
         Event event = events.top();
         events.pop();
 
@@ -55,7 +57,8 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     left_arc->s1 = middle_arc->s0;
     right_arc->s0 = middle_arc->s1;
 
-    // TODO: Invalidate circle events
+    // Invalidate circle events
+    invalidateCircleEvent(arc_above);
 
     // Check for new circle events
     checkCircleEvents(middle_arc);
@@ -70,9 +73,6 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     left_arc->next = right_arc;
     right_arc->previous = left_arc;
 
-    delete arc;
-
-    // Set end points for edges
     Edge* left_edge = left_arc->s1;
     Edge* right_edge = right_arc->s0;
 
@@ -83,8 +83,13 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     diagram.addEdge(*left_edge);
     diagram.addEdge(*right_edge);
 
-    // TODO: Remove any circle events now not needed
-    // TODO: Check to see if we need to create new circle events
+    // Remove any circle events now not needed
+    invalidateCircleEvent(arc);
+
+    // Check to see if we need to create new circle events
+    checkCircleEvents(arc);
+
+    delete arc;
 }
 
 Arc* FortuneAlgorithm::locateArcAbove(Site site) {
@@ -150,6 +155,13 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     if (intersection.y - radius > sweep_line) {
         Event circle_event = Event(arc, intersection.y - radius);
         events.push(circle_event);
+    }
+}
+
+void FortuneAlgorithm::invalidateCircleEvent(Arc* arc) {
+    if (arc->event != nullptr) {
+        arc->event->valid = false;
+        arc->event = nullptr;
     }
 }
 

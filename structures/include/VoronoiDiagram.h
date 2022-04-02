@@ -31,6 +31,7 @@ private:
     std::vector<Edge> edges;
 public:
     void addEdge(Edge segment);
+    std::vector<Edge> getEdges() const;
 };
 
 #endif

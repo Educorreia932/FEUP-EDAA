@@ -1,6 +1,6 @@
-#include "MapViewer.h"
-
 #include "FortuneAlgorithm.h"
+
+#include <iostream>
 
 int main() {
     std::vector<Site> sites;
@@ -9,6 +9,9 @@ int main() {
         sites.push_back(Site{Vector2(i, i)});
 
     VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
+
+    for (Edge edge: diagram.getEdges())
+        std::cout << "Start: " << edge.start.x << " " << edge.start.y << " End: " << edge.end.x << " " << edge.end.y << std::endl;
 
     return 0;
 }

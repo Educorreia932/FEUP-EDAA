@@ -16,7 +16,7 @@ public:
     Edge* s1; // Right edge
 
     Site site;
-    Event* event;
+    Event* event = nullptr;
 
     Arc(Site site);
     Arc(Site site, Arc* previous, Arc* next);

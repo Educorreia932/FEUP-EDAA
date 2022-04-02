@@ -4,6 +4,10 @@ void VoronoiDiagram::addEdge(Edge segment) {
     edges.push_back(segment);
 }
 
+std::vector<Edge> VoronoiDiagram::getEdges() const {
+    return edges;
+}
+
 
 Edge::Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint) : start(start) {
     this->m = -1.0 / ((leftpoint.y - rightpoint.y) / (leftpoint.x - rightpoint.x));
