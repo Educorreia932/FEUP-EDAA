@@ -36,3 +36,9 @@ bool Edge::intersect(Edge edge, Vector2 &intersection) {
 
     return true;
 }
+
+double Edge::evaluateY(double x) const {
+    double w = (x - start.x)/(end.x - start.x);
+    double y = (1-w)*start.y + (w)*end.y;
+    return y;
+}

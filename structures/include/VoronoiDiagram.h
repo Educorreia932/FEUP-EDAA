@@ -24,6 +24,8 @@ public:
     Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint);
 
     bool intersect(Edge edge, Vector2 &intersection);
+
+    double evaluateY(double x) const;
 };
 
 class VoronoiDiagram {

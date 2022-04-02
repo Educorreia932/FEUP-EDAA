@@ -27,5 +27,6 @@ Vector2 operator+(Vector2 lhs, const Vector2 &rhs);
 Vector2 operator-(Vector2 lhs, const Vector2 &rhs);
 Vector2 operator*(double t, Vector2 vec);
 Vector2 operator*(Vector2 vec, double t);
+bool operator==(const Vector2 &lhs, const Vector2 &rhs);
 
 #endif

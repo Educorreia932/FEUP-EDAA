@@ -69,3 +69,7 @@ Vector2 operator*(Vector2 vec, double t) {
     return t * vec;
 }
 
+bool operator==(const Vector2 &lhs, const Vector2 &rhs){
+    return (lhs.x == rhs.x && lhs.y == rhs.y);
+}
+
