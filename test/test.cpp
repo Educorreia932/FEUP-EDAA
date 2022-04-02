@@ -377,8 +377,13 @@ TEST_CASE("Slab decomposition", "[slab-1]"){
     REQUIRE(s.getClosestPoint({9  , 1  }) == sites.at("E").point);
 }
 
+struct test {
+    int x;
+};
+
 TEST_CASE("Slab decomposition RB", "[slab-rb-1]"){
-    RBTree<int> t;            // t is empty
-    auto t0 = t.insert(0);    // t0 contains {0}
-    auto t1 = t0.insert(1);   // t1 contains {0, 1}   
+    RBTree<test> t0; // t0 is empty
+    auto t1 = t0.insert({0}, [](const test &lhs, const test &rhs){ return lhs.x < rhs.x; }); // t1 contains {0}
+    auto t2 = t1.insert({1}, [](const test &lhs, const test &rhs){ return lhs.x < rhs.x; }); // t2 contains {0, 1}
+    auto t3 = t2.remove({0}, [](const test &lhs, const test &rhs){ return lhs.x < rhs.x; }); // t3 contains {1}
 }

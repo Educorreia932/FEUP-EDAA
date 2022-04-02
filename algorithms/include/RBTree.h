@@ -16,17 +16,16 @@
 #include <utility>
 
 template <
-    typename Key
+    class T
 > class RBTree {
-   private:
+private:
     struct Node;
     struct Entry;
 
     typedef std::shared_ptr<const Node> node_ptr_type;
     typedef std::shared_ptr<const Entry> entry_ptr_type;
 
-    typedef Key key_type;
-    typedef Key value_type;
+    typedef T key_type;
 
     struct Entry {
         Entry(const key_type& key) : key(key){}
@@ -35,7 +34,7 @@ template <
     };
 
     struct Node : std::enable_shared_from_this<const Node> {
-       public:
+    public:
         Node(const bool red,
              const entry_ptr_type& entry,
              const node_ptr_type& left,
@@ -47,7 +46,7 @@ template <
         Node(const bool red, const key_type& key)
             : red(red), entry(std::make_shared<const Entry>(key)) {}
 
-       public:
+    public:
         inline auto copyWithEntry(const key_type& key) const {
             const auto new_entry = std::make_shared<const Entry>(key);
             return std::make_shared<const Node>(red, new_entry, left, right);
@@ -69,12 +68,14 @@ template <
             return std::make_shared<const Node>(true, entry, left, right);
         }
 
-       public:
-        static std::pair<node_ptr_type, bool> insert(const node_ptr_type& node,
-                                                     const key_type& key) {
+    public:
+        template<
+            class Compare
+        > static std::pair<node_ptr_type, bool> insert(const node_ptr_type& node,
+                                                     const key_type& key, Compare comp) {
             if (node) {
-                if (key < node->entry->key) {
-                    const auto [new_left, is_new_key] = insert(node->left, key);
+                if (comp(key, node->entry->key)) {
+                    const auto [new_left, is_new_key] = insert(node->left, key, comp);
                     const auto new_node = node->copyWithLeft(new_left);
                     if (is_new_key) {
                         return std::make_pair(new_node->balance(), is_new_key);
@@ -82,8 +83,8 @@ template <
                         return std::make_pair(new_node, is_new_key);
                     }
 
-                } else if (node->entry->key < key) {
-                    const auto [new_right, is_new_key] = insert(node->right, key);
+                } else if (comp(node->entry->key, key)) {
+                    const auto [new_right, is_new_key] = insert(node->right, key, comp);
                     const auto new_node = node->copyWithRight(new_right);
                     if (is_new_key) {
                         return std::make_pair(new_node->balance(), is_new_key);
@@ -228,7 +229,7 @@ template <
         }
 
         // remove
-       public:
+    public:
         static node_ptr_type fuse(const node_ptr_type& left,
                                   const node_ptr_type& right) {
             // match: (left, right)
@@ -472,9 +473,11 @@ template <
             assert(0);  // LCOV_EXCL_LINE
         }
 
-        static std::pair<node_ptr_type, bool> remove_left(
-            const node_ptr_type& node, const key_type& key) {
-            const auto [new_left, removed] = remove(node->left, key);
+        template<
+            class Compare
+        > static std::pair<node_ptr_type, bool> remove_left(
+            const node_ptr_type& node, const key_type& key, Compare comp) {
+            const auto [new_left, removed] = remove(node->left, key, comp);
 
             const auto new_node = std::make_shared<const Node>(
                 true,  // In case of rebalance the color does not matter
@@ -488,9 +491,11 @@ template <
             return std::make_pair(balanced_new_node, removed);
         }
 
-        static std::pair<node_ptr_type, bool> remove_right(
-            const node_ptr_type& node, const key_type& key) {
-            const auto [new_right, removed] = remove(node->right, key);
+        template<
+            class Compare
+        > static std::pair<node_ptr_type, bool> remove_right(
+            const node_ptr_type& node, const key_type& key, Compare comp) {
+            const auto [new_right, removed] = remove(node->right, key, comp);
 
             const auto new_node = std::make_shared<const Node>(
                 true,  // In case of rebalance the color does not matter
@@ -504,13 +509,15 @@ template <
             return std::make_pair(bal_new_node, removed);
         }
 
-        static std::pair<node_ptr_type, bool> remove(
-            const node_ptr_type& node, const key_type& key) {
+        template<
+            class Compare
+        > static std::pair<node_ptr_type, bool> remove(
+            const node_ptr_type& node, const key_type& key, Compare comp) {
             if (node) {
-                if (key < node->entry->key) {
-                    return remove_left(node, key);
-                } else if (node->entry->key < key) {
-                    return remove_right(node, key);
+                if (comp(key, node->entry->key)) {
+                    return remove_left(node, key, comp);
+                } else if (comp(node->entry->key, key)) {
+                    return remove_right(node, key, comp);
                 } else {
                     const auto new_node = fuse(node->left, node->right);
                     return std::make_pair(new_node, true);
@@ -520,30 +527,35 @@ template <
             }
         }
 
-       public:
+    public:
         const bool red;
         const entry_ptr_type entry;
         const node_ptr_type left;
         const node_ptr_type right;
     };
 
-   public:
+public:
     RBTree() : root_(nullptr),
              size_(0) {}
 
-   private:
+private:
     RBTree(node_ptr_type root, std::size_t size) : root_(root), size_(size) {}
 
-   public:
-    RBTree insert(const key_type& key) const {
-        const auto [mb_new_root, is_new_key] = Node::insert(root_, key);
+public:
+    
+    template<
+        class Compare = std::less<T>
+    > RBTree insert(const key_type& key, Compare comp = Compare()) const {
+        const auto [mb_new_root, is_new_key] = Node::insert(root_, key, comp);
         const auto new_root = mb_new_root->copyAsBlack();  // mb = maybe black
         const auto new_size = size_ + (is_new_key ? 1 : 0);
         return RBTree(new_root, new_size);
     }
 
-    RBTree remove(const key_type& key) const {
-        const auto [mb_new_root, removed] = Node::remove(root_, key);
+    template<
+        class Compare = std::less<T>
+    > RBTree remove(const key_type& key, Compare comp = Compare()) const {
+        const auto [mb_new_root, removed] = Node::remove(root_, key, comp);
         if (removed) {
             const auto new_root = mb_new_root ? mb_new_root->copyAsBlack() : mb_new_root;
             return RBTree(new_root, size_ - 1);
@@ -552,15 +564,17 @@ template <
         }
     }
 
-    // boost::optional<value_type> get(const key_type& key) const {
+    // template<
+    //     class Compare = std::less<T>
+    // > boost::optional<key_type> get(const key_type& key, Compare comp = Compare()) const {
     //     auto cur = root_;
     //     while (cur) {
-    //         if (key < cur->entry->key) {
+    //         if (comp(key, cur->entry->key)) {
     //             cur = cur->left;
-    //         } else if (cur->entry->key < key) {
+    //         } else if (comp(cur->entry->key, key)) {
     //             cur = cur->right;
     //         } else {
-    //             return std::make_pair(cur->entry->key, cur->entry->value);
+    //             return cur->entry->key;
     //         }
     //     }
     //     return boost::none;
@@ -600,7 +614,7 @@ template <
         root_.reset();
     }
 
-   private:
+private:
     node_ptr_type root_;
     std::size_t size_;
 };
