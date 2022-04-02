@@ -4,9 +4,16 @@
 
 int main() {
     std::vector<Site> sites;
+    std::vector<Vector2> points = {
+        Vector2(5, 10), // A
+        Vector2(9, 9.9), // B
+        Vector2(5, 6),  // C
+        Vector2(1, 2),  // D
+        Vector2(4.9, 1.9),  // E
+    };
 
-    for (int i = 0; i < 10; i++)
-        sites.push_back(Site{Vector2(i, i)});
+    for (Vector2 point: points)
+        sites.push_back(Site{point});
 
     VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
 
