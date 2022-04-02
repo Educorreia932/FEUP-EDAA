@@ -105,8 +105,8 @@ for row in r2:
     totalGood += 1
 
 print(totalGood)
-print("Number of runs: ", totalGood, file=sys.stderr)
-print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
+print("Number of trips: ", totalGood, file=sys.stderr)
+print("Number of trips with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
 print(f"Total number of coordinates: {totalPoints}", file=sys.stderr)
 
 f3 = open(input_filename, "r")

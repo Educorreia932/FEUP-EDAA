@@ -1,11 +1,11 @@
-#include "Run.h"
+#include "Trip.h"
 
 #include <fstream>
 
 using namespace std;
 
-vector<Run> Run::loadRuns(const string &filepath){
-    vector<Run> ret;
+vector<Trip> Trip::loadTrips(const string &filepath){
+    vector<Trip> ret;
 
     ifstream is; is.exceptions(ifstream::failbit | ifstream::badbit);
     is.open(filepath);
@@ -13,8 +13,8 @@ vector<Run> Run::loadRuns(const string &filepath){
     size_t N; is >> N;
     ret.reserve(N);
     for(size_t i = 0; i < N; ++i){
-        ret.push_back(Run());
-        Run &r = *ret.rbegin();
+        ret.push_back(Trip());
+        Trip &r = *ret.rbegin();
         size_t M;
         is >> r.id >> r.timestamp >> M;
         r.coords.reserve(M);

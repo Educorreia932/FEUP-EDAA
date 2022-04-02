@@ -1,6 +1,6 @@
-all: pkdd15-i/pkdd15-i.runs
+all: pkdd15-i/pkdd15-i.trips
 
-pkdd15-i/pkdd15-i.runs: pkdd15-i/process.py pkdd15-i/train.csv
+pkdd15-i/pkdd15-i.trips: pkdd15-i/process.py pkdd15-i/train.csv
 	python3 pkdd15-i/process.py pkdd15-i/train.csv > $@
 
 pkdd15-i/train.csv: pkdd15-i/train.zip

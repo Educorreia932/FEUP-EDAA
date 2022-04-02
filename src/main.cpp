@@ -5,10 +5,10 @@
 #include "EdgeType.h"
 #include "MapGraph.h"
 #include "MapGraphView.h"
-#include "MapRunsView.h"
+#include "MapTripsView.h"
 #include "MapViewer.h"
 
-#include "Run.h"
+#include "Trip.h"
 
 #include "QuadTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
@@ -36,15 +36,16 @@ void voronoi_display(const MapGraph &M) {
     view.drawVoronoi();
 }
 
-void view_runs(const MapGraph &M, const std::vector<Run> &runs){
-    std::cout << "Building graph from runs..." << std::endl;
+void view_trips(const MapGraph &M, const std::vector<Trip> &trips){
+    std::cout << "Building graph from trips..." << std::endl;
     const size_t N = 50000;
+    std::set<size_t> s;
+    while(s.size() < N) s.insert(rand()%trips.size());
     MapGraph R;
     {
         std::map<coord_t, DWGraph::node_t> points;
-        auto it = runs.begin();
-        for(size_t i = 0; i < N; ++i, ++it){
-            for(const coord_t &c: it->coords){
+        for(size_t i : s){
+            for(const coord_t &c: trips[i].coords){
                 if(!points.count(c)){
                     size_t u = points.size();
                     points[c] = u;
@@ -53,19 +54,18 @@ void view_runs(const MapGraph &M, const std::vector<Run> &runs){
             }
         }
         std::cout << "Gathered run coords..." << std::endl;
-        it = runs.begin();
-        for(size_t i = 0; i < N; ++i, ++it){
+        for(size_t i : s){
             MapGraph::way_t w;
-            for(const coord_t &c: it->coords){
+            for(const coord_t &c: trips[i].coords){
                 w.nodes.push_back(points.at(c));
             }
             R.addWay(w);
         }
-        std::cout << "Built graph from runs" << std::endl;
+        std::cout << "Built graph from trips" << std::endl;
     }
 
-    MapRunsView view(R);
-    view.drawRuns();
+    MapTripsView view(R);
+    view.drawTrips();
 }
 
 int main(int argc, char *argv[]){
@@ -83,12 +83,14 @@ int main(int argc, char *argv[]){
         if(opt == "voronoi"){ voronoi(M); return 0; }
         if(opt == "voronoi-display"){ voronoi_display(M); return 0; }
         
-        std::cout << "Loading runs..." << std::endl;
-        std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
-        std::cout << "Loaded runs" << std::endl;
+        std::cout << "Loading trips..." << std::endl;
+        std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
+        std::cout << "Loaded trips" << std::endl;
 
-        if(opt == "view-runs"){ view_runs(M, runs); return 0; }
+        if(opt == "view-trips"){ view_trips(M, trips); return 0; }
         
+        std::cerr << "Invalid option" << std::endl;
+        return -1;
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         std::cout << "Usage: ./main (view | ...)\n";

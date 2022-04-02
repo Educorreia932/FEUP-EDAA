@@ -1,4 +1,4 @@
-#include "MapRunsView.h"
+#include "MapTripsView.h"
 
 #include "MapViewer.h"
 
@@ -6,16 +6,16 @@ typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
 typedef MapGraph::way_t way_t;
 
-MapRunsView::MapRunsView(const MapGraph &g):graph(g){}
+MapTripsView::MapTripsView(const MapGraph &g):graph(g){}
 
 static MapViewer* createMapViewer(coord_t min_coord, coord_t max_coord, int w = 1800, int h = 900){
     MapViewer *gv = new MapViewer(w, h, min_coord, max_coord);
     return gv;
 }
 
-void MapRunsView::drawRuns() const{
+void MapTripsView::drawTrips() const{
     static const int defaultWidth = 2;
-    static const GraphViewer::Color defaultColor = GraphViewer::Color(255, 0, 0, 8);
+    static const GraphViewer::Color defaultColor = GraphViewer::Color(255, 0, 0, 16);
 
     auto nodes = graph.getNodes();
     auto ways = graph.getWays();
