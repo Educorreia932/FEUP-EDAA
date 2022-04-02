@@ -378,7 +378,7 @@ TEST_CASE("Slab decomposition", "[slab-1]"){
 }
 
 TEST_CASE("Slab decomposition RB", "[slab-rb-1]"){
-    RBTree<int, int> t;            // t is empty
-    auto t0 = t.insert(0, 0);    // t0 contains {0,0}
-    auto t1 = t0.insert(1, 1);   // t1 contains {0,0}, {1,1}   
+    RBTree<int> t;            // t is empty
+    auto t0 = t.insert(0);    // t0 contains {0}
+    auto t1 = t0.insert(1);   // t1 contains {0, 1}   
 }
