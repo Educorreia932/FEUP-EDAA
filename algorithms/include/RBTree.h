@@ -614,6 +614,21 @@ public:
         root_.reset();
     }
 
+    template <
+        class Compare = std::less<T>
+    > const key_type *lower_bound(const T &val, Compare comp = Compare()) const {
+        const key_type *ret = nullptr;
+        
+        node_ptr_type u = root_;
+        while(u){
+            if     (comp(val, u->entry->key)){ ret = u; u = u->left ; }
+            else if(comp(u->entry->key, val)){          u = u->right; }
+            else                               return &u->entry->key;
+        }
+
+        return ret;
+    }
+
 private:
     node_ptr_type root_;
     std::size_t size_;
