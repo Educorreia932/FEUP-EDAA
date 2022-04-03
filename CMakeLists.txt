@@ -28,9 +28,9 @@ endif ()
 find_library(SFML_LIB NAMES sfml-graphics sfml-window sfml-system)
 if(NOT SFML_LIB)
     message("DID NOT FIND SFML, COMPILING IT")
-    add_subdirectory(SFML)
+    add_subdirectory(lib/SFML)
+    include_directories(lib/SFML/include)
 endif()
-include_directories(SFML/include)
 
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")

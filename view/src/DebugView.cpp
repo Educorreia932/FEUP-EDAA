@@ -33,7 +33,7 @@ void DebugView::draw(){
     debugText.setString(debugInfo);
     Vector2f size = Vector2f(window->getSize());
     FloatRect bounds = debugText.getLocalBounds();
-    debugText.setOrigin(0, bounds.height);
+    debugText.setOrigin(Vector2f(0.0, bounds.height));
     debugText.setPosition(Vector2f(0.2f*DebugView::FONT_SIZE, size.y-0.7f*DebugView::FONT_SIZE));
 
     window->draw(debugText);
