@@ -4,3 +4,6 @@
 [submodule "res/map/rapidxml"]
 	path = res/map/rapidxml
 	url = https://github.com/dwd/rapidxml.git
+[submodule "lib/SFML"]
+	path = lib/SFML
+	url = https://github.com/SFML/SFML.git

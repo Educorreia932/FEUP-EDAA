@@ -12,6 +12,9 @@
 #include "QuadTreeClosestPoint.h"
 #include "DeepVStripes.h"
 
+#include <algorithm>
+#include <chrono>
+
 void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
     os << std::fixed << std::setprecision(3);
@@ -87,7 +90,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
         (1<<17)-3,(1<<17)-2,(1<<17)-1,(1<<17),(1<<17)+1,(1<<17)+2,(1<<17)+3,(1<<17)+4,
         (1<<18)-3,(1<<18)-2,(1<<18)-1,(1<<18),(1<<18)+1,(1<<18)+2,(1<<18)+3,(1<<18)+4,
     };
-    sort(szs.begin(), szs.end());
+    std::sort(szs.begin(), szs.end());
 
     for(const size_t &sz: szs){
         os << sz;

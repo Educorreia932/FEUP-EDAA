@@ -25,8 +25,21 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_PARANOID}")
 endif ()
 
+find_library(SFML_LIB NAMES sfml-graphics sfml-window sfml-system)
+if(NOT SFML_LIB)
+    message("DID NOT FIND SFML, COMPILING IT")
+    add_subdirectory(SFML)
+endif()
+include_directories(SFML/include)
+
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
+target_link_libraries(da_proj sfml-graphics sfml-window sfml-system)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    message("Detected Linux, linking some libraries for project to work")
+    target_link_libraries(da_proj pthread)
+    target_link_libraries(da_proj X11)
+endif()
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")
