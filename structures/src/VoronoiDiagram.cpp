@@ -20,7 +20,7 @@ bool Edge::intersect(Edge edge, Vector2 &intersection) {
     if (this->m == edge.m)
         return false;
 
-    double x = (this->c - edge.c) / (this->m - edge.m);
+    double x = (edge.c - this->c) / (this->m - edge.m);
     double y = this->m * x + this->c;
 
     // Edges have a direction, intersection is on that side of the edge
@@ -33,7 +33,7 @@ bool Edge::intersect(Edge edge, Vector2 &intersection) {
     if ((x - edge.start.x) / edge.direction.x < 0)
         return false;
 
-    if ((y - this->start.y) / edge.direction.y < 0)
+    if ((y - edge.start.y) / edge.direction.y < 0)
         return false;
 
     intersection = Vector2(x, y);

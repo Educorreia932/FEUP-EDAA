@@ -17,7 +17,7 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
         // Update sweep line position
         sweep_line = event.point.y;
 
-        std::cout << event.point.x << " " << event.point.y << std::endl;
+        std::cout << "Event: " << event.point.x << " " << event.point.y << std::endl;
 
         if (event.type == Event::SITE)
             handleSiteEvent(event);
@@ -155,7 +155,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     double radius = sqrt(pow(dx, 2) + pow(dy, 2));
 
     // Check if sweepline hasn't passed possible circle event location
-    if (intersection.y - radius > sweep_line) {
+    if (intersection.y - radius < sweep_line) {
         Event circle_event = Event(arc, intersection.y - radius);
         events.push(circle_event);
     }
