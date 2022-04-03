@@ -10,7 +10,7 @@ typedef DWGraph::weight_t weight_t;
 typedef MapGraph::way_t way_t;
 
 static const int width = 2;
-static const GraphViewer::Color color = GraphViewer::Color(255, 0, 0, 16);
+static const Color color = Color(255, 0, 0, 16);
 
 MapTripsView::MapTripsView(WindowView &windowView_, MapView &mapView_, const vector<Trip> &trips_):
     windowView(windowView_), mapView(mapView_), trips(trips_)

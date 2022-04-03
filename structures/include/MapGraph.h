@@ -2,7 +2,6 @@
 #define MAPGRAPH_H_INCLUDED
 
 #include "DWGraph.h"
-#include "graphviewer.h"
 #include "EdgeType.h"
 #include "coord.h"
 // #include "ClosestPoint.h"

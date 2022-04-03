@@ -12,8 +12,6 @@
 #include "QuadTreeClosestPoint.h"
 #include "DeepVStripes.h"
 
-#include "graphviewer.h"
-
 void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
     os << std::fixed << std::setprecision(3);

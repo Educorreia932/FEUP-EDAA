@@ -14,12 +14,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory("lib/GraphViewerCpp")
-include_directories("lib/GraphViewerCpp/include")
-
-include_directories("include" "algorithms/include" "structures/include" "utils/include" "ui/include" "controller/include" "view/include")
+include_directories("include" "algorithms/include" "structures/include" "utils/include" "controller/include" "view/include")
 file(GLOB SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
-file(GLOB SRC_UI "ui/src/*.cpp" "controller/src/*.cpp" "view/src/*.cpp")
+file(GLOB SRC_UI "controller/src/*.cpp" "view/src/*.cpp")
 file(GLOB SRC_TEST "test/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -30,7 +27,6 @@ endif ()
 
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
-target_link_libraries(${PROJECT_NAME} graphviewer)
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")
