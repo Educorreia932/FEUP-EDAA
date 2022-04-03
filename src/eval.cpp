@@ -4,8 +4,6 @@
 
 #include "EdgeType.h"
 #include "MapGraph.h"
-#include "MapGraphView.h"
-#include "MapViewer.h"
 
 #include "next_pow2.h"
 

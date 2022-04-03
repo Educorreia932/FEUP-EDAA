@@ -4,16 +4,12 @@
 
 #include "EdgeType.h"
 #include "MapGraph.h"
-#include "MapGraphView.h"
 #include "MapTripsView.h"
-#include "MapViewer.h"
 
 #include "Trip.h"
 
 #include "QuadTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
-
-#include "graphviewer.h"
 
 #include "WindowView.h"
 #include "MapView.h"
