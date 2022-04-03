@@ -64,20 +64,20 @@ void MapGraphView::drawRoads() const{
         {edge_type_t::SERVICE       ,  5}
     };
     static const std::unordered_map<edge_type_t, GraphViewer::Color> color_map = {
-        {edge_type_t::MOTORWAY      , GraphViewer::RED    },
-        {edge_type_t::MOTORWAY_LINK , GraphViewer::RED    },
-        {edge_type_t::TRUNK         , GraphViewer::PINK   },
-        {edge_type_t::TRUNK_LINK    , GraphViewer::PINK   },
-        {edge_type_t::PRIMARY       , GraphViewer::ORANGE },
-        {edge_type_t::PRIMARY_LINK  , GraphViewer::ORANGE },
-        {edge_type_t::SECONDARY     , GraphViewer::YELLOW },
-        {edge_type_t::SECONDARY_LINK, GraphViewer::YELLOW },
-        {edge_type_t::TERTIARY      , GraphViewer::GRAY   },
-        {edge_type_t::TERTIARY_LINK , GraphViewer::GRAY   },
-        {edge_type_t::UNCLASSIFIED  , GraphViewer::GRAY   },
-        {edge_type_t::RESIDENTIAL   , GraphViewer::GRAY   },
-        {edge_type_t::LIVING_STREET , GraphViewer::GRAY   },
-        {edge_type_t::SERVICE       , GraphViewer::GRAY   }
+        {edge_type_t::MOTORWAY      , GraphViewer::Color(232, 146, 162) },
+        {edge_type_t::MOTORWAY_LINK , GraphViewer::Color(232, 146, 162) },
+        {edge_type_t::TRUNK         , GraphViewer::Color(249, 178, 156) },
+        {edge_type_t::TRUNK_LINK    , GraphViewer::Color(249, 178, 156) },
+        {edge_type_t::PRIMARY       , GraphViewer::Color(252, 214, 164) },
+        {edge_type_t::PRIMARY_LINK  , GraphViewer::Color(252, 214, 164) },
+        {edge_type_t::SECONDARY     , GraphViewer::Color(247, 250, 191) },
+        {edge_type_t::SECONDARY_LINK, GraphViewer::Color(247, 250, 191) },
+        {edge_type_t::TERTIARY      , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::TERTIARY_LINK , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::UNCLASSIFIED  , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::RESIDENTIAL   , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::LIVING_STREET , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::SERVICE       , GraphViewer::Color(200, 200, 200) }
     };
 
     auto nodes = graph.getNodes();
@@ -196,20 +196,20 @@ void MapGraphView::drawVoronoi() const {
         {edge_type_t::SERVICE       ,  5}
     };
     static const std::unordered_map<edge_type_t, GraphViewer::Color> color_map = {
-        {edge_type_t::MOTORWAY      , GraphViewer::RED    },
-        {edge_type_t::MOTORWAY_LINK , GraphViewer::RED    },
-        {edge_type_t::TRUNK         , GraphViewer::PINK   },
-        {edge_type_t::TRUNK_LINK    , GraphViewer::PINK   },
-        {edge_type_t::PRIMARY       , GraphViewer::ORANGE },
-        {edge_type_t::PRIMARY_LINK  , GraphViewer::ORANGE },
-        {edge_type_t::SECONDARY     , GraphViewer::YELLOW },
-        {edge_type_t::SECONDARY_LINK, GraphViewer::YELLOW },
-        {edge_type_t::TERTIARY      , GraphViewer::GRAY   },
-        {edge_type_t::TERTIARY_LINK , GraphViewer::GRAY   },
-        {edge_type_t::UNCLASSIFIED  , GraphViewer::GRAY   },
-        {edge_type_t::RESIDENTIAL   , GraphViewer::GRAY   },
-        {edge_type_t::LIVING_STREET , GraphViewer::GRAY   },
-        {edge_type_t::SERVICE       , GraphViewer::GRAY   }
+        {edge_type_t::MOTORWAY      , GraphViewer::Color(232, 146, 162) },
+        {edge_type_t::MOTORWAY_LINK , GraphViewer::Color(232, 146, 162) },
+        {edge_type_t::TRUNK         , GraphViewer::Color(249, 178, 156) },
+        {edge_type_t::TRUNK_LINK    , GraphViewer::Color(249, 178, 156) },
+        {edge_type_t::PRIMARY       , GraphViewer::Color(252, 214, 164) },
+        {edge_type_t::PRIMARY_LINK  , GraphViewer::Color(252, 214, 164) },
+        {edge_type_t::SECONDARY     , GraphViewer::Color(247, 250, 191) },
+        {edge_type_t::SECONDARY_LINK, GraphViewer::Color(247, 250, 191) },
+        {edge_type_t::TERTIARY      , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::TERTIARY_LINK , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::UNCLASSIFIED  , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::RESIDENTIAL   , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::LIVING_STREET , GraphViewer::Color(200, 200, 200) },
+        {edge_type_t::SERVICE       , GraphViewer::Color(200, 200, 200) }
     };
 
     auto nodes = graph.getNodes();

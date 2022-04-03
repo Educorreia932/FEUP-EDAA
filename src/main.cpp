@@ -15,11 +15,23 @@
 
 #include "graphviewer.h"
 
+#include "WindowView.h"
+#include "MapView.h"
+#include "MapGraphOsmView.h"
+
+#include "WindowController.h"
+
 #include <X11/Xlib.h>
 
 void view(const MapGraph &M){
-    MapGraphView view(M);
-    view.drawRoads();
+    WindowView windowView(sf::Vector2f(0,0));
+    MapView mapView(coord_t(41.1594,-8.6199), 50000);
+    MapGraphOsmView mapGraphOsmView(windowView, mapView, M);
+    mapView.addView(&mapGraphOsmView);
+    windowView.setView(&mapView);
+
+    WindowController windowController(windowView);
+    windowController.run();
 }
 
 void voronoi(const MapGraph &M) {
