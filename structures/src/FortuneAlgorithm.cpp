@@ -48,15 +48,16 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     Edge* left_edge = new Edge(start, arc_above.site.point, event.site.point);
     Edge* right_edge = new Edge(start, event.site.point, arc_above.site.point);
 
+    // Link up the two edges
+    left_edge->adjacent = right_edge;
+    right_edge->adjacent = left_edge;
+
     Arc* middle_arc = breakArc(&arc_above, event.site);
     Arc* left_arc = middle_arc->previous;
     Arc* right_arc = middle_arc->next;
 
-    // Link up the two edges
     middle_arc->s0 = left_edge;
     middle_arc->s1 = right_edge;
-    middle_arc->s0->adjacent = middle_arc->s1;
-    middle_arc->s1->adjacent = middle_arc->s0;
 
     left_arc->s1 = middle_arc->s0;
     right_arc->s0 = middle_arc->s1;
@@ -100,10 +101,10 @@ Arc& FortuneAlgorithm::locateArcAbove(Site site) {
         double b = std::numeric_limits<double>::infinity();
 
         if (current_arc->previous != nullptr)
-            a = current_arc->intersect(*current_arc->previous, sweep_line).x;
+            a = current_arc->intersect(*current_arc->previous->s1, sweep_line).x;
 
         if (current_arc->next != nullptr)
-            b = current_arc->intersect(*current_arc->next, sweep_line).x;
+            b = current_arc->intersect(*current_arc->next->s0, sweep_line).x;
 
         if ((current_arc->previous == nullptr || a <= site.point.x) &&
             (current_arc->next == nullptr || site.point.x <= b))
@@ -137,9 +138,6 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site site) {
 
     if (arc == root)
         root = left_arc;
-
-    // Delete old arc
-    delete arc;
 
     return middle_arc;
 }
