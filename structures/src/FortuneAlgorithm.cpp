@@ -17,7 +17,7 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
         // Update sweep line position
         sweep_line = event.point.y;
 
-        std::cout << "Event: " << event.point.x << " " << event.point.y << std::endl;
+        std::cout << "Event " << event.type << ": " << event.point.x << " " << event.point.y << std::endl;
 
         if (event.type == Event::SITE)
             handleSiteEvent(event);
@@ -79,15 +79,20 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     Edge* left_edge = left_arc->s1;
     Edge* right_edge = right_arc->s0;
 
-    left_edge->end = event.point;
-    right_edge->end = event.point;
+    Vector2 point = Vector2(event.point.x, event.point.y + event.radius);
+
+    left_edge->end = point;
+    right_edge->end = point;
 
     // Add finished edges to diagram
     diagram.addEdge(*left_edge);
     diagram.addEdge(*right_edge);
 
     // Check to see if we need to create new circle events
-    checkCircleEvents(arc);
+    checkCircleEvents(left_arc);
+    checkCircleEvents(right_arc);
+
+    delete arc;
 }
 
 Arc& FortuneAlgorithm::locateArcAbove(Site site) {
@@ -129,11 +134,17 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site site) {
     left_arc->previous = arc->previous;
     left_arc->next = middle_arc;
 
+    if (left_arc->previous != nullptr)
+        left_arc->previous->next = left_arc;
+
     middle_arc->previous = left_arc;
     middle_arc->next = right_arc;
 
     right_arc->previous = middle_arc;
     right_arc->next = arc->next;
+
+    if (right_arc->next != nullptr)
+        right_arc->next->previous = right_arc;
 
     if (arc == root)
         root = left_arc;
@@ -156,7 +167,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 
     // Check if sweepline hasn't passed possible circle event location
     if (intersection.y - radius < sweep_line) {
-        Event circle_event = Event(arc, Vector2(intersection.x, intersection.y - radius));
+        Event circle_event = Event(arc, Vector2(intersection.x, intersection.y - radius), radius);
         events.push(circle_event);
     }
 }
