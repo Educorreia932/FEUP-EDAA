@@ -1,6 +1,7 @@
 #include "Arc.h"
 
 #include <cmath>
+#include <limits>
 
 Arc::Arc(Site site) : site(site) {
 
@@ -54,26 +55,32 @@ Vector2 Arc::intersect(Arc arc, double sweep_line) {
 // Intersect parabola with edge
 Vector2 Arc::intersect(Edge edge, double sweep_line) {
     Vector2 focus = site.point;
+    double x;
 
-    // Distance between the parabola's focus and its vertex
-    // Or distance from the parabola's vertex to its directrix (the sweep line)
-    double p = (focus.y - sweep_line) / 2;
+    if (edge.m == std::numeric_limits<double>::infinity())
+        x = edge.start.x;
 
-    // x, y of parabola's vertex,
-    double h = focus.x;
-    double k = focus.y - p;
+    else {
+        // Distance between the parabola's focus and its vertex
+        // Or distance from the parabola's vertex to its directrix (the sweep line)
+        double p = (focus.y - sweep_line) / 2;
 
-    double a = 1 / (4 * p);
-    double b = (-h / (2 * p)) - edge.m;
-    double c = ((pow(h, 2) / (4 * p)) + k) - edge.c;
+        // x, y of parabola's vertex,
+        double h = focus.x;
+        double k = focus.y - p;
 
-    double delta = b * b - 4 * a * c;
-    double x1 = (-b + sqrt(delta)) / (2 * a);
-    double x2 = (-b - sqrt(delta)) / (2 * a);
+        double a = 1 / (4 * p);
+        double b = (-h / (2 * p)) - edge.m;
+        double c = ((pow(h, 2) / (4 * p)) + k) - edge.c;
 
-    double min = x1 < x2 ? x1 : x2;
-    double max = x1 > x2 ? x1 : x2;
-    double x = edge.direction.x < 0 ? min : max;
+        double delta = b * b - 4 * a * c;
+        double x1 = (-b + sqrt(delta)) / (2 * a);
+        double x2 = (-b - sqrt(delta)) / (2 * a);
+
+        double min = x1 < x2 ? x1 : x2;
+        double max = x1 > x2 ? x1 : x2;
+        x = edge.direction.x < 0 ? min : max;
+    }
 
     return getPoint(x, sweep_line);
 }

@@ -227,6 +227,7 @@ TEST_CASE("Arc y-point", "[arc-1]") {
 }
 
 TEST_CASE("Arc intersection 1", "[arc-2]") {
+    // Intersection with edge with horizontal slope
     Arc arc(Site{ Vector2(5, 10) });
     Edge edge(Vector2(9, 10), Vector2(9, -1), Vector2(9, 1));
     double sweep_line = 8;
@@ -236,8 +237,19 @@ TEST_CASE("Arc intersection 1", "[arc-2]") {
 }
 
 TEST_CASE("Arc intersection 2", "[arc-3]") {
+    // Intersection with edge with slope equal to -1
     Arc arc(Site{ Vector2(5, 10) });
     Edge edge(Vector2(9, 8), Vector2(8, 7), Vector2(10, 9));
+    double sweep_line = 8;
+
+    REQUIRE(arc.intersect(edge, sweep_line).x == 7);
+    REQUIRE(arc.intersect(edge, sweep_line).y == 10);
+}
+
+TEST_CASE("Arc intersection 3", "[arc-4]") {
+    // Intersection with vertical edge
+    Arc arc(Site{ Vector2(5, 10) });
+    Edge edge(Vector2(7, std::numeric_limits<double>::infinity()), Vector2(5, 10), Vector2(9, 10));
     double sweep_line = 8;
 
     REQUIRE(arc.intersect(edge, sweep_line).x == 7);

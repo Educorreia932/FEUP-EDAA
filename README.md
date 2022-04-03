@@ -29,3 +29,7 @@ Save the file as `map.xml` in path `map/original/map.xml`
 - http://blog.ivank.net/fortunes-algorithm-and-implementation.html
 
 - Using `valid` flag for *events* is not very effective and practical, however it's necessary, since priority queue (at least C++ implementation) doesn't support removal of an element that isn't the top one.
+
+
+- [Fortune's Algorithm - Desmos](https://www.desmos.com/calculator/ejatebvup4)
+- [Voronoi Generation - Paul Reed](http://paul-reed.co.uk/fortune.htm#findycoord)
