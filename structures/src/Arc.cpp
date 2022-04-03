@@ -20,7 +20,7 @@ Vector2 Arc::getPoint(double x, double sweep_line) {
 
     // x, y of parabola's vertex,
     double h = focus.x;
-    double k = focus.y + p;
+    double k = focus.y - p;
 
     double a = 1 / (4 * p);
     double b = -h / (2 * p);
