@@ -17,8 +17,6 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
         // Update sweep line position
         sweep_line = event.point.y;
 
-        std::cout << "Event " << event.type << ": " << event.point.x << " " << event.point.y << std::endl;
-
         if (event.type == Event::SITE)
             handleSiteEvent(event);
 
@@ -26,7 +24,19 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
             handleCircleEvent(event);
     }
 
-    // TODO: Bounding box
+    // Finish edges
+    Box bounding_box = Box(Vector2(0, 0), Vector2(8, 8));
+
+    for (Edge* edge : edges) {
+        if (!edge->finished) {
+            Vector2 intersection;
+            
+            edge->finished = true;
+        }
+
+        if (edge->finished)
+            diagram.addEdge(edge->merge());
+    }
 
     return diagram;
 }
@@ -47,6 +57,10 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
 
     Edge* left_edge = new Edge(start, arc_above.site.point, event.site.point);
     Edge* right_edge = new Edge(start, event.site.point, arc_above.site.point);
+
+    // Add edges to diagram
+    edges.push_back(left_edge);
+    edges.push_back(right_edge);
 
     // Link up the two edges
     left_edge->adjacent = right_edge;
@@ -83,10 +97,8 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
 
     left_edge->end = point;
     right_edge->end = point;
-
-    // Add finished edges to diagram
-    diagram.addEdge(*left_edge);
-    diagram.addEdge(*right_edge);
+    left_edge->finished = true;
+    right_edge->finished = true;
 
     // Check to see if we need to create new circle events
     checkCircleEvents(left_arc);

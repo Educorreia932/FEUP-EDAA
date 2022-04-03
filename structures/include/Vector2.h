@@ -2,13 +2,14 @@
 #define VECTOR_2
 
 #include <ostream>
+#include <limits>
 
 class Vector2 {
 public:
     double x;
     double y;
 
-    Vector2(double x = 0.0, double y = 0.0);
+    Vector2(double x = std::numeric_limits<double>::infinity(), double y = std::numeric_limits<double>::infinity());
 
     // Unary operators
     Vector2& operator+=(const Vector2& other);
@@ -20,6 +21,8 @@ public:
     double dot(const Vector2 &other) const;
     double getDistance(const Vector2 &other) const;
     double getDet(Vector2 vector2);
+
+    bool operator<(const Vector2 &vector) const;
 };
 
 // Binary operators

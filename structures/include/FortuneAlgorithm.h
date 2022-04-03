@@ -6,6 +6,7 @@
 class FortuneAlgorithm {
 private:
     VoronoiDiagram diagram;
+    std::vector<Edge*> edges;
     std::priority_queue<Event> events;
     Arc* root = nullptr;   // Binary tree for parabola arcs
     double sweep_line = 0; // Current y-position of sweep line
