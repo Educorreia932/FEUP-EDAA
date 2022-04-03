@@ -4,8 +4,6 @@
 
 #include "EdgeType.h"
 #include "MapGraph.h"
-#include "MapGraphView.h"
-#include "MapViewer.h"
 
 #include "next_pow2.h"
 
@@ -14,7 +12,8 @@
 #include "QuadTreeClosestPoint.h"
 #include "DeepVStripes.h"
 
-#include "graphviewer.h"
+#include <algorithm>
+#include <chrono>
 
 void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
@@ -91,7 +90,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
         (1<<17)-3,(1<<17)-2,(1<<17)-1,(1<<17),(1<<17)+1,(1<<17)+2,(1<<17)+3,(1<<17)+4,
         (1<<18)-3,(1<<18)-2,(1<<18)-1,(1<<18),(1<<18)+1,(1<<18)+2,(1<<18)+3,(1<<18)+4,
     };
-    sort(szs.begin(), szs.end());
+    std::sort(szs.begin(), szs.end());
 
     for(const size_t &sz: szs){
         os << sz;
