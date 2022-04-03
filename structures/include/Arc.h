@@ -12,8 +12,8 @@ public:
     Arc* previous = nullptr;
     Arc* next = nullptr;
 
-    Edge* s0; // Left edge
-    Edge* s1; // Right edge
+    Edge* s0 = nullptr; // Left edge
+    Edge* s1 = nullptr; // Right edge
 
     Site site;
     Event* event = nullptr;

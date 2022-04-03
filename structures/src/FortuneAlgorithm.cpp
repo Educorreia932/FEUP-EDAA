@@ -63,7 +63,8 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     right_arc->s0 = middle_arc->s1;
 
     // Check for new circle events
-    checkCircleEvents(middle_arc);
+    checkCircleEvents(left_arc);
+    checkCircleEvents(right_arc);
 }
 
 // Remove parabola
@@ -87,8 +88,6 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
 
     // Check to see if we need to create new circle events
     checkCircleEvents(arc);
-
-    delete arc;
 }
 
 Arc& FortuneAlgorithm::locateArcAbove(Site site) {
@@ -144,10 +143,11 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site site) {
 
 void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     Vector2 intersection;
-    Vector2 focus = arc->site.point;
 
-    if (!arc->s0->intersect(*arc->s1, intersection))
+    if (arc->s0 == nullptr || arc->s1 == nullptr || !arc->s0->intersect(*arc->s1, intersection))
         return;
+
+    Vector2 focus = arc->site.point;
 
     // Calculate radius of circle
     double dy = focus.y - intersection.y;
