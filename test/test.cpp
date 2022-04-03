@@ -5,32 +5,33 @@
 
 using namespace std;
 
-bool findClosestBruteForce_exact(const list<coord_t> &l, const coord_t &u, coord_t &cbest){
+bool findClosestBruteForce_exact(const list<coord_t>& l, const coord_t& u, coord_t& cbest) {
     int dbest = 1000000000;
     bool good_example = true;
-    for(const coord_t &c: l){
+    for (const coord_t& c : l) {
         int dx = c.getLon() - u.getLon();
         int dy = c.getLat() - u.getLat();
-        int d = dx*dx + dy*dy;
-        if(d < dbest){
+        int d = dx * dx + dy * dy;
+        if (d < dbest) {
             dbest = d;
             cbest = c;
             good_example = true;
-        } else if(d == dbest){
+        }
+        else if (d == dbest) {
             good_example = false;
         }
     }
     return good_example;
 }
 
-coord_t findClosestBruteForce(const list<coord_t> &l, const coord_t &u){
+coord_t findClosestBruteForce(const list<coord_t>& l, const coord_t& u) {
     coord_t::deg_t dbest = 1000000000.0L;
     coord_t cbest;
-    for(const coord_t &c: l){
+    for (const coord_t& c : l) {
         coord_t::deg_t dx = c.getLon() - u.getLon();
         coord_t::deg_t dy = c.getLat() - u.getLat();
-        coord_t::deg_t d = dx*dx + dy*dy;
-        if(d < dbest){
+        coord_t::deg_t d = dx * dx + dy * dy;
+        if (d < dbest) {
             dbest = d;
             cbest = c;
         }
@@ -195,21 +196,21 @@ coord_t findClosestBruteForce(const list<coord_t> &l, const coord_t &u){
 #include "Vector2.h"
 #include "VoronoiDiagram.h"
 
-TEST_CASE("Edge 1", "[edge-1]") {
+TEST_CASE("Edge slope 1", "[edge-1]") {
     Vector2 start(0, 0);
     Edge edge_1(start, Vector2(0, 1), Vector2(0, -1));
 
     REQUIRE(edge_1.m == 0);
 }
 
-TEST_CASE("Edge 2", "[edge-2]") {
+TEST_CASE("Edge slope 2", "[edge-2]") {
     Vector2 start(0, 0);
     Edge edge_2(start, Vector2(0, 1), Vector2(1, 0));
 
     REQUIRE(edge_2.m == 1);
 }
 
-TEST_CASE("Edge 3", "[edge-3]") {
+TEST_CASE("Edge slope 3", "[edge-3]") {
     Vector2 start(0, 0);
     Edge edge_3(start, Vector2(-1, 0), Vector2(1, 0));
 
@@ -217,9 +218,28 @@ TEST_CASE("Edge 3", "[edge-3]") {
 }
 
 TEST_CASE("Arc y-point", "[arc-1]") {
-    double sweep_line = 6;
-    double x = 5;
-    Arc arc(Site{Vector2(5, 10)});
+    Vector2 point(5, 6);
+    double x = point.x;
+    double sweep_line = point.y;
+    Arc arc(Site{ Vector2(5, 10) });
 
-    REQUIRE(arc.getPoint(5, sweep_line).y == 8);
+    REQUIRE(arc.getPoint(x, sweep_line).y == 8);
+}
+
+TEST_CASE("Arc intersection 1", "[arc-2]") {
+    Arc arc(Site{ Vector2(5, 10) });
+    Edge edge(Vector2(9, 10), Vector2(9, -1), Vector2(9, 1));
+    double sweep_line = 8;
+
+    REQUIRE(arc.intersect(edge, sweep_line).x == 7);
+    REQUIRE(arc.intersect(edge, sweep_line).y == 10);
+}
+
+TEST_CASE("Arc intersection 2", "[arc-3]") {
+    Arc arc(Site{ Vector2(5, 10) });
+    Edge edge(Vector2(9, 8), Vector2(8, 7), Vector2(10, 9));
+    double sweep_line = 8;
+
+    REQUIRE(arc.intersect(edge, sweep_line).x == 7);
+    REQUIRE(arc.intersect(edge, sweep_line).y == 10);
 }

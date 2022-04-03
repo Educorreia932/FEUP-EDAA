@@ -50,3 +50,30 @@ Vector2 Arc::intersect(Arc arc, double sweep_line) {
 
     return Vector2(x, y);
 }
+
+// Intersect parabola with edge
+Vector2 Arc::intersect(Edge edge, double sweep_line) {
+    Vector2 focus = site.point;
+
+    // Distance between the parabola's focus and its vertex
+    // Or distance from the parabola's vertex to its directrix (the sweep line)
+    double p = (focus.y - sweep_line) / 2;
+
+    // x, y of parabola's vertex,
+    double h = focus.x;
+    double k = focus.y - p;
+
+    double a = 1 / (4 * p);
+    double b = (-h / (2 * p)) - edge.m;
+    double c = ((pow(h, 2) / (4 * p)) + k) - edge.c;
+
+    double delta = b * b - 4 * a * c;
+    double x1 = (-b + sqrt(delta)) / (2 * a);
+    double x2 = (-b - sqrt(delta)) / (2 * a);
+
+    double min = x1 < x2 ? x1 : x2;
+    double max = x1 > x2 ? x1 : x2;
+    double x = edge.direction.x < 0 ? min : max;
+
+    return getPoint(x, sweep_line);
+}

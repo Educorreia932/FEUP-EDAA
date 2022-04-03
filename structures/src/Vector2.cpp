@@ -27,6 +27,10 @@ Vector2 &Vector2::operator*=(double t) {
     return *this;
 }
 
+bool operator==(Vector2 vec, const Vector2 &rhs) {
+    return vec.x == rhs.x && vec.y == rhs.y;
+}
+
 Vector2 Vector2::getOrthogonal() const {
     return Vector2(-y, x);
 }

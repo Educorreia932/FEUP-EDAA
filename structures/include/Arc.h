@@ -23,6 +23,7 @@ public:
 
     Vector2 getPoint(double x, double sweep_line);
     Vector2 intersect(Arc arc, double sweep_line);
+    Vector2 intersect(Edge edge, double sweep_line);
 };
 
 #endif
