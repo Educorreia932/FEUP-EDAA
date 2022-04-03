@@ -9,7 +9,7 @@
 
 #include "next_pow2.h"
 
-#include "Run.h"
+#include "Trip.h"
 
 #include "QuadTreeClosestPoint.h"
 #include "DeepVStripes.h"
@@ -119,7 +119,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
     }
 }
 
-void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
+void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/2d-tree-querytime.csv");
     os << std::fixed << std::setprecision(3);
 
@@ -133,7 +133,7 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
     std::vector<coord_t> candidates;
-    for(const Run &r: runs)
+    for(const Trip &r: trips)
         for(const coord_t &c: r.coords)
             candidates.push_back(c);
 
@@ -418,7 +418,7 @@ void evalDeepVStripes_BuildTime(const MapGraph &M){
     }
 }
 
-void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &runs){
+void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/deepvstripes-querytime-d.csv");
     os << std::fixed << std::setprecision(9);
 
@@ -428,7 +428,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
         coords.push_back(p.second);
 
     std::vector<coord_t> candidates;
-    for(const Run &r: runs)
+    for(const Trip &r: trips)
         for(const coord_t &c: r.coords)
             candidates.push_back(c);
 
@@ -525,7 +525,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Run> &run
     }
 }
 
-void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs){
+void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/deepvstripes-querytime.csv");
     os << std::fixed << std::setprecision(3);
 
@@ -539,7 +539,7 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs)
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
     std::vector<coord_t> candidates;
-    for(const Run &r: runs)
+    for(const Trip &r: trips)
         for(const coord_t &c: r.coords)
             candidates.push_back(c);
 
@@ -626,7 +626,7 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Run> &runs)
     }
 }
 
-void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Run> &runs){
+void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/deepvstripes-querytime-nd.csv");
     os << std::fixed;
 
@@ -640,7 +640,7 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Run> &ru
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
     std::vector<coord_t> candidates;
-    for(const Run &r: runs)
+    for(const Trip &r: trips)
         for(const coord_t &c: r.coords)
             candidates.push_back(c);
 
@@ -764,14 +764,14 @@ int main(int argc, char *argv[]){
         if(opt == "2d-tree-buildtime"){ eval2DTree_BuildTime  (M); return 0; }
         if(opt == "deepvstripes-buildtime"){ evalDeepVStripes_BuildTime(M); return 0; }
         
-        std::cout << "Loading runs..." << std::endl;
-        std::vector<Run> runs = Run::loadRuns("res/data/pkdd15-i/pkdd15-i.runs");
-        std::cout << "Loaded runs" << std::endl;
+        std::cout << "Loading trips..." << std::endl;
+        std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
+        std::cout << "Loaded trips" << std::endl;
 
-        if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, runs);
-        if(opt == "deepvstripes-querytime-d") evalDeepVStripes_QueryTime_d(M, runs);
-        if(opt == "deepvstripes-querytime") evalDeepVStripes_QueryTime(M, runs);
-        if(opt == "deepvstripes-querytime-nd") evalDeepVStripes_QueryTime_nd(M, runs);
+        if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, trips);
+        if(opt == "deepvstripes-querytime-d") evalDeepVStripes_QueryTime_d(M, trips);
+        if(opt == "deepvstripes-querytime") evalDeepVStripes_QueryTime(M, trips);
+        if(opt == "deepvstripes-querytime-nd") evalDeepVStripes_QueryTime_nd(M, trips);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;

@@ -37,9 +37,11 @@ private:
 
     std::unordered_map<DWGraph::node_t, coord_t> nodes;
     std::map<coord_t, DWGraph::node_t> coord2node;
-    coord_t min_coord, max_coord, mean_coord;
+    coord_t min_coord = coord_t(+90.0, +180.0);
+    coord_t max_coord = coord_t(-90.0, -180.0);
     std::list<way_t> ways;
 public:
+    MapGraph();
     /**
      * @brief Construct from files
      * 
@@ -47,6 +49,8 @@ public:
      */
     MapGraph(const std::string &path);
     ~MapGraph();
+    void addNode(DWGraph::node_t u, coord_t c);
+    void addWay(way_t w);
     DWGraph::DWGraph getFullGraph() const;
     DWGraph::DWGraph getConnectedGraph() const;
     DWGraph::DWGraph getReducedGraph() const;

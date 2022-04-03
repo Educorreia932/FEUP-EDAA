@@ -40,6 +40,8 @@ public:
     Box(Vector2 bottom_left, Vector2 upper_right);
 
     bool intersect(Edge edge, Vector2 &intersection);
+
+    double evaluateY(double x) const;
 };
 
 class VoronoiDiagram {

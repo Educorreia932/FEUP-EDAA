@@ -15,15 +15,11 @@ MapViewer::MapViewer(window_t w_, window_t h_, coord_t min_, coord_t max_):
 }
 
 void MapViewer::addNode(node_t i, coord_t c){
-    float x = float(+(c.getLon() - nw_corner.getLon())*COORDMULT);
-    float y = float(-(c.getLat() - nw_corner.getLat())*COORDMULT);
-    GraphViewer::addNode(i, sf::Vector2f(x, y));
+    GraphViewer::addNode(i, coord2vector(c));
 }
 
 void MapViewer::addNode(node_t i, coord_t c, const sf::Color &color, window_t w){
-    window_t x = (window_t)(double)(+(c.getLon() - nw_corner.getLon())*COORDMULT);
-    window_t y = (window_t)(double)(-(c.getLat() - nw_corner.getLat())*COORDMULT);
-    GraphViewer::Node &node = GraphViewer::addNode(i, sf::Vector2f(x, y));
+    GraphViewer::Node &node = GraphViewer::addNode(i, coord2vector(c));
     node.setColor(color);
     node.setSize(w);
 }
@@ -45,4 +41,10 @@ void MapViewer::createWindow(){
 
 void MapViewer::join(){
     GraphViewer::join();
+}
+
+sf::Vector2f MapViewer::coord2vector(const coord_t &c) const{
+    float x = float(+(c.getLon() - nw_corner.getLon())*COORDMULT);
+    float y = float(-(c.getLat() - nw_corner.getLat())*COORDMULT);
+    return sf::Vector2f(x, y);
 }

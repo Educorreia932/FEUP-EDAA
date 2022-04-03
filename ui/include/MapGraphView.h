@@ -21,6 +21,7 @@ private:
 public:
     MapGraphView(const MapGraph &g);
 
-    void drawRoads (int fraction, int display) const;
-    void drawSpeeds(int fraction, int display) const;
+    void drawRoads () const;
+    void drawSpeeds() const;
+    void drawVoronoi() const;
 };

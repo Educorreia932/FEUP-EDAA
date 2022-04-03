@@ -76,6 +76,8 @@ MapGraph::speed_t MapGraph::way_t::getRealSpeed() const{
     }
 }
 
+MapGraph::MapGraph(){}
+
 MapGraph::MapGraph(const std::string &path){
     {
         std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -113,7 +115,6 @@ MapGraph::MapGraph(const std::string &path){
         }
         min_coord = coord_t(lat_max, lon_min);
         max_coord = coord_t(lat_min, lon_max);
-        mean_coord = (min_coord + max_coord)/2;
     }
     fullGraph = getFullGraph();
     /*
@@ -163,6 +164,19 @@ MapGraph::MapGraph(const std::string &path){
 
 MapGraph::~MapGraph(){
     // delete closestPoint;
+}
+
+void MapGraph::addNode(DWGraph::node_t u, coord_t c){
+    nodes[u] = c;
+    coord2node[c] = u;
+    min_coord.lat = std::min(min_coord.lat, c.lat);
+    min_coord.lon = std::min(min_coord.lon, c.lon);
+    max_coord.lat = std::max(max_coord.lat, c.lat);
+    max_coord.lon = std::max(max_coord.lon, c.lon);
+}
+
+void MapGraph::addWay(MapGraph::way_t w){
+    ways.push_back(w);
 }
 
 DWGraph::DWGraph MapGraph::getFullGraph() const{

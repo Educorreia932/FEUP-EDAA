@@ -2,9 +2,34 @@ import sys
 import csv
 import json
 import time
-import math
+from math import sin, cos, asin, sqrt, pi
 
 INF = 180.0
+
+DEG_TO_METERS = 111000
+KPH_TO_MPS = 1/3.6
+
+DEG_TO_RAD = pi / 180.0
+
+def haversine(lat1, lon1, lat2, lon2):
+    # distance between latitudes
+    # and longitudes
+    dLat = (lat2 - lat1) * DEG_TO_RAD
+    dLon = (lon2 - lon1) * DEG_TO_RAD
+ 
+    # convert to radians
+    lat1 = (lat1) * DEG_TO_RAD
+    lat2 = (lat2) * DEG_TO_RAD
+ 
+    # apply formulae
+    a = (sin(dLat / 2)**2 +
+         sin(dLon / 2)**2 *
+             cos(lat1) * cos(lat2))
+    c = 2 * asin(sqrt(a))
+    return c
+
+def dist(lat1, lon1, lat2, lon2):
+    return haversine(lat1, lon1, lat2, lon2) * 6371000
 
 input_filename = sys.argv[1]
 f1 = open(input_filename, "r")
@@ -48,10 +73,8 @@ for row in r1:
         lat, lon = c[1], c[0]
 
         if prevLat != 0 and prevLon != 0:
-            dx = prevLon-lon
-            dy = prevLat-lat
-            d = math.sqrt(dx*dx + dy*dy)
-            if d > 0.0005*15*4: # 0.0005 deg/s = 200kph, 15s, 4 is a margin factor
+            d = dist(prevLat, prevLon, lat, lon)
+            if d > 150*KPH_TO_MPS*15: # 15s, 200kph is a margin factor
                 # print(f"DANGER! {id}: {prevLat}, {prevLon} and {lat},{lon} are too far appart to be correct", file=sys.stderr)
                 speedErrors += 1
                 isGood = False
@@ -82,8 +105,8 @@ for row in r2:
     totalGood += 1
 
 print(totalGood)
-print("Number of runs: ", totalGood, file=sys.stderr)
-print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
+print("Number of trips: ", totalGood, file=sys.stderr)
+print("Number of trips with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
 print(f"Total number of coordinates: {totalPoints}", file=sys.stderr)
 
 f3 = open(input_filename, "r")
