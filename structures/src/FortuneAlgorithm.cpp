@@ -156,7 +156,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 
     // Check if sweepline hasn't passed possible circle event location
     if (intersection.y - radius < sweep_line) {
-        Event circle_event = Event(arc, intersection.y - radius);
+        Event circle_event = Event(arc, Vector2(intersection.x, intersection.y - radius));
         events.push(circle_event);
     }
 }
