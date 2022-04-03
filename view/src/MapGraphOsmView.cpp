@@ -62,6 +62,8 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
     auto ways = graph.getWays();
 
     for(const way_t &way: ways){
+        if(way.nodes.size() < 2) continue;
+
         GraphViewer::Color color = color_map.at(way.edgeType);
         float width = width_map.at(way.edgeType);
         bool dashed = dashed_map.at(way.edgeType);
@@ -78,6 +80,7 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
             const VertexArray &shape = *e;
             for(size_t i = 0; i < shape.getVertexCount(); ++i)
                 zip.push_back(shape[i]);
+            delete e; e = nullptr;
         }
     }
 }

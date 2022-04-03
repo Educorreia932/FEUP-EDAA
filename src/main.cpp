@@ -44,40 +44,25 @@ void voronoi(const MapGraph &M) {
 }
 
 void voronoi_display(const MapGraph &M) {
-    MapGraphView view(M);
-    view.drawVoronoi();
 }
 
 void view_trips(const MapGraph &M, const std::vector<Trip> &trips){
     std::cout << "Building graph from trips..." << std::endl;
-    const size_t N = 50000;
+    const size_t N = 100000;
     std::set<size_t> s;
     while(s.size() < N) s.insert(rand()%trips.size());
-    MapGraph R;
-    {
-        std::map<coord_t, DWGraph::node_t> points;
-        for(size_t i : s){
-            for(const coord_t &c: trips[i].coords){
-                if(!points.count(c)){
-                    size_t u = points.size();
-                    points[c] = u;
-                    R.addNode(u, c);
-                }
-            }
-        }
-        std::cout << "Gathered run coords..." << std::endl;
-        for(size_t i : s){
-            MapGraph::way_t w;
-            for(const coord_t &c: trips[i].coords){
-                w.nodes.push_back(points.at(c));
-            }
-            R.addWay(w);
-        }
-        std::cout << "Built graph from trips" << std::endl;
-    }
+    std::vector<Trip> tripsSmall;
+    for(size_t i : s)
+        tripsSmall.push_back(trips[i]);
 
-    MapTripsView view(R);
-    view.drawTrips();
+    WindowView windowView(sf::Vector2f(0,0));
+    MapView mapView(coord_t(41.1594,-8.6199), 50000);
+    MapTripsView mapTripsView(windowView, mapView, tripsSmall);
+    mapView.addView(&mapTripsView);
+    windowView.setView(&mapView);
+
+    WindowController windowController(windowView);
+    windowController.run();
 }
 
 int main(int argc, char *argv[]){
