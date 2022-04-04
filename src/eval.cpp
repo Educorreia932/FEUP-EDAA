@@ -1,19 +1,16 @@
+#include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <random>
 
+#include "DeepVStripes.h"
 #include "EdgeType.h"
 #include "MapGraph.h"
-
-#include "next_pow2.h"
-
+#include "QuadTreeClosestPoint.h"
 #include "Trip.h"
 
-#include "QuadTreeClosestPoint.h"
-#include "DeepVStripes.h"
-
-#include <algorithm>
-#include <chrono>
+#include "utils.h"
 
 void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
@@ -305,7 +302,7 @@ void eval2DTree_BuildMemory(){
 
         size_t mem = 0;
 
-        size_t N = next_pow2(sz);
+        size_t N = utils::nextPow2(sz);
         mem += N * sizeof(coord_t) * 2; // Data structure
         mem += N * sizeof(coord_t); // Stable sort
 

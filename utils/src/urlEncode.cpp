@@ -1,8 +1,8 @@
-#include "urlencode.h"
+#include "urlEncode.h"
 
 #include <iomanip>
 
-std::string urlencode(const std::string &s){
+std::string utils::urlEncode(const std::string &s){
     std::stringstream os;
     os.fill('0');
     os << std::hex;
@@ -18,7 +18,7 @@ std::string urlencode(const std::string &s){
     return os.str();
 }
 
-std::string urlencode(const std::string &s, const std::string &encode){
+std::string utils::urlEncode(const std::string &s, const std::string &encode){
     std::stringstream os;
     os.fill('0');
     os << std::hex;
@@ -34,7 +34,7 @@ std::string urlencode(const std::string &s, const std::string &encode){
     return os.str();
 }
 
-std::string urldecode(const std::string &str){
+std::string utils::urlDecode(const std::string &str){
     std::string s = "";
     size_t i = 0;
     while(i < str.size()){

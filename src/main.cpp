@@ -43,7 +43,7 @@ void voronoi(const MapGraph &M) {
 void voronoi_display(const MapGraph &M) {
 }
 
-void view_trips(const MapGraph &M, const std::vector<Trip> &trips){
+void view_trips(const std::vector<Trip> &trips){
     std::cout << "Building graph from trips..." << std::endl;
     const size_t N = 100000;
     std::set<size_t> s;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
         std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
         std::cout << "Loaded trips" << std::endl;
 
-        if(opt == "view-trips"){ view_trips(M, trips); return 0; }
+        if(opt == "view-trips"){ view_trips(trips); return 0; }
         
         std::cerr << "Invalid option" << std::endl;
         return -1;

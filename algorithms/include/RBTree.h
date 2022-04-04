@@ -28,23 +28,23 @@ private:
     typedef T key_type;
 
     struct Entry {
-        Entry(const key_type& key) : key(key){}
+        Entry(const key_type& key_) : key(key_){}
 
         const key_type key;
     };
 
     struct Node : std::enable_shared_from_this<const Node> {
     public:
-        Node(const bool red,
-             const entry_ptr_type& entry,
-             const node_ptr_type& left,
-             const node_ptr_type& right) : red(red),
-                                           entry(entry),
-                                           left(left),
-                                           right(right) {}
+        Node(const bool red_,
+             const entry_ptr_type& entry_,
+             const node_ptr_type& left_,
+             const node_ptr_type& right_) : red(red_),
+                                           entry(entry_),
+                                           left(left_),
+                                           right(right_) {}
 
-        Node(const bool red, const key_type& key)
-            : red(red), entry(std::make_shared<const Entry>(key)) {}
+        Node(const bool red_, const key_type& key_)
+            : red(red_), entry(std::make_shared<const Entry>(key_)) {}
 
     public:
         inline auto copyWithEntry(const key_type& key) const {
@@ -52,12 +52,12 @@ private:
             return std::make_shared<const Node>(red, new_entry, left, right);
         }
 
-        inline auto copyWithLeft(const node_ptr_type& left) const {
-            return std::make_shared<const Node>(red, entry, left, right);
+        inline auto copyWithLeft(const node_ptr_type& left_) const {
+            return std::make_shared<const Node>(red, entry, left_, right);
         }
 
-        inline auto copyWithRight(const node_ptr_type& right) const {
-            return std::make_shared<const Node>(red, entry, left, right);
+        inline auto copyWithRight(const node_ptr_type& right_) const {
+            return std::make_shared<const Node>(red, entry, left, right_);
         }
 
         inline auto copyAsBlack() const {

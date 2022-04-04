@@ -14,8 +14,8 @@ WindowView::WindowView(Vector2f center_) : center(center_) {
     debugView = new DebugView(window, fpsMonitor);
 }
 
-void WindowView::setView(View *view){
-    v = view;
+void WindowView::setView(View *view_){
+    v = view_;
 }
 
 void WindowView::draw(){
