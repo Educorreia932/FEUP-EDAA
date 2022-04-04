@@ -106,6 +106,7 @@ void VoronoiDiagram::addEdge(Edge segment) {
 std::vector<Edge> VoronoiDiagram::getEdges() const {
     return edges;
 }
+
 double Edge::evaluateY(double x) const {
     double w = (x - start.x)/(end.x - start.x);
     double y = (1-w)*start.y + (w)*end.y;

@@ -28,20 +28,19 @@ public:
 
     bool intersect(Edge edge, Vector2& intersection);
     Edge merge();
-
+    double evaluateY(double x) const;
+    
     bool operator<(const Edge& edge) const;
     bool operator==(const Edge& edge) const;
 };
 
 class Box {
-private:
-    Edge bounds[4];
 public:
+    Edge bounds[4];
+
     Box(Vector2 bottom_left, Vector2 upper_right);
 
     bool intersect(Edge edge, Vector2 &intersection);
-
-    double evaluateY(double x) const;
 };
 
 class VoronoiDiagram {

@@ -38,6 +38,9 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
             diagram.addEdge(edge->merge());
     }
 
+    for (Edge bound : bounding_box.bounds) 
+        diagram.addEdge(bound);
+
     return diagram;
 }
 

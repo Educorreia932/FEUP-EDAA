@@ -26,6 +26,6 @@ Save the file as `map.xml` in path `map/original/map.xml`
 
 - Using `valid` flag for *events* is not very effective and practical, however it's necessary, since priority queue (at least C++ implementation) doesn't support removal of an element that isn't the top one.
 
-- https://www.youtube.com/watch?v=pUwEp1hs8MM
+- [Voronoi Diagram - Philipp Kindermann](https://www.youtube.com/watch?v=pUwEp1hs8MM)
 - [Fortune's Algorithm - Desmos](https://www.desmos.com/calculator/ejatebvup4)
 - [Voronoi Generation - Paul Reed](http://paul-reed.co.uk/fortune.htm#findycoord)
