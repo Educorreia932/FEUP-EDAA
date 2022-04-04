@@ -62,6 +62,17 @@ void view_trips(const std::vector<Trip> &trips){
     windowController.run();
 }
 
+void match_trip(const MapGraph &M, const std::vector<Trip> &trips){
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
+    MapGraphOsmView mapGraphOsmView(window, mapView, M);
+    mapView.addView(&mapGraphOsmView);
+    window.setView(&mapView);
+
+    WindowController windowController(window);
+    windowController.run();
+}
+
 int main(int argc, char *argv[]){
     XInitThreads();
 
@@ -86,6 +97,7 @@ int main(int argc, char *argv[]){
         std::cout << "Loaded trips" << std::endl;
 
         if(opt == "view-trips"){ view_trips(trips); return 0; }
+        if(opt == "match-trip"){ match_trip(M, trips); return 0; }
         
         std::cerr << "Invalid option" << std::endl;
         return -1;
