@@ -78,6 +78,8 @@ static const std::list<edge_type_t> order = {
 
 static const Color buildingOutlineColor(196, 182, 171);
 
+static const size_t N_CIRCLE = 8;
+
 MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const vector<polygon_t> &polygons_):
     windowView(windowView_), mapView(mapView_), graph(graph_)
 {
@@ -95,8 +97,23 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
             float width = width_map.at(way.edgeType);
             bool dashed = dashed_map.at(way.edgeType);
 
+            // sf::Vector2f u = mapView.coordToVector2f(nodes.at(*way.nodes.begin()));
+            // for(size_t i = 0; i < N_CIRCLE/2; ++i){
+            //     float theta1 = 2*M_PI/N_CIRCLE * i;
+            //     float theta2 = 2*M_PI/N_CIRCLE * (i+1);
+            //     float x1 = cos(theta1)*width/2,
+            //           x2 = cos(theta2)*width/2;
+            //     float y1 = sin(theta1)*width/2,
+            //           y2 = sin(theta2)*width/2;
+            //     zip.push_back(Vertex({u.x+x1, u.y+y1}, color));
+            //     zip.push_back(Vertex({u.x+x2, u.y+y2}, color));
+            //     zip.push_back(Vertex({u.x-x1, u.y-y1}, color));
+            //     zip.push_back(Vertex({u.x-x2, u.y-y2}, color));
+            // }
+
             auto it1 = way.nodes.begin(),
                 it2 = ++way.nodes.begin();
+            bool first = true;
             while(it2 != way.nodes.end()){
                 sf::Vector2f u = mapView.coordToVector2f(nodes.at(*(it1++))),
                              v = mapView.coordToVector2f(nodes.at(*(it2++)));
@@ -105,10 +122,32 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
                 else        e = new DashedLineShape(u, v, width);
                 e->setFillColor(color);
                 const VertexArray &shape = *e;
+                const size_t sz = zip.size();
+                if(!first && !dashed){
+                    zip.push_back(zip[sz-2]);
+                    zip.push_back(zip[sz-1]);
+                    zip.push_back(shape[0] );
+                    zip.push_back(shape[1] );
+                }
                 for(size_t i = 0; i < shape.getVertexCount(); ++i)
                     zip.push_back(shape[i]);
                 delete e; e = nullptr;
+                first = false;
             }
+
+            // u = mapView.coordToVector2f(nodes.at(*way.nodes.rbegin()));
+            // for(size_t i = 0; i < N_CIRCLE/2; ++i){
+            //     float theta1 = 2*M_PI/N_CIRCLE * i;
+            //     float theta2 = 2*M_PI/N_CIRCLE * (i+1);
+            //     float x1 = cos(theta1)*width/2,
+            //           x2 = cos(theta2)*width/2;
+            //     float y1 = sin(theta1)*width/2,
+            //           y2 = sin(theta2)*width/2;
+            //     zip.push_back(Vertex({u.x+x1, u.y+y1}, color));
+            //     zip.push_back(Vertex({u.x+x2, u.y+y2}, color));
+            //     zip.push_back(Vertex({u.x-x1, u.y-y1}, color));
+            //     zip.push_back(Vertex({u.x-x2, u.y-y2}, color));
+            // }
         }
     }
 

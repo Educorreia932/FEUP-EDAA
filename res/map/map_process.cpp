@@ -387,6 +387,16 @@ int main(int argc, char *argv[]) {
                 for(const auto &u: way)
                     polygon.coords.push_back(nodes.at(u));
             }
+
+            auto natural = find_tag(it, "natural");
+            if(natural != NULL && string(natural->first_attribute("v")->value()) == "water"){
+                polygons.push_back(polygon_t());
+                polygon_t &polygon = *polygons.rbegin();
+                polygon.id = way.id;
+                polygon.t = polygon_t::type::WATER;
+                for(const auto &u: way)
+                    polygon.coords.push_back(nodes.at(u));
+            }
         }
 
         for(const auto &p: membersOfRelations){
