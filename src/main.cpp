@@ -21,7 +21,7 @@
 
 void view(const MapGraph &M){
     WindowView windowView(sf::Vector2f(0,0));
-    MapView mapView(coord_t(41.1594,-8.6199), 50000);
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapGraphOsmView mapGraphOsmView(windowView, mapView, M);
     mapView.addView(&mapGraphOsmView);
     windowView.setView(&mapView);
@@ -52,7 +52,7 @@ void view_trips(const MapGraph &M, const std::vector<Trip> &trips){
         tripsSmall.push_back(trips[i]);
 
     WindowView windowView(sf::Vector2f(0,0));
-    MapView mapView(coord_t(41.1594,-8.6199), 50000);
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapTripsView mapTripsView(windowView, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
     windowView.setView(&mapView);

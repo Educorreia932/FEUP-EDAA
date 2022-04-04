@@ -8,8 +8,8 @@
 
 class WindowView : public View {
 public:
-    static const int DEFAULT_WIDTH  = 800;
-    static const int DEFAULT_HEIGHT = 600;
+    static const int DEFAULT_WIDTH  = 1600;
+    static const int DEFAULT_HEIGHT = 900;
 private:
     sf::RenderWindow *window = nullptr;     ///< @brief Window.
     sf::View *view = nullptr;               ///< @brief Default view, to draw the graph.

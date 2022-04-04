@@ -13,6 +13,8 @@ private:
     double scale;
     std::list<View*> views;
 public:
+    static sf::Vector2f wsg84ToWebMercator(const coord_t &c);
+
     MapView(coord_t c0_, double scale_);
     
     void addView(View *view);
