@@ -12,22 +12,22 @@
 #include "QuadTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
 
-#include "WindowView.h"
+#include "DraggableZoomableWindow.h"
 #include "MapView.h"
-#include "MapGraphOsmView.h"
+#include "MapOsmView.h"
 
 #include "WindowController.h"
 
 #include <X11/Xlib.h>
 
-void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
-    WindowView windowView(sf::Vector2f(0, 0)); windowView.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(coord_t(41.1594, -8.6199), 20000000);
-    MapGraphOsmView mapGraphOsmView(windowView, mapView, M, polygons);
-    mapView.addView(&mapGraphOsmView);
-    windowView.setView(&mapView);
+void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
+    MapOsmView mapOsmView(window, mapView, M, polygons);
+    mapView.addView(&mapOsmView);
+    window.setDrawView(&mapView);
 
-    WindowController windowController(windowView);
+    WindowController windowController(window);
     windowController.run();
 }
 
@@ -79,7 +79,7 @@ void voronoi_display(const VoronoiDiagram diagram) {
     }
 }
 
-void view_trips(const MapGraph& M, const std::vector<Trip>& trips) {
+void view_trips(const std::vector<Trip> &trips){
     std::cout << "Building graph from trips..." << std::endl;
     const size_t N = 100000;
     std::set<size_t> s;
@@ -88,17 +88,28 @@ void view_trips(const MapGraph& M, const std::vector<Trip>& trips) {
     for (size_t i : s)
         tripsSmall.push_back(trips[i]);
 
-    WindowView windowView(sf::Vector2f(0, 0));
-    MapView mapView(coord_t(41.1594, -8.6199), 20000000);
-    MapTripsView mapTripsView(windowView, mapView, tripsSmall);
+    DraggableZoomableWindow window(sf::Vector2f(0,0));
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
+    MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
-    windowView.setView(&mapView);
+    window.setDrawView(&mapView);
 
-    WindowController windowController(windowView);
+    WindowController windowController(window);
     windowController.run();
 }
 
-int main(int argc, char* argv[]) {
+void match_trip(const MapGraph &M, const std::vector<Trip> &trips){
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(coord_t(41.1594,-8.6199), 20000000);
+    MapGraphOsmView mapGraphOsmView(window, mapView, M);
+    mapView.addView(&mapGraphOsmView);
+    window.setDrawView(&mapView);
+
+    WindowController windowController(window);
+    windowController.run();
+}
+
+int main(int argc, char *argv[]){
     XInitThreads();
 
     try {
@@ -121,8 +132,9 @@ int main(int argc, char* argv[]) {
         std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
         std::cout << "Loaded trips" << std::endl;
 
-        if (opt == "view-trips") { view_trips(M, trips); return 0; }
-
+        if(opt == "view-trips"){ view_trips(trips); return 0; }
+        if(opt == "match-trip"){ match_trip(M, trips); return 0; }
+        
         std::cerr << "Invalid option" << std::endl;
         return -1;
     }

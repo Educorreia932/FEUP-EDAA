@@ -2,13 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "WindowView.h"
+#include "DraggableZoomableWindow.h"
 
 class WindowController {
 private:
-    WindowView &windowView;
+    DraggableZoomableWindow &window;
 public:
-    WindowController(WindowView &windowView_);
+    WindowController(DraggableZoomableWindow &window);
 
     void run();
 };

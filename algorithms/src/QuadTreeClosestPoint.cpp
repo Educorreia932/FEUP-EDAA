@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <bitset>
-#include "next_pow2.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -17,7 +17,7 @@ size_t size_bits(size_t n){
 QuadTreeClosestPoint::QuadTreeClosestPoint(){}
 
 void QuadTreeClosestPoint::initialize(const list<coord_t> &points){
-    size_t N = next_pow2(points.size());
+    size_t N = utils::nextPow2(points.size());
     c.resize(N);
     split.resize(N);
     copy(points.begin(), points.end(), c.begin());

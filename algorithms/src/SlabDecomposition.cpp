@@ -32,7 +32,7 @@ void SlabDecomposition::run(){
     }
 
     // map<deg_t, set<const Edge*, cmp_t>> slabs;
-    set<const Edge*, cmp_t> prev, cur;
+    set<const Edge*, cmp_t> prev;
 
     auto it1 = events.begin(),
          it2 = ++events.begin();

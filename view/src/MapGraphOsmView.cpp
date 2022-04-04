@@ -78,8 +78,10 @@ static const std::list<edge_type_t> order = {
 
 static const Color buildingOutlineColor(196, 182, 171);
 
-MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const vector<polygon_t> &polygons_):
-    windowView(windowView_), mapView(mapView_), graph(graph_)
+static const size_t N_CIRCLE = 8;
+
+MapGraphOsmView::MapGraphOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph &graph_):
+    window(window_), mapView(mapView_), graph(graph_)
 {
     auto nodes = graph.getNodes();
     auto ways = graph.getWays();
@@ -95,8 +97,23 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
             float width = width_map.at(way.edgeType);
             bool dashed = dashed_map.at(way.edgeType);
 
+            // sf::Vector2f u = mapView.coordToVector2f(nodes.at(*way.nodes.begin()));
+            // for(size_t i = 0; i < N_CIRCLE/2; ++i){
+            //     float theta1 = 2*M_PI/N_CIRCLE * i;
+            //     float theta2 = 2*M_PI/N_CIRCLE * (i+1);
+            //     float x1 = cos(theta1)*width/2,
+            //           x2 = cos(theta2)*width/2;
+            //     float y1 = sin(theta1)*width/2,
+            //           y2 = sin(theta2)*width/2;
+            //     zip.push_back(Vertex({u.x+x1, u.y+y1}, color));
+            //     zip.push_back(Vertex({u.x+x2, u.y+y2}, color));
+            //     zip.push_back(Vertex({u.x-x1, u.y-y1}, color));
+            //     zip.push_back(Vertex({u.x-x2, u.y-y2}, color));
+            // }
+
             auto it1 = way.nodes.begin(),
                 it2 = ++way.nodes.begin();
+            bool first = true;
             while(it2 != way.nodes.end()){
                 sf::Vector2f u = mapView.coordToVector2f(nodes.at(*(it1++))),
                              v = mapView.coordToVector2f(nodes.at(*(it2++)));
@@ -105,66 +122,36 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
                 else        e = new DashedLineShape(u, v, width);
                 e->setFillColor(color);
                 const VertexArray &shape = *e;
+                const size_t &sz = zip.size();
+                // if(!first && !dashed){
+                //     zip.push_back(zip[sz-2]);
+                //     zip.push_back(zip[sz-1]);
+                //     zip.push_back(shape[0] );
+                //     zip.push_back(shape[1] );
+                // }
                 for(size_t i = 0; i < shape.getVertexCount(); ++i)
                     zip.push_back(shape[i]);
                 delete e; e = nullptr;
+                first = false;
             }
-        }
-    }
 
-    for(const polygon_t &polygon: polygons_){
-        if(polygon.coords.size() < 2) continue;
-        Color color;
-        switch(polygon.t){
-            case polygon_t::type::WATER   : color = Color(170, 211, 223); break;
-            case polygon_t::type::LAND    : color = Color(242, 239, 233); break;
-            case polygon_t::type::BUILDING: color = Color(217, 208, 201); break;
-            default                    : color = Color(  0,   0,   0); break;
-        }
-        vector<vector<Point>> p(1);
-        for(const coord_t &c: polygon.coords){
-            auto xy = mapView.coordToVector2f(c);
-            p[0].push_back({xy.x, xy.y});
-        }
-        const coord_t &c = *polygon.coords.begin();
-        auto xy = mapView.coordToVector2f(c);
-        p[0].push_back(Point({xy.x, xy.y}));
-
-        std::vector<size_t> idx = mapbox::earcut<size_t>(p);
-        for(size_t i = 0; i < idx.size(); i += 3){
-            size_t idx0 = idx[i+0];
-            size_t idx1 = idx[i+1];
-            size_t idx2 = idx[i+2];
-
-            Vector2f v0(p[0][idx0][0], p[0][idx0][1]);
-            Vector2f v1(p[0][idx1][0], p[0][idx1][1]);
-            Vector2f v2(p[0][idx2][0], p[0][idx2][1]);
-
-            std::vector<sf::Vertex> *v;
-            if     (polygon.t == polygon_t::type::WATER) v = &water;
-            else if(polygon.t == polygon_t::type::LAND) v = &land;
-            else if(polygon.t == polygon_t::type::BUILDING) v = &building;
-            v->push_back(Vertex(v0, color));
-            v->push_back(Vertex(v1, color));
-            v->push_back(Vertex(v2, color));
-        }
-
-        if(polygon.t == polygon_t::type::BUILDING){
-            for(size_t i = 1; i < p[0].size(); ++i){
-                Vector2f u(p[0][i-1][0], p[0][i-1][1]),
-                        v(p[0][i-0][0], p[0][i-0][1]);
-                buildingOutlines.push_back(Vertex(u, buildingOutlineColor));
-                buildingOutlines.push_back(Vertex(v, buildingOutlineColor));
-            }
+            // u = mapView.coordToVector2f(nodes.at(*way.nodes.rbegin()));
+            // for(size_t i = 0; i < N_CIRCLE/2; ++i){
+            //     float theta1 = 2*M_PI/N_CIRCLE * i;
+            //     float theta2 = 2*M_PI/N_CIRCLE * (i+1);
+            //     float x1 = cos(theta1)*width/2,
+            //           x2 = cos(theta2)*width/2;
+            //     float y1 = sin(theta1)*width/2,
+            //           y2 = sin(theta2)*width/2;
+            //     zip.push_back(Vertex({u.x+x1, u.y+y1}, color));
+            //     zip.push_back(Vertex({u.x+x2, u.y+y2}, color));
+            //     zip.push_back(Vertex({u.x-x1, u.y-y1}, color));
+            //     zip.push_back(Vertex({u.x-x2, u.y-y2}, color));
+            // }
         }
     }
 }
 
 void MapGraphOsmView::draw(){
-    RenderWindow *window = windowView.getWindow();
-    window->draw(&land[0], land.size(), Triangles);
-    window->draw(&water[0], water.size(), Triangles);
-    window->draw(&building[0], building.size(), Triangles);
-    window->draw(&buildingOutlines[0], buildingOutlines.size(), Lines);
-    window->draw(&zip[0], zip.size(), Quads);
+    window.draw(&zip[0], zip.size(), Quads);
 }

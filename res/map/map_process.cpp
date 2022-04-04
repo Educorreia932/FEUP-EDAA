@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 #include "point.h"
 #include "polygon.h"
 
-#include "dir.h"
+#include "utils.h"
 
 using namespace std;
 using namespace rapidxml;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
     
     const string prefix = string(argv[1]);
 
-    const string dir = getDirectory(prefix);
+    const string dir = utils::getDirectory(prefix);
 
     const string nodesFilepath    = prefix + ".nodes";
     const string edgesFilepath    = prefix + ".edges";
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
         os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+            os << utils::urlEncode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
         }
     }
 
@@ -384,6 +384,16 @@ int main(int argc, char *argv[]) {
                 polygon_t &polygon = *polygons.rbegin();
                 polygon.id = way.id;
                 polygon.t = polygon_t::type::BUILDING;
+                for(const auto &u: way)
+                    polygon.coords.push_back(nodes.at(u));
+            }
+
+            auto natural = find_tag(it, "natural");
+            if(natural != NULL && string(natural->first_attribute("v")->value()) == "water"){
+                polygons.push_back(polygon_t());
+                polygon_t &polygon = *polygons.rbegin();
+                polygon.id = way.id;
+                polygon.t = polygon_t::type::WATER;
                 for(const auto &u: way)
                     polygon.coords.push_back(nodes.at(u));
             }
