@@ -11,7 +11,6 @@ public:
     static const int DEFAULT_WIDTH  = 1600;
     static const int DEFAULT_HEIGHT = 900;
 private:
-    sf::RenderWindow *window = nullptr;     ///< @brief Window.
     sf::View *view = nullptr;               ///< @brief Default view, to draw the graph.
 
     float scale = 1.0;                          ///< @brief Scale (changed with scroll).
@@ -42,7 +41,7 @@ private:
 public:
     DraggableZoomableWindow(sf::Vector2f center_);
 
-    void setView(View *view);
+    void setDrawView(View *view);
     void draw();
     
     void onResize();

@@ -25,7 +25,7 @@ void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
-    window.setView(&mapView);
+    window.setDrawView(&mapView);
 
     WindowController windowController(window);
     windowController.run();
@@ -56,7 +56,7 @@ void view_trips(const std::vector<Trip> &trips){
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
-    window.setView(&mapView);
+    window.setDrawView(&mapView);
 
     WindowController windowController(window);
     windowController.run();
@@ -67,7 +67,7 @@ void match_trip(const MapGraph &M, const std::vector<Trip> &trips){
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
     mapView.addView(&mapGraphOsmView);
-    window.setView(&mapView);
+    window.setDrawView(&mapView);
 
     WindowController windowController(window);
     windowController.run();

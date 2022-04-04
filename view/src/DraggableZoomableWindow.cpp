@@ -9,18 +9,18 @@ DraggableZoomableWindow::DraggableZoomableWindow(sf::Vector2f center_) :
     settings.antialiasingLevel = 8;
     create(sf::VideoMode(DEFAULT_WIDTH, DEFAULT_HEIGHT), "Window Title", sf::Style::Default, settings);
     
-    view = new sf::View(window->getDefaultView());
+    view = new sf::View(getDefaultView());
 
-    debugView = new DebugView(window, fpsMonitor);
+    debugView = new DebugView(this, fpsMonitor);
 }
 
-void DraggableZoomableWindow::setView(View *view_){
+void DraggableZoomableWindow::setDrawView(View *view_){
     v = view_;
 }
 
 void DraggableZoomableWindow::draw(){
-    window->setView(*view);
-    window->clear(backgroundColor);
+    setView(*view);
+    clear(backgroundColor);
     v->draw();
     fpsMonitor.count();
     if(debugMode) debugView->draw();
@@ -36,7 +36,7 @@ void DraggableZoomableWindow::onScroll(float delta){
 }
 
 void DraggableZoomableWindow::recalculateView(){
-    sf::Vector2f size((float) window->getSize().x, (float) window->getSize().y);
+    sf::Vector2f size((float) getSize().x, (float) getSize().y);
     *view = sf::View(center, size*scale);
     debugView->recalculateView();
 }
