@@ -122,13 +122,13 @@ MapGraphOsmView::MapGraphOsmView(RenderTarget &window_, MapView &mapView_, const
                 else        e = new DashedLineShape(u, v, width);
                 e->setFillColor(color);
                 const VertexArray &shape = *e;
-                const size_t sz = zip.size();
-                if(!first && !dashed){
-                    zip.push_back(zip[sz-2]);
-                    zip.push_back(zip[sz-1]);
-                    zip.push_back(shape[0] );
-                    zip.push_back(shape[1] );
-                }
+                const size_t &sz = zip.size();
+                // if(!first && !dashed){
+                //     zip.push_back(zip[sz-2]);
+                //     zip.push_back(zip[sz-1]);
+                //     zip.push_back(shape[0] );
+                //     zip.push_back(shape[1] );
+                // }
                 for(size_t i = 0; i < shape.getVertexCount(); ++i)
                     zip.push_back(shape[i]);
                 delete e; e = nullptr;
