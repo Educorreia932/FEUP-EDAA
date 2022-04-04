@@ -20,10 +20,10 @@ void DraggableZoomableWindow::setView(View *view_){
 
 void DraggableZoomableWindow::draw(){
     window->setView(*view);
-    window->clear(background_color);
+    window->clear(backgroundColor);
     v->draw();
     fpsMonitor.count();
-    if(debug_mode) debugView->draw();
+    if(debugMode) debugView->draw();
 }
 
 void DraggableZoomableWindow::onResize(){
@@ -42,10 +42,10 @@ void DraggableZoomableWindow::recalculateView(){
 }
 
 bool DraggableZoomableWindow::getDebugMode() const {
-    return debug_mode;
+    return debugMode;
 }
 void DraggableZoomableWindow::setDebugMode(bool b) {
-    debug_mode = b;
+    debugMode = b;
 }
 
 void DraggableZoomableWindow::onLeftPress(const sf::Event &event){
@@ -73,5 +73,5 @@ void DraggableZoomableWindow::onMouseMoved(const sf::Event &event){
 }
 
 void DraggableZoomableWindow::setBackgroundColor(sf::Color color){
-    background_color = color;
+    backgroundColor = color;
 }

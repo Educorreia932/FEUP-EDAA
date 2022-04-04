@@ -27,7 +27,7 @@ private:
     static constexpr float SCALE_DELTA = 1.5;
     sf::Vector2f center;                        ///< @brief Coordinates of center of the window.
 
-    bool debug_mode = false;                    ///< @brief True if debug mode is enabled, false otherwise.
+    bool debugMode = false;                    ///< @brief True if debug mode is enabled, false otherwise.
     DebugView *debugView = nullptr;
 
     View *v = nullptr;
@@ -36,7 +36,7 @@ private:
     sf::Vector2f centerInitial;
     sf::Vector2f posMouseInitial;
 
-    sf::Color background_color = sf::Color::White; ///< @brief Background color.
+    sf::Color backgroundColor = sf::Color::White; ///< @brief Background color.
 
     FpsMonitor fpsMonitor = FpsMonitor(1000);  ///< @brief FPS monitor.
 public:
