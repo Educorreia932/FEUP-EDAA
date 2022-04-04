@@ -19,6 +19,8 @@ private:
     const MapGraph &graph;
     std::vector<sf::Vertex> land;
     std::vector<sf::Vertex> water;
+    std::vector<sf::Vertex> building;
+    std::vector<sf::Vertex> buildingOutlines;
     std::vector<sf::Vertex> zip;
 public:
     MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const std::vector<polygon_t> &polygons_);

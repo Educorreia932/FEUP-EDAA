@@ -28,20 +28,20 @@ static const std::unordered_map<edge_type_t, bool> dashed_map = {
     {edge_type_t::SERVICE       , true }
 };
 static const std::unordered_map<edge_type_t, float> width_map = {
-    {edge_type_t::MOTORWAY      , 10.0},
-    {edge_type_t::MOTORWAY_LINK ,  5.0},
-    {edge_type_t::TRUNK         , 10.0},
-    {edge_type_t::TRUNK_LINK    ,  5.0},
-    {edge_type_t::PRIMARY       ,  7.0},
-    {edge_type_t::PRIMARY_LINK  ,  5.0},
-    {edge_type_t::SECONDARY     ,  7.0},
-    {edge_type_t::SECONDARY_LINK,  5.0},
-    {edge_type_t::TERTIARY      ,  5.0},
-    {edge_type_t::TERTIARY_LINK ,  5.0},
-    {edge_type_t::UNCLASSIFIED  ,  5.0},
-    {edge_type_t::RESIDENTIAL   ,  5.0},
-    {edge_type_t::LIVING_STREET ,  5.0},
-    {edge_type_t::SERVICE       ,  5.0}
+    {edge_type_t::MOTORWAY      ,  7.0},
+    {edge_type_t::MOTORWAY_LINK ,  3.0},
+    {edge_type_t::TRUNK         ,  7.0},
+    {edge_type_t::TRUNK_LINK    ,  3.0},
+    {edge_type_t::PRIMARY       ,  5.0},
+    {edge_type_t::PRIMARY_LINK  ,  3.0},
+    {edge_type_t::SECONDARY     ,  5.0},
+    {edge_type_t::SECONDARY_LINK,  3.0},
+    {edge_type_t::TERTIARY      ,  3.0},
+    {edge_type_t::TERTIARY_LINK ,  3.0},
+    {edge_type_t::UNCLASSIFIED  ,  3.0},
+    {edge_type_t::RESIDENTIAL   ,  3.0},
+    {edge_type_t::LIVING_STREET ,  1.0},
+    {edge_type_t::SERVICE       ,  1.0}
 };
 static const std::unordered_map<edge_type_t, Color> color_map = {
     {edge_type_t::MOTORWAY      , Color(232, 146, 162) },
@@ -75,6 +75,8 @@ static const std::list<edge_type_t> order = {
     edge_type_t::LIVING_STREET ,
     edge_type_t::SERVICE
 };
+
+static const Color buildingOutlineColor(196, 182, 171);
 
 MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const vector<polygon_t> &polygons_):
     windowView(windowView_), mapView(mapView_), graph(graph_)
@@ -114,8 +116,9 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
         if(polygon.coords.size() < 2) continue;
         Color color;
         switch(polygon.t){
-            case polygon_t::type::WATER: color = Color(170, 211, 223); break;
-            case polygon_t::type::LAND : color = Color(242, 239, 233); break;
+            case polygon_t::type::WATER   : color = Color(170, 211, 223); break;
+            case polygon_t::type::LAND    : color = Color(242, 239, 233); break;
+            case polygon_t::type::BUILDING: color = Color(217, 208, 201); break;
             default                    : color = Color(  0,   0,   0); break;
         }
         vector<vector<Point>> p(1);
@@ -136,15 +139,22 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
             Vector2f v0(p[0][idx0][0], p[0][idx0][1]);
             Vector2f v1(p[0][idx1][0], p[0][idx1][1]);
             Vector2f v2(p[0][idx2][0], p[0][idx2][1]);
-            
-            if(polygon.t == polygon_t::type::WATER){
-                water.push_back(Vertex(v0, color));
-                water.push_back(Vertex(v1, color));
-                water.push_back(Vertex(v2, color));
-            } else if (polygon.t == polygon_t::type::LAND){
-                land.push_back(Vertex(v0, color));
-                land.push_back(Vertex(v1, color));
-                land.push_back(Vertex(v2, color));
+
+            std::vector<sf::Vertex> *v;
+            if     (polygon.t == polygon_t::type::WATER) v = &water;
+            else if(polygon.t == polygon_t::type::LAND) v = &land;
+            else if(polygon.t == polygon_t::type::BUILDING) v = &building;
+            v->push_back(Vertex(v0, color));
+            v->push_back(Vertex(v1, color));
+            v->push_back(Vertex(v2, color));
+        }
+
+        if(polygon.t == polygon_t::type::BUILDING){
+            for(size_t i = 1; i < p[0].size(); ++i){
+                Vector2f u(p[0][i-1][0], p[0][i-1][1]),
+                        v(p[0][i-0][0], p[0][i-0][1]);
+                buildingOutlines.push_back(Vertex(u, buildingOutlineColor));
+                buildingOutlines.push_back(Vertex(v, buildingOutlineColor));
             }
         }
     }
@@ -154,5 +164,7 @@ void MapGraphOsmView::draw(){
     RenderWindow *window = windowView.getWindow();
     window->draw(&land[0], land.size(), Triangles);
     window->draw(&water[0], water.size(), Triangles);
+    window->draw(&building[0], building.size(), Triangles);
+    window->draw(&buildingOutlines[0], buildingOutlines.size(), Lines);
     window->draw(&zip[0], zip.size(), Quads);
 }
