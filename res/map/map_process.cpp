@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 #include "point.h"
 #include "polygon.h"
 
-#include "dir.h"
+#include "utils.h"
 
 using namespace std;
 using namespace rapidxml;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
     
     const string prefix = string(argv[1]);
 
-    const string dir = getDirectory(prefix);
+    const string dir = utils::getDirectory(prefix);
 
     const string nodesFilepath    = prefix + ".nodes";
     const string edgesFilepath    = prefix + ".edges";
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
         os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+            os << utils::urlEncode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
         }
     }
 
