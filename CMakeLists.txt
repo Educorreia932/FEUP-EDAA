@@ -14,12 +14,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory("lib/GraphViewerCpp")
-include_directories("lib/GraphViewerCpp/include")
-
-include_directories("include" "algorithms/include" "structures/include" "utils/include" "ui/include")
+include_directories("include" "algorithms/include" "structures/include" "utils/include" "controller/include" "view/include")
 file(GLOB SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
-file(GLOB SRC_UI "ui/src/*.cpp")
+file(GLOB SRC_UI "controller/src/*.cpp" "view/src/*.cpp")
 file(GLOB SRC_TEST "test/*.cpp")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -28,9 +25,23 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_FLAGS_PARANOID}")
 endif ()
 
+find_library(SFML_LIB NAMES sfml-graphics sfml-window sfml-system)
+if(NOT SFML_LIB)
+    message("DID NOT FIND SFML, COMPILING IT")
+    add_subdirectory(lib/SFML)
+    include_directories(lib/SFML/include)
+endif()
+
+include_directories(lib/earcut.hpp/include)
+
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
-target_link_libraries(${PROJECT_NAME} graphviewer)
+target_link_libraries(da_proj sfml-graphics sfml-window sfml-system)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    message("Detected Linux, linking some libraries for project to work")
+    target_link_libraries(da_proj pthread)
+    target_link_libraries(da_proj X11)
+endif()
 
 # ################ TESTS ################
 add_subdirectory("test/Catch2")
