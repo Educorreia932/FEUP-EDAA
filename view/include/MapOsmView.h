@@ -9,13 +9,12 @@
 #include "MapGraph.h"
 #include "MapGraphOsmView.h"
 #include "MapView.h"
-#include "WindowView.h"
 
 #include "polygon.h"
 
 class MapOsmView: public View {
 private:
-    WindowView &windowView;
+    sf::RenderTarget &window;
     MapView &mapView;
     std::vector<sf::Vertex> land;
     std::vector<sf::Vertex> water;
@@ -23,6 +22,6 @@ private:
     std::vector<sf::Vertex> buildingOutlines;
     MapGraphOsmView mapGraphOsmView;
 public:
-    MapOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const std::vector<polygon_t> &polygons_);
+    MapOsmView(sf::RenderTarget &window_, MapView &mapView_, const MapGraph &graph_, const std::vector<polygon_t> &polygons_);
     virtual void draw();
 };

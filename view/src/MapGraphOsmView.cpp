@@ -80,8 +80,8 @@ static const Color buildingOutlineColor(196, 182, 171);
 
 static const size_t N_CIRCLE = 8;
 
-MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_):
-    windowView(windowView_), mapView(mapView_), graph(graph_)
+MapGraphOsmView::MapGraphOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph &graph_):
+    window(window_), mapView(mapView_), graph(graph_)
 {
     auto nodes = graph.getNodes();
     auto ways = graph.getWays();
@@ -153,6 +153,5 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
 }
 
 void MapGraphOsmView::draw(){
-    RenderWindow *window = windowView.getWindow();
-    window->draw(&zip[0], zip.size(), Quads);
+    window.draw(&zip[0], zip.size(), Quads);
 }

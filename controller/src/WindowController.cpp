@@ -7,22 +7,21 @@
 using namespace sf;
 using namespace std;
 
-WindowController::WindowController(WindowView &windowView_): windowView(windowView_){}
+WindowController::WindowController(DraggableZoomableWindow &window_): window(window_){}
 
 void WindowController::run(){
-    windowView.recalculateView();
-    RenderWindow *window = windowView.getWindow();
-    while (window->isOpen()){
+    window.recalculateView();
+    while (window.isOpen()){
         Event event{};
-        while (window->pollEvent(event)){
+        while (window.pollEvent(event)){
             switch(event.type){
-                case Event::Closed            : window->close(); break;
-                case Event::Resized           : windowView.onResize(); break;
-                case Event::MouseWheelScrolled: windowView.onScroll(event.mouseWheelScroll.delta); break;
+                case Event::Closed            : window.close(); break;
+                case Event::Resized           : window.onResize(); break;
+                case Event::MouseWheelScrolled: window.onScroll(event.mouseWheelScroll.delta); break;
                 case Event::MouseButtonPressed:
                     switch(event.mouseButton.button){
                         case Mouse::Button::Left:
-                            windowView.onLeftPress(event);
+                            window.onLeftPress(event);
                             break;
                         default: break;
                     }
@@ -30,24 +29,24 @@ void WindowController::run(){
                 case Event::MouseButtonReleased:
                     switch(event.mouseButton.button){
                         case Mouse::Button::Left:
-                            windowView.onLeftRelease();
+                            window.onLeftRelease();
                             break;
                         default: break;
                     }
                     break;
                 case Event::MouseMoved:
-                    windowView.onMouseMoved(event);
+                    window.onMouseMoved(event);
                     break;
                 case Event::TextEntered:
                     switch(toupper((int) event.text.unicode)){
-                        case 'D': windowView.setDebugMode(!windowView.getDebugMode()); break;
+                        case 'D': window.setDebugMode(!window.getDebugMode()); break;
                         default: break;
                     }
                     break;
                 default: break;
             }
         }
-        windowView.draw();
-        window->display();
+        window.draw();
+        window.display();
     }
 }

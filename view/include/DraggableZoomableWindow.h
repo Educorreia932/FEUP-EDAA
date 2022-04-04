@@ -6,7 +6,7 @@
 
 #include <SFML/Graphics.hpp>
 
-class WindowView : public View {
+class DraggableZoomableWindow : public sf::RenderWindow {
 public:
     static const int DEFAULT_WIDTH  = 1600;
     static const int DEFAULT_HEIGHT = 900;
@@ -40,17 +40,15 @@ private:
 
     FpsMonitor fpsMonitor = FpsMonitor(1000);  ///< @brief FPS monitor.
 public:
-    WindowView(sf::Vector2f center_);
+    DraggableZoomableWindow(sf::Vector2f center_);
 
     void setView(View *view);
-
     void draw();
     
     void onResize();
     void onScroll(float delta);
     void recalculateView();
 
-    sf::RenderWindow *getWindow();
     bool getDebugMode() const;
     void setDebugMode(bool b);
 

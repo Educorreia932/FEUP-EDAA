@@ -12,7 +12,7 @@
 #include "QuadTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
 
-#include "WindowView.h"
+#include "DraggableZoomableWindow.h"
 #include "MapView.h"
 #include "MapOsmView.h"
 
@@ -21,13 +21,13 @@
 #include <X11/Xlib.h>
 
 void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
-    WindowView windowView(sf::Vector2f(0,0)); windowView.setBackgroundColor(sf::Color(170, 211, 223));
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
-    MapOsmView mapOsmView(windowView, mapView, M, polygons);
+    MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
-    windowView.setView(&mapView);
+    window.setView(&mapView);
 
-    WindowController windowController(windowView);
+    WindowController windowController(window);
     windowController.run();
 }
 
@@ -52,13 +52,13 @@ void view_trips(const std::vector<Trip> &trips){
     for(size_t i : s)
         tripsSmall.push_back(trips[i]);
 
-    WindowView windowView(sf::Vector2f(0,0));
+    DraggableZoomableWindow window(sf::Vector2f(0,0));
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
-    MapTripsView mapTripsView(windowView, mapView, tripsSmall);
+    MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
-    windowView.setView(&mapView);
+    window.setView(&mapView);
 
-    WindowController windowController(windowView);
+    WindowController windowController(window);
     windowController.run();
 }
 

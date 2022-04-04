@@ -15,8 +15,8 @@ static const Color buildingOutlineColor(196, 182, 171);
 
 static const size_t N_CIRCLE = 8;
 
-MapOsmView::MapOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const vector<polygon_t> &polygons_):
-    windowView(windowView_), mapView(mapView_), mapGraphOsmView(windowView_, mapView_, graph_)
+MapOsmView::MapOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph &graph_, const vector<polygon_t> &polygons_):
+    window(window_), mapView(mapView_), mapGraphOsmView(window_, mapView_, graph_)
 {
     for(const polygon_t &polygon: polygons_){
         if(polygon.coords.size() < 2) continue;
@@ -67,10 +67,9 @@ MapOsmView::MapOsmView(WindowView &windowView_, MapView &mapView_, const MapGrap
 }
 
 void MapOsmView::draw(){
-    RenderWindow *window = windowView.getWindow();
-    window->draw(&land[0], land.size(), Triangles);
-    window->draw(&water[0], water.size(), Triangles);
-    window->draw(&building[0], building.size(), Triangles);
-    window->draw(&buildingOutlines[0], buildingOutlines.size(), Lines);
+    window.draw(&land[0], land.size(), Triangles);
+    window.draw(&water[0], water.size(), Triangles);
+    window.draw(&building[0], building.size(), Triangles);
+    window.draw(&buildingOutlines[0], buildingOutlines.size(), Lines);
     mapGraphOsmView.draw();
 }
