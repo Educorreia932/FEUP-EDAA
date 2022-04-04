@@ -7,3 +7,6 @@
 [submodule "lib/SFML"]
 	path = lib/SFML
 	url = https://github.com/SFML/SFML.git
+[submodule "lib/earcut.hpp"]
+	path = lib/earcut.hpp
+	url = https://github.com/mapbox/earcut.hpp.git

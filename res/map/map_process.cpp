@@ -7,6 +7,7 @@ namespace fs = std::filesystem;
 #include "coord.h"
 #include "DWGraph.h"
 #include "point.h"
+#include "polygon.h"
 
 #include "dir.h"
 
@@ -49,7 +50,7 @@ public:
 private:
     void get_way(xml_node<> *it){
         id = atoll(it->first_attribute("id")->value());
-        for(auto j = it->first_node("nd"); string(j->name()) == "nd"; j = j->next_sibling()){
+        for(auto j = it->first_node("nd"); j != nullptr && string(j->name()) == "nd"; j = j->next_sibling()){
             this->push_back(atoll(j->first_attribute("ref")->value()));
         }
     }
@@ -86,6 +87,7 @@ public:
     dir_t dir;
     speed_t speed;
     edge_type_t edgeType;
+    way_t(){}
     way_t(xml_node<> *it, edge_type_t eType): edgeType(eType) {
         get_way(it);
         dir = get_dir(it);
@@ -198,9 +200,10 @@ int main(int argc, char *argv[]) {
 
     const string dir = getDirectory(prefix);
 
-    const string nodesFilepath  = prefix + ".nodes";
-    const string edgesFilepath  = prefix + ".edges";
-    const string pointsFilepath = prefix + ".points";
+    const string nodesFilepath    = prefix + ".nodes";
+    const string edgesFilepath    = prefix + ".edges";
+    const string pointsFilepath   = prefix + ".points";
+    const string polygonsFilepath = prefix + ".polygons";
 
     // Create destination directory
     if(dir != ""){
@@ -225,21 +228,6 @@ int main(int argc, char *argv[]) {
     xml_document<> doc;
     doc.parse<0>(text);
 
-    // Get ways
-    list<way_t> ways;
-    unordered_set<long long> nodesInWays;
-    for (
-        auto it = doc.first_node()->first_node("way");
-        string(it->name()) == "way";
-        it = it->next_sibling()
-    ) {
-        if (find_tag(it, "area") != nullptr) continue;
-        edge_type_t t = get_edge_type(it);
-        if (t == edge_type_t::NO) continue;
-        way_t way(it, t); ways.push_back(way);
-        for(const DWGraph::node_t &u: way) nodesInWays.insert(u);
-    }
-
     // Get nodes
     unordered_map<long long, coord_t> nodes;
     for (
@@ -255,69 +243,187 @@ int main(int argc, char *argv[]) {
         nodes[u] = c;
     }
 
-    // Print nodes
-    {
-        ofstream os;
-        os.exceptions(ifstream::failbit | ifstream::badbit);
-        os.precision(7);
-        os.open(nodesFilepath);
-        os << nodesInWays.size() << "\n";
-        for(const long long nodeId: nodesInWays){
-            coord_t c = nodes[nodeId];
-            os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
+    // // Get ways
+    // list<way_t> ways;
+    // unordered_set<long long> nodesInWays;
+    // for (
+    //     auto it = doc.first_node()->first_node("way");
+    //     string(it->name()) == "way";
+    //     it = it->next_sibling()
+    // ) {
+    //     if (find_tag(it, "area") != nullptr) continue;
+    //     edge_type_t t = get_edge_type(it);
+    //     if (t == edge_type_t::NO) continue;
+    //     way_t way(it, t); ways.push_back(way);
+    //     for(const DWGraph::node_t &u: way) nodesInWays.insert(u);
+    // }
+
+    // // Print nodes
+    // {
+    //     ofstream os;
+    //     os.exceptions(ifstream::failbit | ifstream::badbit);
+    //     os.precision(7);
+    //     os.open(nodesFilepath);
+    //     os << nodesInWays.size() << "\n";
+    //     for(const long long nodeId: nodesInWays){
+    //         coord_t c = nodes[nodeId];
+    //         os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
+    //     }
+    // }
+
+    // // Print ways/edges
+    // {
+    //     ofstream os;
+    //     os.exceptions(ifstream::failbit | ifstream::badbit);
+    //     os.open(edgesFilepath);
+    //     size_t sz = 0;
+    //     for(const way_t &w: ways){
+    //         sz += w.getNumWays();
+    //     }
+    //     os << sz << "\n";
+    //     for(const way_t &w: ways){
+    //         os << w << "\n";
+    //     }
+    // }
+    
+    // // Get points of interest
+    // list<point_t> points; {
+    //     // Nodes that may be points of interest
+    //     for (auto it = doc.first_node()->first_node("node"); string(it->name()) == "node"; it = it->next_sibling()) {
+    //         auto pname = find_tag(it, "name");
+    //         if(pname != NULL){
+    //             point_t p;
+    //             p.setName(pname->first_attribute("v")->value());
+    //             p.setCoord(coord_t(atof(it->first_attribute("lat")->value()),
+    //                                atof(it->first_attribute("lon")->value())));
+    //             points.push_back(p);
+    //         }
+    //     }
+    //     // Ways that may be points of interest (e.g., buildings are described as ways)
+    //     for (auto it = doc.first_node()->first_node("way"); string(it->name()) == "way"; it = it->next_sibling()) {
+    //         auto pname = find_tag(it, "name");
+    //         if(pname != NULL){
+    //             point_t p;
+    //             p.setName(pname->first_attribute("v")->value());
+    //             way_t way(it, edge_type_t::NO);
+    //             p.setCoord(way.get_mean_coord(nodes));
+    //             points.push_back(p);
+    //         }
+    //     }
+    // }
+    // // Print points of interest
+    // {
+    //     ofstream os;
+    //     os.exceptions(ifstream::failbit | ifstream::badbit);
+    //     os << fixed << setprecision(7);
+    //     os.open(pointsFilepath);
+    //     os << points.size() << "\n";
+    //     for(const auto &p: points){
+    //         os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+    //     }
+    // }
+
+    // Get polygons
+    list<polygon_t> polygons; {
+        unordered_map<long long, list<long long>> membersOfRelations;
+        unordered_map<long long, polygon_t::type> typeOfRelations;
+        for (
+            auto it = doc.first_node()->first_node("relation");
+            it != NULL && string(it->name()) == "relation";
+            it = it->next_sibling()
+        ) {
+            auto id = atoll(it->first_attribute("id")->value());
+
+            bool good = false;
+            polygon_t::type t;
+            auto natural = find_tag(it, "natural");
+            if(natural != NULL){
+                // cout << id << endl;
+                if(string(natural->first_attribute("v")->value()) == "water"){
+                    good = true;
+                    t = polygon_t::type::WATER;
+                }
+            }
+            if(good){
+                typeOfRelations[id] = t;
+                for(
+                    auto it2 = it->first_node("member");
+                    it2 != NULL && string(it2->name()) == "member";
+                    it2 = it2->next_sibling()
+                ){
+                    if(t == polygon_t::type::WATER){
+                        if(
+                            string(it2->first_attribute("type")->value()) == "way" &&
+                            string(it2->first_attribute("role")->value()) == "outer"    
+                        ){
+                            membersOfRelations[id].push_back(atoll(it2->first_attribute("ref")->value()));
+                        }
+                    }
+                }
+            }
+        }
+
+        unordered_map<long long, way_t> ways;
+        for (
+            auto it = doc.first_node()->first_node("way");
+            string(it->name()) == "way";
+            it = it->next_sibling()
+        ) {
+            way_t way(it, edge_type_t::NO);
+            ways[way.id] = way;
+        }
+
+        for(const auto &p: membersOfRelations){
+            long long id = p.first;
+            list<long long> members = p.second;
+
+            // cout << "Relation " << id << endl;
+
+            polygon_t::type t = typeOfRelations.at(id);
+            
+            list<DWGraph::node_t> nodesList;
+            
+            auto it = members.begin();
+            nodesList.insert(nodesList.begin(), ways[*it].begin(), ways[*it].end());
+            members.erase(it);
+
+            size_t prevSize = members.size()+1;
+            while(members.size() != prevSize){
+                // cout << "    Members size: " << members.size() << endl;
+                prevSize = members.size();
+                for(auto it = members.begin(); it != members.end(); ++it){
+                    const way_t &w = ways[*it];
+                    if(*w. begin() == *nodesList.rbegin()){ nodesList.insert(nodesList.end  (), ++w. begin(), w. end()); members.erase(it); break; }
+                    if(*w. begin() == *nodesList. begin()){ nodesList.insert(nodesList.begin(), ++w.rbegin(), w.rend()); members.erase(it); break; }
+                    if(*w.rbegin() == *nodesList. begin()){ nodesList.insert(nodesList.begin(), ++w. begin(), w. end()); members.erase(it); break; }
+                    if(*w.rbegin() == *nodesList.rbegin()){ nodesList.insert(nodesList.end  (), ++w.rbegin(), w.rend()); members.erase(it); break; }
+                }
+            }
+
+            polygons.push_back(polygon_t());
+            polygon_t &polygon = *polygons.rbegin();
+            polygon.id = id;
+            polygon.t = t;
+            for(const DWGraph::node_t &u: nodesList){
+                polygon.coords.push_back(nodes.at(u));
+            }
         }
     }
 
-    // Print ways/edges
-    {
-        ofstream os;
-        os.exceptions(ifstream::failbit | ifstream::badbit);
-        os.open(edgesFilepath);
-        size_t sz = 0;
-        for(const way_t &w: ways){
-            sz += w.getNumWays();
-        }
-        os << sz << "\n";
-        for(const way_t &w: ways){
-            os << w << "\n";
-        }
-    }
-    
-    // Get points of interest
-    list<point_t> points; {
-        // Nodes that may be points of interest
-        for (auto it = doc.first_node()->first_node("node"); string(it->name()) == "node"; it = it->next_sibling()) {
-            auto pname = find_tag(it, "name");
-            if(pname != NULL){
-                point_t p;
-                p.setName(pname->first_attribute("v")->value());
-                p.setCoord(coord_t(atof(it->first_attribute("lat")->value()),
-                                   atof(it->first_attribute("lon")->value())));
-                points.push_back(p);
-            }
-        }
-        // Ways that may be points of interest (e.g., buildings are described as ways)
-        for (auto it = doc.first_node()->first_node("way"); string(it->name()) == "way"; it = it->next_sibling()) {
-            auto pname = find_tag(it, "name");
-            if(pname != NULL){
-                point_t p;
-                p.setName(pname->first_attribute("v")->value());
-                way_t way(it, edge_type_t::NO);
-                p.setCoord(way.get_mean_coord(nodes));
-                points.push_back(p);
-            }
-        }
-    }
-    // Print points of interest
+    // Print polygons
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
         os << fixed << setprecision(7);
-        os.open(pointsFilepath);
-        os << points.size() << "\n";
-        for(const auto &p: points){
-            os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+        os.open(polygonsFilepath);
+        os << polygons.size() << "\n";
+        for(const polygon_t &polygon: polygons){
+            os << polygon.id << " " << char(polygon.t) << " " << polygon.coords.size() << "\n";
+            for(const coord_t &c: polygon.coords){
+                os << c.getLat() << " " << c.getLon() << "\n";
+            }
         }
     }
+
     return 0;
 }

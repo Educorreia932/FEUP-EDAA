@@ -32,6 +32,8 @@ if(NOT SFML_LIB)
     include_directories(lib/SFML/include)
 endif()
 
+include_directories(lib/earcut.hpp/include)
+
 # ################ MAIN ################
 add_executable(da_proj ${SRC} ${SRC_UI} "src/main.cpp")
 target_link_libraries(da_proj sfml-graphics sfml-window sfml-system)

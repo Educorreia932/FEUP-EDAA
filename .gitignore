@@ -43,6 +43,7 @@ map.xml
 *.edges
 *.nodes
 *.points
+*.polygons
 
 *.zip
 train.csv

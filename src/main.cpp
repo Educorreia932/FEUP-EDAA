@@ -7,6 +7,7 @@
 #include "MapTripsView.h"
 
 #include "Trip.h"
+#include "polygon.h"
 
 #include "QuadTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
@@ -19,10 +20,10 @@
 
 #include <X11/Xlib.h>
 
-void view(const MapGraph &M){
+void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
     WindowView windowView(sf::Vector2f(0,0));
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
-    MapGraphOsmView mapGraphOsmView(windowView, mapView, M);
+    MapGraphOsmView mapGraphOsmView(windowView, mapView, M, polygons);
     mapView.addView(&mapGraphOsmView);
     windowView.setView(&mapView);
 
@@ -72,7 +73,11 @@ int main(int argc, char *argv[]){
         MapGraph M("res/map/processed/AMP");
         std::cout << "Loaded map" << std::endl;
 
-        if(opt == "view"){ view(M); return 0; }
+        std::cout << "Loading polygons..." << std::endl;
+        std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
+        std::cout << "Loaded polygons" << std::endl;
+
+        if(opt == "view"){ view(M, polygons); return 0; }
         if(opt == "voronoi"){ voronoi(M); return 0; }
         if(opt == "voronoi-display"){ voronoi_display(M); return 0; }
         
