@@ -81,3 +81,16 @@ bool Vector2::operator<(const Vector2 &vector) const {
     return x < vector.x && y < vector.y;
 }
 
+bool collinear(Vector2 a, Vector2 b, Vector2 c) {
+    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y);
+}
+
+bool within(double p, double q, double r) {
+    return (p <= q && q <= r) || (r <= q && q <= p);
+}
+
+bool Vector2::isOn(Vector2 a, Vector2 b) const {
+    Vector2 c = *this;
+
+    return collinear(a, b, c) && (a.x != b.x ? within(a.x, c.x, b.x) : within(a.y, c.y, b.y));
+}

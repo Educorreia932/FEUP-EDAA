@@ -30,12 +30,15 @@ VoronoiDiagram FortuneAlgorithm::construct(std::vector<Site> sites) {
     for (Edge* edge : edges) {
         if (!edge->finished) {
             Vector2 intersection;
-            
-            edge->finished = true;
+
+            if (bounding_box.intersect(*edge, intersection)) {
+                edge->finished = true;
+                edge->end = intersection;
+            }
         }
 
         if (edge->finished)
-            diagram.addEdge(edge->merge());
+            diagram.addEdge(*edge);
     }
 
     for (Edge bound : bounding_box.bounds) 
@@ -61,7 +64,7 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     Edge* left_edge = new Edge(start, arc_above.site.point, event.site.point);
     Edge* right_edge = new Edge(start, event.site.point, arc_above.site.point);
 
-    // Add edges to diagram
+    // Add edges to diagram 
     edges.push_back(left_edge);
     edges.push_back(right_edge);
 
@@ -102,6 +105,10 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     right_edge->end = point;
     left_edge->finished = true;
     right_edge->finished = true;
+
+    Edge* boundary_ray = new Edge(point, left_arc->site.point, right_arc->site.point);
+
+    edges.push_back(boundary_ray);
 
     // Check to see if we need to create new circle events
     checkCircleEvents(left_arc);

@@ -27,7 +27,7 @@ bool Edge::intersect(Edge edge, Vector2& intersection) {
     double x, y;
 
     // Vertical line
-    if (this->m == std::numeric_limits<double>::infinity()) {
+    if (this->m == std::numeric_limits<double>::infinity() || this->m == -std::numeric_limits<double>::infinity()) {
         x = start.x;
         y = edge.m * x + edge.c;
     }
@@ -85,12 +85,7 @@ Box::Box(Vector2 bottom_left, Vector2 upper_right) {
 bool Box::intersect(Edge edge, Vector2& intersection) {
     for (Edge bound : bounds)
         if (bound.intersect(edge, intersection)) {
-            if (
-                intersection.x < bound.start.x ||
-                intersection.x > bound.end.x ||
-                intersection.y < bound.start.y ||
-                intersection.y > bound.end.y
-            )
+            if (!intersection.isOn(bound.start, bound.end))
                 continue;
 
             return true;
