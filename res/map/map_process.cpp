@@ -336,14 +336,20 @@ int main(int argc, char *argv[]) {
 
             bool good = false;
             polygon_t::type t;
-            auto natural = find_tag(it, "natural");
-            if(natural != NULL){
-                // cout << id << endl;
-                if(string(natural->first_attribute("v")->value()) == "water"){
-                    good = true;
-                    t = polygon_t::type::WATER;
+
+            if(id == 3870917){
+                good = true;
+                t = polygon_t::type::LAND;
+            } else {
+                auto natural = find_tag(it, "natural");
+                if(natural != NULL){
+                    if(string(natural->first_attribute("v")->value()) == "water"){
+                        good = true;
+                        t = polygon_t::type::WATER;
+                    }
                 }
             }
+
             if(good){
                 typeOfRelations[id] = t;
                 for(
@@ -351,7 +357,7 @@ int main(int argc, char *argv[]) {
                     it2 != NULL && string(it2->name()) == "member";
                     it2 = it2->next_sibling()
                 ){
-                    if(t == polygon_t::type::WATER){
+                    if(t == polygon_t::type::WATER || t == polygon_t::type::LAND){
                         if(
                             string(it2->first_attribute("type")->value()) == "way" &&
                             string(it2->first_attribute("role")->value()) == "outer"    
@@ -377,19 +383,22 @@ int main(int argc, char *argv[]) {
             long long id = p.first;
             list<long long> members = p.second;
 
-            // cout << "Relation " << id << endl;
+            for(auto it = members.begin(); it != members.end();){
+                if(ways.count(*it) == 0) it = members.erase(it);
+                else ++it;
+            }
 
             polygon_t::type t = typeOfRelations.at(id);
             
             list<DWGraph::node_t> nodesList;
             
             auto it = members.begin();
-            nodesList.insert(nodesList.begin(), ways[*it].begin(), ways[*it].end());
+            
+            nodesList.insert(nodesList.begin(), ways.at(*it).begin(), ways.at(*it).end());
             members.erase(it);
 
             size_t prevSize = members.size()+1;
             while(members.size() != prevSize){
-                // cout << "    Members size: " << members.size() << endl;
                 prevSize = members.size();
                 for(auto it = members.begin(); it != members.end(); ++it){
                     const way_t &w = ways[*it];
@@ -406,6 +415,11 @@ int main(int argc, char *argv[]) {
             polygon.t = t;
             for(const DWGraph::node_t &u: nodesList){
                 polygon.coords.push_back(nodes.at(u));
+            }
+
+            if(id == 3870917){
+                polygon.coords.push_back(coord_t(40.8160979, -8.4718));
+                polygon.coords.push_back(coord_t(41.3759964, -8.4718));
             }
         }
     }

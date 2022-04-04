@@ -21,7 +21,7 @@
 #include <X11/Xlib.h>
 
 void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
-    WindowView windowView(sf::Vector2f(0,0));
+    WindowView windowView(sf::Vector2f(0,0)); windowView.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(coord_t(41.1594,-8.6199), 20000000);
     MapGraphOsmView mapGraphOsmView(windowView, mapView, M, polygons);
     mapView.addView(&mapGraphOsmView);

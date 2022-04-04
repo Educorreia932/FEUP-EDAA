@@ -6,7 +6,8 @@
 
 struct polygon_t {
     enum type : char {
-        WATER = 'w'
+        WATER = 'w',
+        LAND  = 'l'
     };
 
     long long id;

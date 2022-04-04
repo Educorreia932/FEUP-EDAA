@@ -74,3 +74,7 @@ void WindowView::onMouseMoved(const Event &event){
         recalculateView();
     }
 }
+
+void WindowView::setBackgroundColor(Color color){
+    background_color = color;
+}

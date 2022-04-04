@@ -17,8 +17,9 @@ private:
     WindowView &windowView;
     MapView &mapView;
     const MapGraph &graph;
+    std::vector<sf::Vertex> land;
+    std::vector<sf::Vertex> water;
     std::vector<sf::Vertex> zip;
-    std::vector<sf::Vertex> polygonShapes;
 public:
     MapGraphOsmView(WindowView &windowView_, MapView &mapView_, const MapGraph &graph_, const std::vector<polygon_t> &polygons_);
     virtual void draw();

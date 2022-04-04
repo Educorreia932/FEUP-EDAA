@@ -112,6 +112,12 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
 
     for(const polygon_t &polygon: polygons_){
         if(polygon.coords.size() < 2) continue;
+        Color color;
+        switch(polygon.t){
+            case polygon_t::type::WATER: color = Color(170, 211, 223); break;
+            case polygon_t::type::LAND : color = Color(242, 239, 233); break;
+            default                    : color = Color(  0,   0,   0); break;
+        }
         vector<vector<Point>> p(1);
         for(const coord_t &c: polygon.coords){
             auto xy = mapView.coordToVector2f(c);
@@ -127,20 +133,26 @@ MapGraphOsmView::MapGraphOsmView(WindowView &windowView_, MapView &mapView_, con
             size_t idx1 = idx[i+1];
             size_t idx2 = idx[i+2];
 
-            Vector2f v0(p[0][idx0][0], p[0][idx0][1]); cout << v0.x << "," << v0.y << endl;
-            Vector2f v1(p[0][idx1][0], p[0][idx1][1]); cout << v1.x << "," << v1.y << endl;
-            Vector2f v2(p[0][idx2][0], p[0][idx2][1]); cout << v2.x << "," << v2.y << endl;
+            Vector2f v0(p[0][idx0][0], p[0][idx0][1]);
+            Vector2f v1(p[0][idx1][0], p[0][idx1][1]);
+            Vector2f v2(p[0][idx2][0], p[0][idx2][1]);
             
-            
-            polygonShapes.push_back(Vertex(v0, Color(170, 211, 223)));
-            polygonShapes.push_back(Vertex(v1, Color(170, 211, 223)));
-            polygonShapes.push_back(Vertex(v2, Color(170, 211, 223)));
+            if(polygon.t == polygon_t::type::WATER){
+                water.push_back(Vertex(v0, color));
+                water.push_back(Vertex(v1, color));
+                water.push_back(Vertex(v2, color));
+            } else if (polygon.t == polygon_t::type::LAND){
+                land.push_back(Vertex(v0, color));
+                land.push_back(Vertex(v1, color));
+                land.push_back(Vertex(v2, color));
+            }
         }
     }
 }
 
 void MapGraphOsmView::draw(){
     RenderWindow *window = windowView.getWindow();
-    window->draw(&polygonShapes[0], polygonShapes.size(), Triangles);
+    window->draw(&land[0], land.size(), Triangles);
+    window->draw(&water[0], water.size(), Triangles);
     window->draw(&zip[0], zip.size(), Quads);
 }

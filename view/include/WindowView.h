@@ -57,4 +57,6 @@ public:
     void onLeftPress(const sf::Event &event);
     void onLeftRelease();
     void onMouseMoved(const sf::Event &event);
+
+    void setBackgroundColor(sf::Color c);
 };
