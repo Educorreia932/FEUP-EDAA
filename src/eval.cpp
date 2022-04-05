@@ -7,7 +7,7 @@
 #include "DeepVStripes.h"
 #include "EdgeType.h"
 #include "MapGraph.h"
-#include "QuadTreeClosestPoint.h"
+#include "K2DTreeClosestPoint.h"
 #include "Trip.h"
 
 #include "utils.h"
@@ -99,7 +99,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
 
         std::chrono::_V2::system_clock::time_point begin, end;
 
-        QuadTreeClosestPoint t;
+        K2DTreeClosestPoint t;
         
         begin = std::chrono::high_resolution_clock::now();
         for(size_t i = 0; i < REPEAT; ++i){
@@ -214,7 +214,7 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
         for(size_t i = 0; i < sz; ++i)
             l.push_back(coords.at(i));
 
-        QuadTreeClosestPoint t;
+        K2DTreeClosestPoint t;
         t.initialize(l);
         t.run();
         for(const Coord &u: test_coords){

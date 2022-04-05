@@ -9,7 +9,7 @@
  * @brief VStripes algorithm for Closest Point
  * 
  */
-class QuadTreeClosestPoint: public ClosestPoint{
+class K2DTreeClosestPoint: public ClosestPoint{
 private:
     std::vector<Vector2> c;
     std::vector<double> split;
@@ -21,7 +21,7 @@ public:
      * 
      * @param Delta value in degress
      */
-    QuadTreeClosestPoint();
+    K2DTreeClosestPoint();
 
     /**
      * @brief Initializes data members

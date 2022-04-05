@@ -1,4 +1,4 @@
-#include "QuadTreeClosestPoint.h"
+#include "K2DTreeClosestPoint.h"
 
 #include <algorithm>
 #include <bitset>
@@ -12,9 +12,9 @@ size_t size_bits(size_t n){
     return 32 - __builtin_clz(uint32_t(n));
 }
 
-QuadTreeClosestPoint::QuadTreeClosestPoint(){}
+K2DTreeClosestPoint::K2DTreeClosestPoint(){}
 
-void QuadTreeClosestPoint::initialize(const list<Vector2> &points){
+void K2DTreeClosestPoint::initialize(const list<Vector2> &points){
     size_t N = utils::nextPow2(points.size());
     c.resize(N);
     split.resize(N);
@@ -23,7 +23,7 @@ void QuadTreeClosestPoint::initialize(const list<Vector2> &points){
     fill(c.begin() + points.size(), c.end(), *(c.begin() + points.size() - 1));
 }
 
-void QuadTreeClosestPoint::run(){
+void K2DTreeClosestPoint::run(){
     const size_t N = c.size();
     for(size_t i = 1; i < N; ++i){
         size_t level = size_bits(N) - size_bits(i);
@@ -41,14 +41,14 @@ void QuadTreeClosestPoint::run(){
     }
 }
 
-Vector2 QuadTreeClosestPoint::getClosestPoint(const Vector2 p) const {
+Vector2 K2DTreeClosestPoint::getClosestPoint(const Vector2 p) const {
     Vector2 cbest;
     double dbest = INF;
     search(p, 1, cbest, dbest);
     return cbest;
 }
 
-void QuadTreeClosestPoint::search(const Vector2 &p, size_t r, Vector2 &cbest, double &dbest) const {
+void K2DTreeClosestPoint::search(const Vector2 &p, size_t r, Vector2 &cbest, double &dbest) const {
     const size_t &N = c.size();
     size_t level = size_bits(N) - size_bits(r);
     bool xAxisActive = (level%2 == 1);

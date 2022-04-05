@@ -10,7 +10,7 @@
 #include "Trip.h"
 #include "polygon.h"
 
-#include "QuadTreeClosestPoint.h"
+#include "K2DTreeClosestPoint.h"
 #include "FortuneAlgorithm.h"
 
 #include "DraggableZoomableWindow.h"
