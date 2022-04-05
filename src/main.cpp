@@ -11,7 +11,7 @@
 #include "Trip.h"
 #include "polygon.h"
 
-#include "K2DTreeClosestPoint.h"
+#include "K2DTreeClosestPointFactory.h"
 #include "FortuneAlgorithm.h"
 
 #include "DraggableZoomableWindow.h"
@@ -151,9 +151,10 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
         points.push_back(p.second);
     }
 
-    K2DTreeClosestPoint closestPoint;
-    closestPoint.initialize(points);
-    closestPoint.run();
+    K2DTreeClosestPointFactory factory;
+    MapMatching::FromClosestPoint mapMatching(factory);
+    mapMatching.initialize(points);
+    mapMatching.run();
 
     std::cout << "Generating graph..." << std::endl;
     DWGraph::DWGraph dwG = G.getFullGraph();
@@ -169,7 +170,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     mapView.addView(&mapTripMatchView);
     window.setDrawView(&mapView);
 
-    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, closestPoint);
+    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, mapMatching);
     windowTripController.run();
 }
 
