@@ -44,7 +44,8 @@ public:
     void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
     DWGraph::DWGraph getFullGraph() const;
-    DWGraph::DWGraph getConnectedGraph() const;
+    // DWGraph::DWGraph getConnectedGraph() const;
+    MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
     Coord getMinCoord() const;
     Coord getMaxCoord() const;

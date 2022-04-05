@@ -22,6 +22,12 @@ MapOsmView::MapOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph 
     mapGraphOsmView(window_, mapView_, graph_)
 {}
 
+void MapOsmView::refresh(){
+    mapTerrainOsmView.refresh();
+    mapBuildingsOsmView.refresh();
+    mapGraphOsmView.refresh();
+}
+
 void MapOsmView::draw(){
     mapTerrainOsmView.draw();
     mapBuildingsOsmView.draw();

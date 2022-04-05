@@ -18,5 +18,6 @@ private:
 public:
     DebugView(sf::RenderWindow *window_, const FpsMonitor &fpsMonitor_);
     void recalculateView();
+    virtual void refresh();
     virtual void draw();
 };

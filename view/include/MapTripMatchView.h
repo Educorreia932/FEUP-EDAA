@@ -7,20 +7,20 @@
 
 #include "LineShape.h"
 #include "MapGraph.h"
-#include "MapGraphOsmView.h"
 #include "MapView.h"
+#include "Trip.h"
 
 #include "polygon.h"
 
-class MapTerrainOsmView: public View {
+class MapTripMatchView: public View {
 private:
     sf::RenderTarget &window;
     MapView &mapView;
-    const std::vector<polygon_t> &polygons;
-    std::vector<sf::Vertex> land;
-    std::vector<sf::Vertex> water;
+    const Trip &trip;
+    const std::vector<Coord> &matches;
+    std::vector<sf::Vertex> zip;
 public:
-    MapTerrainOsmView(sf::RenderTarget &window_, MapView &mapView_, const std::vector<polygon_t> &polygons_);
+    MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_, const Trip &trip_, const std::vector<Coord> &matches_);
     virtual void refresh();
     virtual void draw();
 };

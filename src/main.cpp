@@ -6,6 +6,7 @@
 #include "EdgeType.h"
 #include "MapGraph.h"
 #include "MapTripsView.h"
+#include "MapTripMatchView.h"
 
 #include "Trip.h"
 #include "polygon.h"
@@ -100,12 +101,74 @@ void view_trips(const std::vector<Trip>& trips) {
 }
 
 void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+    // double minD, maxD, meanD; size_t n;
+    
+    // minD = 100000;
+    // maxD = -100000;
+    // meanD = 0;
+    // n = 0;
+    // const auto &nodesM = M.getNodes();
+    // for(const MapGraph::way_t &way: M.getWays()){
+    //     if(way.nodes.size() < 2) continue;
+    //     for(auto it1 = way.nodes.begin(), it2 = ++way.nodes.begin(); it2 != way.nodes.end(); ++it1, ++it2){
+    //         double d = Coord::getDistanceArc(nodesM.at(*it1), nodesM.at(*it2));
+    //         minD = std::min(minD, d);
+    //         maxD = std::max(maxD, d);
+    //         meanD += d;
+    //         n++;
+    //     }
+    // }
+    // meanD /= n;
+    // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesM.size() << std::endl;
+
+    auto begin = hrc::now();
+    MapGraph G = M.splitLongEdges(5.0);
+    auto end = hrc::now();
+    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
+    std::cout << "Took " << dt << "s to split long edges" << std::endl;
+
+    // minD = 100000;
+    // maxD = -100000;
+    // meanD = 0;
+    // n = 0;
+    // const auto &nodesG = G.getNodes();
+    // for(const MapGraph::way_t &way: G.getWays()){
+    //     if(way.nodes.size() < 2) continue;
+    //     for(auto it1 = way.nodes.begin(), it2 = ++way.nodes.begin(); it2 != way.nodes.end(); ++it1, ++it2){
+    //         double d = Coord::getDistanceArc(nodesG.at(*it1), nodesG.at(*it2));
+    //         minD = std::min(minD, d);
+    //         maxD = std::max(maxD, d);
+    //         meanD += d;
+    //         n++;
+    //     }
+    // }
+    // meanD /= n;
+    // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
+
+    std::list<Vector2> points;
+    for(const auto &p: G.getNodes()){
+        points.push_back(p.second);
+    }
+
+    ClosestPoint *closestPoint = new K2DTreeClosestPoint();
+    closestPoint->initialize(points);
+    closestPoint->run();
+
+    size_t tripIdx = 1;
+    const Trip &trip = trips[tripIdx];
+    std::vector<Coord> matches(trip.coords.size());
+    for(size_t i = 0; i < trip.coords.size(); ++i){
+        matches[i] = Coord(closestPoint->getClosestPoint(trip.coords[i]));
+    }
+
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
+    MapTripMatchView mapTripMatchView(window, mapView, trip, matches);
     mapView.addView(&mapTerrainOsmView);
     mapView.addView(&mapGraphOsmView);
+    mapView.addView(&mapTripMatchView);
     window.setDrawView(&mapView);
 
     WindowController windowController(window);

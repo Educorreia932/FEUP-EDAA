@@ -8,7 +8,7 @@ public:
     double x;
     double y;
 
-    Vector2(double x = std::numeric_limits<double>::infinity(), double y = std::numeric_limits<double>::infinity());
+    explicit Vector2(double x = std::numeric_limits<double>::infinity(), double y = std::numeric_limits<double>::infinity());
 
     // Unary operators
     Vector2& operator+=(const Vector2& other);

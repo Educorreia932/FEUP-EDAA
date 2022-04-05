@@ -83,6 +83,12 @@ static const size_t N_CIRCLE = 8;
 MapGraphOsmView::MapGraphOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph &graph_):
     window(window_), mapView(mapView_), graph(graph_)
 {
+    refresh();
+}
+
+void MapGraphOsmView::refresh(){
+    zip.clear();
+
     auto nodes = graph.getNodes();
     auto ways = graph.getWays();
 

@@ -19,5 +19,6 @@ private:
     std::vector<sf::Vertex> zip;
 public:
     MapGraphOsmView(sf::RenderTarget &window_, MapView &mapView_, const MapGraph &graph_);
+    virtual void refresh();
     virtual void draw();
 };

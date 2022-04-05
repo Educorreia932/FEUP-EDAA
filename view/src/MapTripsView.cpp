@@ -15,6 +15,12 @@ static const Color color = Color(255, 0, 0, 16);
 MapTripsView::MapTripsView(RenderTarget &window_, MapView &mapView_, const vector<Trip> &trips_):
     window(window_), mapView(mapView_), trips(trips_)
 {
+    refresh();
+}
+
+void MapTripsView::refresh(){
+    zip.clear();
+
     for(const Trip &trip: trips){
         if(trip.coords.size() < 2) continue;
         auto it1 = trip.coords.begin(),

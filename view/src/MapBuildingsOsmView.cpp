@@ -17,9 +17,16 @@ static const Color buildingOutlineColor(196, 182, 171);
 static const size_t N_CIRCLE = 8;
 
 MapBuildingsOsmView::MapBuildingsOsmView(RenderTarget &window_, MapView &mapView_, const vector<polygon_t> &polygons_):
-    window(window_), mapView(mapView_)
+    window(window_), mapView(mapView_), polygons(polygons_)
 {
-    for(const polygon_t &polygon: polygons_){
+    refresh();
+}
+
+void MapBuildingsOsmView::refresh(){
+    building.clear();
+    buildingOutlines.clear();
+
+    for(const polygon_t &polygon: polygons){
         if(polygon.coords.size() < 2) continue;
         if(polygon.t != polygon_t::type::BUILDING) continue;
 

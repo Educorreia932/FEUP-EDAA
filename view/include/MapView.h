@@ -21,5 +21,7 @@ public:
 
     sf::Vector2f coordToVector2f(const Coord &coord) const;
 
+    virtual void refresh();
+
     virtual void draw();
 };

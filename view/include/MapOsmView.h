@@ -23,5 +23,6 @@ private:
     MapGraphOsmView mapGraphOsmView;
 public:
     MapOsmView(sf::RenderTarget &window_, MapView &mapView_, const MapGraph &graph_, const std::vector<polygon_t> &polygons_);
+    virtual void refresh();
     virtual void draw();
 };
