@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 #include <SFML/Graphics.hpp>
+#include <stdlib.h>
 
 VoronoiDiagram voronoi(std::vector<Site> sites) {
     VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
@@ -15,23 +16,31 @@ void voronoi_display(const VoronoiDiagram diagram) {
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "Voronoi diagram", sf::Style::Default, settings);
 
+    window.clear(sf::Color::White);
+
+    // Draw edges
+    for (Edge edge : diagram.getEdges()) {
+        sf::Color color(
+            rand() % 255 + 1,
+            rand() % 255 + 1,
+            rand() % 255 + 1,
+            255
+        );
+
+        sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), color),
+            sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), color)
+        };
+
+        window.draw(line, 2, sf::Lines);
+    }
+
     while (window.isOpen()) {
         sf::Event event;
-
-        window.clear(sf::Color::White);
 
         while (window.pollEvent(event))
             if (event.type == sf::Event::Closed)
                 window.close();
-
-        for (Edge edge : diagram.getEdges()) {
-            sf::Vertex line[] = {
-                sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), sf::Color(255, 0, 0, 255)),
-                sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), sf::Color(255, 0, 0, 255))
-            };
-
-            window.draw(line, 2, sf::Lines);
-        }
 
         window.display();
     }

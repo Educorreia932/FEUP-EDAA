@@ -1,7 +1,9 @@
 #pragma once
 
-#include <vector>
 #include "Coord.h"
+
+#include <string>
+#include <vector>
 
 class Trip {
 public:

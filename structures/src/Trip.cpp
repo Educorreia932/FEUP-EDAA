@@ -4,7 +4,7 @@
 
 using namespace std;
 
-vector<Trip> Trip::loadTrips(const string &filepath){
+vector<Trip> Trip::loadTrips(const std::string &filepath){
     vector<Trip> ret;
 
     ifstream is; is.exceptions(ifstream::failbit | ifstream::badbit);
