@@ -1,6 +1,7 @@
 #include "SlabDecompositionRB.h"
 
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 

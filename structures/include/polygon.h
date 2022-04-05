@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "Coord.h"
+
+#include <string>
+#include <vector>
 
 struct polygon_t {
     enum type : char {
