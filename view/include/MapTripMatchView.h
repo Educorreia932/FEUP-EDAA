@@ -16,11 +16,13 @@ class MapTripMatchView: public View {
 private:
     sf::RenderTarget &window;
     MapView &mapView;
-    const Trip &trip;
-    const std::vector<Coord> &matches;
+    Trip trip;
+    std::vector<Coord> matches;
     std::vector<sf::Vertex> zip;
 public:
+    MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_);
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_, const Trip &trip_, const std::vector<Coord> &matches_);
+    void setTripMatches(const Trip &trip_, const std::vector<Coord> &matches_);
     virtual void refresh();
     virtual void draw();
 };

@@ -19,6 +19,7 @@
 #include "MapOsmView.h"
 
 #include "WindowController.h"
+#include "WindowTripController.h"
 
 #include <X11/Xlib.h>
 
@@ -150,29 +151,22 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
         points.push_back(p.second);
     }
 
-    ClosestPoint *closestPoint = new K2DTreeClosestPoint();
-    closestPoint->initialize(points);
-    closestPoint->run();
-
-    size_t tripIdx = 1;
-    const Trip &trip = trips[tripIdx];
-    std::vector<Coord> matches(trip.coords.size());
-    for(size_t i = 0; i < trip.coords.size(); ++i){
-        matches[i] = Coord(closestPoint->getClosestPoint(trip.coords[i]));
-    }
+    K2DTreeClosestPoint closestPoint;
+    closestPoint.initialize(points);
+    closestPoint.run();
 
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
-    MapTripMatchView mapTripMatchView(window, mapView, trip, matches);
+    MapTripMatchView mapTripMatchView(window, mapView);
     mapView.addView(&mapTerrainOsmView);
     mapView.addView(&mapGraphOsmView);
     mapView.addView(&mapTripMatchView);
     window.setDrawView(&mapView);
 
-    WindowController windowController(window);
-    windowController.run();
+    WindowTripController windowTripController(window, mapTripMatchView, trips, closestPoint);
+    windowTripController.run();
 }
 
 int main(int argc, char* argv[]) {

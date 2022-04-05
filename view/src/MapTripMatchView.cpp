@@ -9,10 +9,18 @@ typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
 typedef MapGraph::way_t way_t;
 
+MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_):
+    window(window_), mapView(mapView_){}
+
 MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_, const Trip &trip_, const vector<Coord> &matches_):
     window(window_), mapView(mapView_), trip(trip_), matches(matches_)
 {
     refresh();
+}
+
+void MapTripMatchView::setTripMatches(const Trip &trip_, const vector<Coord> &matches_){
+    trip = trip_;
+    matches = matches_;
 }
 
 void MapTripMatchView::refresh(){
