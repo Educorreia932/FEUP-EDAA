@@ -49,9 +49,6 @@ VoronoiDiagram voronoi(const MapGraph& M) {
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
-    for (Edge edge : diagram.getEdges())
-        std::cout << "Start: " << edge.start.x << " " << edge.start.y << " End: " << edge.end.x << " " << edge.end.y << std::endl;
-
     return diagram;
 }
 
@@ -60,7 +57,7 @@ void voronoi_display() {
         new Site{Vector2(2, 6)},
         new Site{Vector2(5, 5)},
         new Site{Vector2(5.13, 3.74)},
-        new Site{Vector2(1, 1)}
+        new Site{Vector2(3, 1)}
     };
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();

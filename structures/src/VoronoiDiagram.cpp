@@ -89,7 +89,7 @@ bool Edge::operator==(const Edge& edge) const {
 
 double Edge::evaluateY(double x) const {
     double w = (x - start.x) / (end.x - start.x);
-    double y = (1 - w) * start.y + (w) * end.y;
+    double y = (1 - w) * start.y + (w)*end.y;
 
     return y;
 }
@@ -114,6 +114,13 @@ bool Box::intersect(Edge edge, Vector2& intersection) {
         }
 
     return false;
+}
+
+bool Box::contains(Vector2 point) {
+    return point.x >= bounds[0].start.x &&
+        point.x <= bounds[2].start.x &&
+        point.y >= bounds[0].start.y &&
+        point.y <= bounds[1].start.y;
 }
 
 void VoronoiDiagram::addEdge(Edge segment) {

@@ -32,14 +32,18 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     Box bounding_box = Box(Vector2(0, 0), Vector2(8, 8));
 
     for (Edge* edge : edges) {
-        if (!edge->finished) {
-            Vector2 intersection;
+        Vector2 intersection;
 
+        if (!edge->finished) {
             if (bounding_box.intersect(*edge, intersection)) {
                 edge->finished = true;
                 edge->end = intersection;
             }
         }
+
+        if (!bounding_box.contains(edge->start)) 
+            if (bounding_box.intersect(*edge, intersection)) 
+                edge->start = intersection;
 
         if (edge->finished)
             diagram.addEdge(*edge);
@@ -119,8 +123,6 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     // Check to see if we need to create new circle events
     checkCircleEvents(left_arc);
     checkCircleEvents(right_arc);
-
-    delete arc;
 }
 
 Arc& FortuneAlgorithm::locateArcAbove(Site site) {
