@@ -19,6 +19,8 @@ private:
     Trip trip;
     std::vector<Coord> matches;
     std::vector<sf::Vertex> zip;
+    sf::CircleShape beginCircle;
+    sf::CircleShape endCircle;
 public:
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_);
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_, const Trip &trip_, const std::vector<Coord> &matches_);

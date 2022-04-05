@@ -14,7 +14,7 @@ private:
     MapTripMatchView &mapTripMatchView;
     const std::vector<Trip> &trips;
     const ClosestPoint &closestPoint;
-    size_t tripIndex;
+    size_t tripIndex = 0;
     std::vector<Coord> currentMatches;
 public:
     WindowTripController(DraggableZoomableWindow &window_, MapTripMatchView &mapTripMatchView_, const std::vector<Trip> &trips_, const ClosestPoint &closestPoint_);
