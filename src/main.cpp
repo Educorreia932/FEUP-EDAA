@@ -57,9 +57,9 @@ VoronoiDiagram voronoi(const MapGraph& M) {
 
 void voronoi_display() {
     std::vector<Site*> sites = {
-        new Site{Vector2(6, 6)},
-        new Site{Vector2(2, 4)},
-        new Site{Vector2(4, 2)},
+        new Site{Vector2(2, 6)},
+        new Site{Vector2(5, 5)},
+        new Site{Vector2(5.13, 3.74)},
         new Site{Vector2(1, 1)}
     };
 
@@ -171,6 +171,7 @@ int main(int argc, char* argv[]) {
     try {
         if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         std::string opt = argv[1];
+        if (opt == "voronoi-display") { voronoi_display(); return 0; }
 
         std::chrono::_V2::system_clock::time_point begin, end;
         double dt;
@@ -191,7 +192,6 @@ int main(int argc, char* argv[]) {
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
-        if (opt == "voronoi-display") { voronoi_display(); return 0; }
 
         std::cout << "Loading trips..." << std::endl;
         begin = hrc::now();

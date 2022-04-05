@@ -111,8 +111,10 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     right_edge->finished = true;
 
     Edge* boundary_ray = new Edge(point, left_arc->site, right_arc->site);
-
     edges.push_back(boundary_ray);
+
+    left_arc->s1 = boundary_ray;
+    right_arc->s0 = boundary_ray;
 
     // Check to see if we need to create new circle events
     checkCircleEvents(left_arc);
@@ -193,8 +195,8 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 
     // Check if sweepline hasn't passed possible circle event location
     if (intersection.y - radius < sweep_line) {
-        Event circle_event = Event(arc, Vector2(intersection.x, intersection.y - radius), radius);
-        events.push(circle_event);
+        Event* circle_event = new Event(arc, Vector2(intersection.x, intersection.y - radius), radius);
+        events.push(*circle_event);
     }
 }
 
