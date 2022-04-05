@@ -4,7 +4,7 @@ namespace fs = std::filesystem;
 
 #include "rapidxml.hpp"
 #include "EdgeType.h"
-#include "coord.h"
+#include "Coord.h"
 #include "DWGraph.h"
 #include "point.h"
 #include "polygon.h"

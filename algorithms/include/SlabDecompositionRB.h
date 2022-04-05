@@ -10,7 +10,7 @@
 class SlabDecompositionRB : public VoronoiDecomposition {
 private:
     struct cmp_t {
-        coord_t::deg_t x;
+        double x;
         bool operator()(const Edge *lhs, const Edge *rhs) const {
             return lhs->evaluateY(x) < rhs->evaluateY(x);
         }
@@ -22,8 +22,8 @@ private:
     };
 
     std::vector<const Edge*> edges;
-    std::map<coord_t::deg_t, std::list<Event>> events;
-    std::map<coord_t::deg_t, RBTree<const Edge*>> slabs;
+    std::map<double, std::list<Event>> events;
+    std::map<double, RBTree<const Edge*>> slabs;
 public:
     void initialize(const std::list<Edge> &edges);
     void run();

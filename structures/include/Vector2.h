@@ -1,7 +1,6 @@
-#ifndef VECTOR_2
-#define VECTOR_2
+#pragma once
 
-#include <ostream>
+#include <functional>
 #include <limits>
 
 class Vector2 {
@@ -15,6 +14,14 @@ public:
     Vector2& operator+=(const Vector2& other);
     Vector2& operator-=(const Vector2& other);
     Vector2& operator*=(double t);
+    Vector2& operator/=(double t);
+
+    // Binary operators
+    Vector2 operator+(const Vector2 &rhs) const;
+    Vector2 operator-(const Vector2 &rhs) const;
+    Vector2 operator*(double t) const;
+    Vector2 operator/(double t) const;
+    bool operator==(const Vector2 &rhs) const;
 
     Vector2 getOrthogonal() const;
     double getNorm() const;
@@ -23,14 +30,12 @@ public:
     double getDet(Vector2 vector2);
     bool isOn(Vector2 a, Vector2 b) const;
 
-    bool operator<(const Vector2 &vector) const;
+    static bool compX(const Vector2 &lhs, const Vector2 &rhs);
+    static bool compY(const Vector2 &lhs, const Vector2 &rhs);
 };
 
-// Binary operators
-Vector2 operator+(Vector2 lhs, const Vector2 &rhs);
-Vector2 operator-(Vector2 lhs, const Vector2 &rhs);
-Vector2 operator*(double t, Vector2 vec);
-Vector2 operator*(Vector2 vec, double t);
-bool operator==(Vector2 vec, const Vector2 &rhs);
-
-#endif
+namespace std {
+    template <> struct hash<Vector2> {
+        size_t operator()(const Vector2& v) const;
+    };
+}

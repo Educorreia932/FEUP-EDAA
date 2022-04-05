@@ -1,9 +1,8 @@
-#ifndef MAPGRAPH_H_INCLUDED
-#define MAPGRAPH_H_INCLUDED
+#pragma once
 
 #include "DWGraph.h"
 #include "EdgeType.h"
-#include "coord.h"
+#include "Coord.h"
 // #include "ClosestPoint.h"
 // #include "Ride.h"
 
@@ -22,22 +21,16 @@ public:
          * @return speed_t 
          */
         speed_t getMaxSpeed() const;
-        /**
-         * @brief Get the real speed in m/s
-         * 
-         * @return speed_t 
-         */
-        speed_t getRealSpeed() const;
     };
 private:
     DWGraph::DWGraph fullGraph;
     DWGraph::DWGraph connectedGraph;
     // ClosestPoint *closestPoint = nullptr;
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes;
-    std::map<coord_t, DWGraph::node_t> coord2node;
-    coord_t min_coord = coord_t(+90.0, +180.0);
-    coord_t max_coord = coord_t(-90.0, -180.0);
+    std::unordered_map<DWGraph::node_t, Coord> nodes;
+    std::unordered_map<Coord, DWGraph::node_t> coord2node;
+    Coord min_coord = Coord(+90.0, +180.0);
+    Coord max_coord = Coord(-90.0, -180.0);
     std::list<way_t> ways;
 public:
     MapGraph();
@@ -48,16 +41,12 @@ public:
      */
     MapGraph(const std::string &path);
     ~MapGraph();
-    void addNode(DWGraph::node_t u, coord_t c);
+    void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
     DWGraph::DWGraph getFullGraph() const;
     DWGraph::DWGraph getConnectedGraph() const;
-    DWGraph::DWGraph getReducedGraph() const;
-    DWGraph::node_t getClosestNode(coord_t c) const;
-    const std::unordered_map<DWGraph::node_t, coord_t>& getNodes() const;
-    coord_t getMinCoord() const;
-    coord_t getMaxCoord() const;
+    const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
+    Coord getMinCoord() const;
+    Coord getMaxCoord() const;
     const std::list<way_t> &getWays() const;
 };
-
-#endif //MAPGRAPH_H_INCLUDED

@@ -28,11 +28,11 @@ MapOsmView::MapOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph 
             default                    : color = Color(  0,   0,   0); break;
         }
         vector<vector<Point>> p(1);
-        for(const coord_t &c: polygon.coords){
+        for(const Coord &c: polygon.coords){
             auto xy = mapView.coordToVector2f(c);
             p[0].push_back({xy.x, xy.y});
         }
-        const coord_t &c = *polygon.coords.begin();
+        const Coord &c = *polygon.coords.begin();
         auto xy = mapView.coordToVector2f(c);
         p[0].push_back(Point({xy.x, xy.y}));
 

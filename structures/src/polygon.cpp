@@ -15,7 +15,7 @@ vector<polygon_t> polygon_t::loadPolygons(const string &filePath){
         polygon.t = static_cast<polygon_t::type>(c);
         polygon.coords.resize(M);
         for(size_t j = 0; j < M; ++j){
-            is >> polygon.coords[j].lat >> polygon.coords[j].lon;
+            is >> polygon.coords[j].lat() >> polygon.coords[j].lon();
         }
     }
     return ret;
