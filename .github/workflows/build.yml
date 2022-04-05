@@ -1,4 +1,4 @@
-name: Test
+name: Build
 
 on:
   push
@@ -28,8 +28,4 @@ jobs:
         mkdir build
         cd build
         cmake ..
-        make tests
-
-    - name: Test
-      run: |
-        ./tests --rng-seed 0
+        cmake --build .
