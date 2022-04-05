@@ -6,17 +6,17 @@
 
 class VStripes: public ClosestPoint {
 private:
-    std::vector<coord_t> v;
+    std::vector<Vector2> v;
 
-    const coord_t::deg_t d;
-    coord_t::deg_t xMin;
-    std::vector<std::vector<coord_t>> stripes;
+    const double d;
+    double xMin;
+    std::vector<std::vector<Vector2>> stripes;
 
-    void checkStripe(const coord_t &p, size_t i, coord_t::deg_t &dBest, coord_t &cBest) const;
+    void checkStripe(const Vector2 &p, size_t i, double &dBest, Vector2 &cBest) const;
 public:
-    VStripes(coord_t::deg_t width);
-    void initialize(const std::list<coord_t> &points);
+    VStripes(double width);
+    void initialize(const std::list<Vector2> &points);
     void run();
-    coord_t getClosestPoint(coord_t p) const;
-    std::pair<bool, coord_t> getClosestPoint_success(coord_t p) const;
+    Vector2 getClosestPoint(Vector2 p) const;
+    std::pair<bool, Vector2> getClosestPoint_success(Vector2 p) const;
 };

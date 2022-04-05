@@ -1,13 +1,15 @@
 #pragma once
 
+#include "Coord.h"
+
+#include <string>
 #include <vector>
-#include "coord.h"
 
 class Trip {
 public:
     long long id;
     long long timestamp;
-    std::vector<coord_t> coords;
+    std::vector<Coord> coords;
 
     static std::vector<Trip> loadTrips(const std::string &filepath);
 };

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-vector<Trip> Trip::loadTrips(const string &filepath){
+vector<Trip> Trip::loadTrips(const std::string &filepath){
     vector<Trip> ret;
 
     ifstream is; is.exceptions(ifstream::failbit | ifstream::badbit);
@@ -18,9 +18,9 @@ vector<Trip> Trip::loadTrips(const string &filepath){
         size_t M;
         is >> r.id >> r.timestamp >> M;
         r.coords.reserve(M);
-        coord_t c;
+        Coord c;
         for(size_t j = 0; j < M; ++j){
-            is >> c.lat >> c.lon;
+            is >> c.lat() >> c.lon();
             r.coords.push_back(c);
         }
     }

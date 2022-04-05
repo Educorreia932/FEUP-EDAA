@@ -16,11 +16,11 @@ void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
     os << std::fixed << std::setprecision(3);
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::vector<coord_t> coords(nodes.size());
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::vector<Coord> coords(nodes.size());
     {
         size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
             coords[i++] = p.second;
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(0));
@@ -93,7 +93,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
         os << sz;
         std::cout << "Size: " << sz << std::endl;
 
-        std::list<coord_t> l;
+        std::list<Vector2> l;
         for(size_t i = 0; i < sz; ++i)
             l.push_back(coords.at(i));
 
@@ -119,24 +119,24 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/2d-tree-querytime.csv");
     os << std::fixed << std::setprecision(3);
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::vector<coord_t> coords(nodes.size());
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::vector<Coord> coords(nodes.size());
     {
         size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
             coords[i++] = p.second;
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
-    std::vector<coord_t> candidates;
+    std::vector<Coord> candidates;
     for(const Trip &r: trips)
-        for(const coord_t &c: r.coords)
+        for(const Coord &c: r.coords)
             candidates.push_back(c);
 
     const size_t N = 100000;
     const size_t REPEAT = 10;
 
-    std::vector<coord_t> test_coords(N);
+    std::vector<Coord> test_coords(N);
     std::set<size_t> indexes;
     while(indexes.size() < N) indexes.insert(rand()%candidates.size());
     size_t j = 0;
@@ -210,14 +210,14 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
         os << sz;
         std::cout << "Size: " << sz << std::endl;
 
-        std::list<coord_t> l;
+        std::list<Vector2> l;
         for(size_t i = 0; i < sz; ++i)
             l.push_back(coords.at(i));
 
         QuadTreeClosestPoint t;
         t.initialize(l);
         t.run();
-        for(const coord_t &u: test_coords){
+        for(const Coord &u: test_coords){
             std::chrono::_V2::system_clock::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
@@ -303,8 +303,8 @@ void eval2DTree_BuildMemory(){
         size_t mem = 0;
 
         size_t N = utils::nextPow2(sz);
-        mem += N * sizeof(coord_t) * 2; // Data structure
-        mem += N * sizeof(coord_t); // Stable sort
+        mem += N * sizeof(Coord) * 2; // Data structure
+        mem += N * sizeof(Coord); // Stable sort
 
         os << "," << mem << std::endl;
     }
@@ -314,11 +314,11 @@ void evalDeepVStripes_BuildTime(const MapGraph &M){
     std::ofstream os("eval/deepvstripes-buildtime.csv");
     os << std::fixed;
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::vector<coord_t> coords(nodes.size());
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::vector<Coord> coords(nodes.size());
     {
         size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
             coords[i++] = p.second;
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
@@ -375,7 +375,7 @@ void evalDeepVStripes_BuildTime(const MapGraph &M){
     };
     sort(szs.begin(), szs.end());
 
-    const coord_t::deg_t d = 0.0003;
+    const double d = 0.0003;
 
     os << "L";
     for(const size_t &sz: szs){
@@ -389,7 +389,7 @@ void evalDeepVStripes_BuildTime(const MapGraph &M){
 
         DeepVStripes t(d, L);
 
-        std::list<coord_t> l;
+        std::list<Vector2> l;
 
         for(const size_t &sz: szs){
             std::cout << "Size: " << sz << std::endl;
@@ -418,14 +418,14 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
     std::ofstream os("eval/deepvstripes-querytime-d.csv");
     os << std::fixed << std::setprecision(9);
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::list<coord_t> coords(nodes.size());
-    for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::list<Vector2> coords(nodes.size());
+    for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
         coords.push_back(p.second);
 
-    std::vector<coord_t> candidates;
+    std::vector<Coord> candidates;
     for(const Trip &r: trips)
-        for(const coord_t &c: r.coords)
+        for(const Coord &c: r.coords)
             candidates.push_back(c);
 
     std::cout << "Candidates size: " << candidates.size() << std::endl;
@@ -433,7 +433,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
     const size_t N = 100000;
     const size_t REPEAT = 10;
 
-    std::vector<coord_t> test_coords(N);
+    std::vector<Coord> test_coords(N);
     std::set<size_t> indexes;
     while(indexes.size() < N) indexes.insert(rand()%candidates.size());
     size_t j = 0;
@@ -441,9 +441,9 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
         test_coords[j++] = candidates[i];
     }
 
-    const coord_t::deg_t X_AMPLITUDE = 0.35;
+    const double X_AMPLITUDE = 0.35;
 
-    std::vector<std::pair<coord_t::deg_t, size_t>> params = {
+    std::vector<std::pair<double, size_t>> params = {
         std::make_pair(0.000001, long(log2(X_AMPLITUDE/0.000001))+1),
 
         std::make_pair(0.00001, long(log2(X_AMPLITUDE/0.00001))+1),
@@ -497,7 +497,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
 
 
     for(const auto &pr: params){
-        const coord_t::deg_t &d = pr.first;
+        const double &d = pr.first;
         const size_t &n = pr.second;
 
         os << d;
@@ -507,7 +507,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
         t.initialize(coords);
         t.run();
 
-        for(const coord_t &u: test_coords){
+        for(const Coord &u: test_coords){
             std::chrono::_V2::system_clock::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
@@ -525,24 +525,24 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Trip> &trip
     std::ofstream os("eval/deepvstripes-querytime.csv");
     os << std::fixed << std::setprecision(3);
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::vector<coord_t> coords(nodes.size());
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::vector<Coord> coords(nodes.size());
     {
         size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
             coords[i++] = p.second;
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
-    std::vector<coord_t> candidates;
+    std::vector<Coord> candidates;
     for(const Trip &r: trips)
-        for(const coord_t &c: r.coords)
+        for(const Coord &c: r.coords)
             candidates.push_back(c);
 
     const size_t N = 100000;
     const size_t REPEAT = 10;
 
-    std::vector<coord_t> test_coords(N);
+    std::vector<Coord> test_coords(N);
     std::set<size_t> indexes;
     while(indexes.size() < N) indexes.insert(rand()%candidates.size());
     size_t j = 0;
@@ -594,21 +594,21 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Trip> &trip
     };
     sort(szs.begin(), szs.end());
 
-    const coord_t::deg_t X_AMPLITUDE = 0.35;
-    const coord_t::deg_t d = 0.0003;
+    const double X_AMPLITUDE = 0.35;
+    const double d = 0.0003;
 
     for(const size_t &sz: szs){
         os << sz;
         std::cout << "Size: " << sz << std::endl;
 
-        std::list<coord_t> l;
+        std::list<Vector2> l;
         for(size_t i = 0; i < sz; ++i)
             l.push_back(coords.at(i));
 
         DeepVStripes t(d, long(log2(X_AMPLITUDE/d))+2);
         t.initialize(l);
         t.run();
-        for(const coord_t &u: test_coords){
+        for(const Coord &u: test_coords){
             std::chrono::_V2::system_clock::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
@@ -626,24 +626,24 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
     std::ofstream os("eval/deepvstripes-querytime-nd.csv");
     os << std::fixed;
 
-    std::unordered_map<DWGraph::node_t, coord_t> nodes = M.getNodes();
-    std::vector<coord_t> coords(nodes.size());
+    std::unordered_map<DWGraph::node_t, Coord> nodes = M.getNodes();
+    std::vector<Coord> coords(nodes.size());
     {
         size_t i = 0;
-        for(const std::pair<DWGraph::node_t, coord_t> &p: nodes)
+        for(const std::pair<DWGraph::node_t, Coord> &p: nodes)
             coords[i++] = p.second;
     }
     std::shuffle(coords.begin(), coords.end(), std::mt19937(4));
     
-    std::vector<coord_t> candidates;
+    std::vector<Coord> candidates;
     for(const Trip &r: trips)
-        for(const coord_t &c: r.coords)
+        for(const Coord &c: r.coords)
             candidates.push_back(c);
 
     const size_t N = 100000;
     const size_t REPEAT = 10;
 
-    std::vector<coord_t> test_coords(N);
+    std::vector<Coord> test_coords(N);
     std::set<size_t> indexes;
     while(indexes.size() < N) indexes.insert(rand()%candidates.size());
     size_t j = 0;
@@ -651,7 +651,7 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
         test_coords[j++] = candidates[i];
     }
 
-    std::vector<coord_t::deg_t> ds = {
+    std::vector<double> ds = {
         0.0001,
         0.0002,
         0.0003,
@@ -702,7 +702,7 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
     };
     sort(szs.begin(), szs.end());
 
-    const coord_t::deg_t X_AMPLITUDE = 0.35;
+    const double X_AMPLITUDE = 0.35;
 
     os << "d";
     for(const size_t &sz: szs){
@@ -710,13 +710,13 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
     }
     os << "\n";
 
-    for(const coord_t::deg_t &d: ds){
+    for(const double &d: ds){
         os << std::setprecision(4) << d << std::setprecision(9);
         std::cout << "d: " << d << std::endl;
 
         DeepVStripes t(d, long(log2(X_AMPLITUDE/d))+2);
 
-        std::list<coord_t> l;
+        std::list<Vector2> l;
 
         for(const size_t &sz: szs){
             std::cout << "Size: " << sz << std::endl;
@@ -730,7 +730,7 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
             std::chrono::_V2::system_clock::time_point begin, end;
 
             begin = std::chrono::high_resolution_clock::now();
-            for(const coord_t &u: test_coords){
+            for(const Coord &u: test_coords){
                 for(size_t i = 0; i < REPEAT; ++i){
                     t.getClosestPoint(u);
                 }

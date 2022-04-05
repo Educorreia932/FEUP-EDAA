@@ -27,6 +27,34 @@ Vector2 &Vector2::operator*=(double t) {
     return *this;
 }
 
+Vector2 &Vector2::operator/=(double t) {
+    x /= t;
+    y /= t;
+
+    return *this;
+}
+
+
+Vector2 Vector2::operator+(const Vector2 &rhs) const {
+    return Vector2(x + rhs.x, y + rhs.y);
+}
+
+Vector2 Vector2::operator-(const Vector2 &rhs) const {
+    return Vector2(x - rhs.x, y - rhs.y);
+}
+
+Vector2 Vector2::operator*(double t) const {
+    return Vector2(x*t, y*t);
+}
+
+Vector2 Vector2::operator/(double t) const {
+    return Vector2(x/t, y/t);
+}
+
+bool Vector2::operator==(const Vector2 &rhs) const {
+    return x == rhs.x && y == rhs.y;
+}
+
 Vector2 Vector2::getOrthogonal() const {
     return Vector2(-y, x);
 }
@@ -47,29 +75,28 @@ double Vector2::getDet(Vector2 v) {
     return x * v.y - y * v.x;
 }
 
-Vector2 operator+(Vector2 lhs, const Vector2 &rhs) {
-    lhs += rhs;
-
-    return lhs;
+bool Vector2::compX(const Vector2 &lhs, const Vector2 &rhs){
+    return (lhs.x < rhs.x);
 }
 
-Vector2 operator-(Vector2 lhs, const Vector2 &rhs) {
-    lhs -= rhs;
-
-    return lhs;
+bool Vector2::compY(const Vector2 &lhs, const Vector2 &rhs){
+    return (lhs.y < rhs.y);
 }
 
-Vector2 operator*(double t, Vector2 vec) {
-    vec *= t;
-
-    return vec;
+bool collinear(Vector2 a, Vector2 b, Vector2 c) {
+    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y);
 }
 
-Vector2 operator*(Vector2 vec, double t) {
-    return t * vec;
+bool within(double p, double q, double r) {
+    return (p <= q && q <= r) || (r <= q && q <= p);
 }
 
-bool operator==(const Vector2 &lhs, const Vector2 &rhs){
-    return (lhs.x == rhs.x && lhs.y == rhs.y);
+bool Vector2::isOn(Vector2 a, Vector2 b) const {
+    Vector2 c = *this;
+
+    return collinear(a, b, c) && (a.x != b.x ? within(a.x, c.x, b.x) : within(a.y, c.y, b.y));
 }
 
+size_t std::hash<Vector2>::operator()(const Vector2& v) const {
+    return hash<double>()(v.x) ^ (hash<double>()(v.y) << 1);
+}

@@ -4,7 +4,7 @@ namespace fs = std::filesystem;
 
 #include "rapidxml.hpp"
 #include "EdgeType.h"
-#include "coord.h"
+#include "Coord.h"
 #include "DWGraph.h"
 #include "point.h"
 #include "polygon.h"
@@ -105,8 +105,8 @@ public:
             default: throw invalid_argument("");
         }
     }
-    coord_t get_mean_coord(const unordered_map<DWGraph::node_t, coord_t> &nodes) const{
-        coord_t ret(0,0);
+    Coord get_mean_coord(const unordered_map<DWGraph::node_t, Coord> &nodes) const{
+        Coord ret(0,0);
         for(auto it = begin(); it != end(); ++it){
             ret = ret + nodes.at(*it);
         }
@@ -229,14 +229,14 @@ int main(int argc, char *argv[]) {
     doc.parse<0>(text);
 
     // Get nodes
-    unordered_map<long long, coord_t> nodes;
+    unordered_map<long long, Coord> nodes;
     for (
         auto it = doc.first_node()->first_node("node");
         string(it->name()) == "node";
         it = it->next_sibling()
     ) {
         DWGraph::node_t u = atoll(it->first_attribute("id")->value());
-        coord_t c(
+        Coord c(
             atof(it->first_attribute("lat")->value()),
             atof(it->first_attribute("lon")->value())
         );
@@ -266,8 +266,8 @@ int main(int argc, char *argv[]) {
         os.open(nodesFilepath);
         os << nodesInWays.size() << "\n";
         for(const long long nodeId: nodesInWays){
-            coord_t c = nodes[nodeId];
-            os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
+            Coord c = nodes[nodeId];
+            os << nodeId << " " << c.lat() << " " << c.lon() << "\n";
         }
     }
 
@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
             if(pname != NULL){
                 point_t p;
                 p.setName(pname->first_attribute("v")->value());
-                p.setCoord(coord_t(atof(it->first_attribute("lat")->value()),
+                p.setCoord(Coord(atof(it->first_attribute("lat")->value()),
                                    atof(it->first_attribute("lon")->value())));
                 points.push_back(p);
             }
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
         os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << utils::urlEncode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+            os << utils::urlEncode(p.getName(), " \t\n") << " " << p.getCoord().lat() << " " << p.getCoord().lon() << "\n";
         }
     }
 
@@ -438,8 +438,8 @@ int main(int argc, char *argv[]) {
             }
 
             if(id == 3870917){
-                polygon.coords.push_back(coord_t(40.8160979, -8.4718));
-                polygon.coords.push_back(coord_t(41.3759964, -8.4718));
+                polygon.coords.push_back(Coord(40.8160979, -8.4718));
+                polygon.coords.push_back(Coord(41.3759964, -8.4718));
             }
         }
     }
@@ -453,8 +453,8 @@ int main(int argc, char *argv[]) {
         os << polygons.size() << "\n";
         for(const polygon_t &polygon: polygons){
             os << polygon.id << " " << char(polygon.t) << " " << polygon.coords.size() << "\n";
-            for(const coord_t &c: polygon.coords){
-                os << c.getLat() << " " << c.getLon() << "\n";
+            for(const Coord &c: polygon.coords){
+                os << c.lat() << " " << c.lon() << "\n";
             }
         }
     }

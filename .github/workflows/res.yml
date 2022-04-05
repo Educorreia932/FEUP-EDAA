@@ -1,4 +1,4 @@
-name: Test
+name: Resources
 
 on:
   push
@@ -9,11 +9,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install SFML
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libsfml-dev
-
     - name: Checkout submodules
       shell: bash
       run: |
@@ -23,13 +18,7 @@ jobs:
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
 
-    - name: Build
+    - name: res
       run: |
-        mkdir build
-        cd build
-        cmake ..
-        make tests
-
-    - name: Test
-      run: |
-        ./build/tests --rng-seed 0
+        cd res
+        make

@@ -22,11 +22,12 @@ public:
 
     // Circle event
     Arc* arc;
+    double radius;
 
     bool operator<(const Event &event) const;
 public:
-    Event(Site site);           // Site event
-    Event(Arc* arc, Vector2 point);  // Circle event
+    Event(Site site);                               // Site event
+    Event(Arc* arc, Vector2 point, double radius);  // Circle event
 };
 
 #endif
