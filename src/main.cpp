@@ -21,12 +21,12 @@
 
 #include <X11/Xlib.h>
 
-void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
+void view(const MapGraph &M, const std::vector<polygon_t> &polygons){std::cout << "L24" << std::endl;
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
-    window.setDrawView(&mapView);
+    window.setDrawView(&mapView); std::cout << "L29" << std::endl;
 
     WindowController windowController(window);
     windowController.run();
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
     try {
         // if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         // std::string opt = argv[1];
-        std::string opt = "voronoi";
+        std::string opt = argv[1];
 
         std::cout << "Loading map..." << std::endl;
         MapGraph M("res/map/processed/AMP");
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Loading polygons..." << std::endl;
         std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
-        std::cout << "Loaded polygons" << std::endl;
+        std::cout << "Loaded polygons" << std::endl; std::cout << "L123" << std::endl;
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
