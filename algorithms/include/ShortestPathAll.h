@@ -60,11 +60,11 @@ public:
 
 class ShortestPathAll::FromOneMany : public ShortestPathAll {
 private:
+    ShortestPathOneManyFactory &oneManyFactory;
     size_t nthreads;
     std::list<DWGraph::node_t> nodes;
     utils::SharedQueue<DWGraph::node_t> Q;
     std::vector< std::thread > threads;
-    ShortestPathOneManyFactory &oneManyFactory;
     std::unordered_map<DWGraph::node_t, std::unordered_map<DWGraph::node_t, DWGraph::weight_t> > dist;
     const DWGraph::DWGraph *G = nullptr;
 
