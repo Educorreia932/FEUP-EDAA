@@ -17,6 +17,7 @@
 #include "DraggableZoomableWindow.h"
 #include "MapView.h"
 #include "MapOsmView.h"
+#include "VoronoiView.h"
 
 #include "WindowController.h"
 #include "WindowTripController.h"
@@ -54,32 +55,23 @@ VoronoiDiagram voronoi(const MapGraph& M) {
     return diagram;
 }
 
-void voronoi_display(const VoronoiDiagram diagram) {
-    sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
+void voronoi_display() {
+    std::vector<Site*> sites = {
+        new Site{Vector2(6, 6)},
+        new Site{Vector2(2, 4)},
+        new Site{Vector2(4, 2)},
+        new Site{Vector2(1, 1)}
+    };
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Voronoi diagram", sf::Style::Default, settings);
+    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
-    while (window.isOpen()) {
-        sf::Event event;
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); 
+    window.setBackgroundColor(sf::Color(255, 255, 255));
+    VoronoiView voronoiView(window, diagram);
+    window.setDrawView(&voronoiView);
 
-        window.clear(sf::Color::White);
-
-        while (window.pollEvent(event))
-            if (event.type == sf::Event::Closed)
-                window.close();
-
-        for (Edge edge : diagram.getEdges()) {
-            sf::Vertex line[] = {
-                sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), sf::Color(255, 0, 0, 255)),
-                sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), sf::Color(255, 0, 0, 255))
-            };
-
-            window.draw(line, 2, sf::Lines);
-        }
-
-        window.display();
-    }
+    WindowController windowController(window);
+    windowController.run();
 }
 
 void view_trips(const std::vector<Trip>& trips) {
@@ -199,7 +191,7 @@ int main(int argc, char* argv[]) {
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
-        if (opt == "voronoi-display") { voronoi_display(voronoi(M)); return 0; }
+        if (opt == "voronoi-display") { voronoi_display(); return 0; }
 
         std::cout << "Loading trips..." << std::endl;
         begin = hrc::now();
