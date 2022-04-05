@@ -9,8 +9,8 @@ class DeepVStripes: public ClosestPoint {
 private:
     std::vector<VStripes> vstripes_vtr;
 public:
-    DeepVStripes(coord_t::deg_t width, size_t nLevels);
-    void initialize(const std::list<coord_t> &points);
+    DeepVStripes(double width, size_t nLevels);
+    void initialize(const std::list<Vector2> &points);
     void run();
-    coord_t getClosestPoint(coord_t p) const;
+    Vector2 getClosestPoint(Vector2 p) const;
 };

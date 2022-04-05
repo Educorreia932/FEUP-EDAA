@@ -1,5 +1,4 @@
-#ifndef VORONOI
-#define VORONOI
+#pragma once
 
 #include "Vector2.h"
 
@@ -30,7 +29,7 @@ public:
     Edge merge();
     double evaluateY(double x) const;
     
-    bool operator<(const Edge& edge) const;
+    // bool operator<(const Edge& edge) const;
     bool operator==(const Edge& edge) const;
 };
 
@@ -50,5 +49,3 @@ public:
     void addEdge(Edge segment);
     std::vector<Edge> getEdges() const;
 };
-
-#endif

@@ -4,8 +4,6 @@
 
 using namespace std;
 
-typedef coord_t::deg_t deg_t;
-
 void SlabDecompositionRB::initialize(const std::list<Edge> &es){
     edges.clear();
     auto it = es.begin();
@@ -13,17 +11,17 @@ void SlabDecompositionRB::initialize(const std::list<Edge> &es){
 }
 
 struct cmp_t {
-    deg_t x;
+    double x;
     bool operator()(const Edge *lhs, const Edge *rhs) const {
         return lhs->evaluateY(x) < rhs->evaluateY(x);
     }
 };
 
 void SlabDecompositionRB::run(){
-    // map<deg_t, list<Event>> events;
+    // map<double, list<Event>> events;
     for(const Edge *e: edges){
-        deg_t xl = e->start.x;
-        deg_t xr = e->end.x;
+        double xl = e->start.x;
+        double xr = e->end.x;
         if(xl == xr) continue;
         if(xl > xr) swap(xl, xr);
 
@@ -31,15 +29,15 @@ void SlabDecompositionRB::run(){
         events[xr].push_back({false, e});
     }
 
-    // map<deg_t, set<const Edge*, cmp_t>> slabs;
+    // map<double, set<const Edge*, cmp_t>> slabs;
     RBTree<const Edge*> prev;
 
     auto it1 = events.begin(),
          it2 = ++events.begin();
     while(it2 != events.end()){
-        deg_t xl = it1->first,
+        double xl = it1->first,
               xr = it2->first;
-        deg_t xm = xl + (xr-xl)/2.0;
+        double xm = xl + (xr-xl)/2.0;
 
         RBTree<const Edge*> &cur = slabs[xl] = prev;
         for(const Event &ev: it1->second) if(!ev.start) cur = cur.remove(ev.e, cmp_t{xm});

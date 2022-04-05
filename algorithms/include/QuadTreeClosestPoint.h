@@ -11,10 +11,10 @@
  */
 class QuadTreeClosestPoint: public ClosestPoint{
 private:
-    std::vector<coord_t> c;
-    std::vector<coord_t::deg_t> split;
+    std::vector<Vector2> c;
+    std::vector<double> split;
 
-    void search(const coord_t &p, size_t r, coord_t &cbest, coord_t::deg_t &dbest) const;
+    void search(const Vector2 &p, size_t r, Vector2 &cbest, double &dbest) const;
 public:
     /**
      * @brief Construct from degrees
@@ -28,7 +28,7 @@ public:
      * 
      * @param points List of provided Points
      */
-    void initialize(const std::list<coord_t> &points);
+    void initialize(const std::list<Vector2> &points);
 
     /**
      * @brief Executes the algorithm
@@ -36,5 +36,5 @@ public:
      */
     void run();
 
-    coord_t getClosestPoint(const coord_t p) const;
+    Vector2 getClosestPoint(const Vector2 p) const;
 };

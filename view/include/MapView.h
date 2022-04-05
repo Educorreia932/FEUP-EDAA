@@ -5,21 +5,21 @@
 #include <SFML/Graphics.hpp>
 #include <list>
 
-#include "coord.h"
+#include "Coord.h"
 
 class MapView: public View {
 private:
-    coord_t c0;
+    Coord c0;
     double scale;
     std::list<View*> views;
 public:
-    static sf::Vector2f wsg84ToWebMercator(const coord_t &c);
+    static sf::Vector2f wsg84ToWebMercator(const Coord &c);
 
-    MapView(coord_t c0_, double scale_);
+    MapView(Coord c0_, double scale_);
     
     void addView(View *view);
 
-    sf::Vector2f coordToVector2f(const coord_t &coord) const;
+    sf::Vector2f coordToVector2f(const Coord &coord) const;
 
     virtual void draw();
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-#include "coord.h"
+#include "Coord.h"
 #include "VoronoiDiagram.h"
 
 class VoronoiDecomposition {

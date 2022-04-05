@@ -1,23 +1,14 @@
 #include "MapGraph.h"
 
-// #include "Astar.h"
-// #include "KosarajuV.h"
-// #include "DFS.h"
-// #include "Dijkstra.h"
-// #include "ShortestPath.h"
-// #include "ShortestPathAll.h"
-// #include "VStripes.h"
-
 #include <fstream>
 #include <iomanip>
-#include <unordered_set>
+#include <iostream>
 #include <map>
+#include <unordered_set>
 #include <vector>
 
-#define COORDMULT               50000       // Multiply coordinates to get integer positions
-#define SECONDS_TO_MICROS       1000000     // Convert seconds to milliseconds
-#define KMH_TO_MS               (1.0/3.6)   // Convert km/h to m/s
-#define SPEED_REDUCTION_FACTOR  0.75        // Reduce speed to account for intense road traffic, and the fact people not always travel at maximum speed 
+const double SECONDS_TO_MICROS = 1000000;     // Convert seconds to milliseconds
+const double KPH_TO_MPS        = (1.0/3.6);   // Convert km/h to m/s
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
@@ -49,33 +40,6 @@ MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
     }
 }
 
-MapGraph::speed_t MapGraph::way_t::getRealSpeed() const{
-
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wfloat-equal"
-    if(speed != -1) return speed*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-    #pragma GCC diagnostic pop
-
-    switch(edgeType){
-        case edge_type_t::MOTORWAY       : return 120*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::MOTORWAY_LINK  : return  60*KMH_TO_MS;
-        case edge_type_t::TRUNK          : return 100*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::TRUNK_LINK     : return  50*KMH_TO_MS;
-        case edge_type_t::PRIMARY        : return  90*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::PRIMARY_LINK   : return  40*KMH_TO_MS;
-        case edge_type_t::SECONDARY      : return  70*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::SECONDARY_LINK : return  30*KMH_TO_MS;
-        case edge_type_t::TERTIARY       : return  50*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::TERTIARY_LINK  : return  30*KMH_TO_MS;
-        case edge_type_t::UNCLASSIFIED   : return  30*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::RESIDENTIAL    : return  30*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::LIVING_STREET  : return  10*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::SERVICE        : return  20*KMH_TO_MS*SPEED_REDUCTION_FACTOR;
-        case edge_type_t::NO             : throw std::invalid_argument("");
-        default                          : throw std::invalid_argument("");
-    }
-}
-
 MapGraph::MapGraph(){}
 
 MapGraph::MapGraph(const std::string &path){
@@ -84,9 +48,9 @@ MapGraph::MapGraph(const std::string &path){
         is.open(path + ".nodes");
         size_t numberNodes; is >> numberNodes;
         for(size_t i = 0; i < numberNodes; ++i){
-            coord_t::deg_t lat, lon;
+            double lat, lon;
             node_t id; is >> id >> lat >> lon;
-            coord_t c(lat, lon);
+            Coord c(lat, lon);
             nodes[id] = c;
             coord2node[c] = id;
         }
@@ -107,19 +71,19 @@ MapGraph::MapGraph(const std::string &path){
         }
     }
     {
-        coord_t::deg_t lat_min = 90, lat_max = -90;
-        coord_t::deg_t lon_min = +180, lon_max = -180;
+        double lat_min = 90, lat_max = -90;
+        double lon_min = +180, lon_max = -180;
         for(const auto &u: nodes){
-            lat_min = std::min(lat_min, u.second.getLat()); lat_max = std::max(lat_max, u.second.getLat());
-            lon_min = std::min(lon_min, u.second.getLon()); lon_max = std::max(lon_max, u.second.getLon());
+            lat_min = std::min(lat_min, u.second.lat()); lat_max = std::max(lat_max, u.second.lat());
+            lon_min = std::min(lon_min, u.second.lon()); lon_max = std::max(lon_max, u.second.lon());
         }
-        min_coord = coord_t(lat_max, lon_min);
-        max_coord = coord_t(lat_min, lon_max);
+        min_coord = Coord(lat_max, lon_min);
+        max_coord = Coord(lat_min, lon_max);
     }
     fullGraph = getFullGraph();
     /*
     {
-        coord_t station_coord; {
+        Coord station_coord; {
             std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             is.open(path + ".points");
             size_t numberPoints; is >> numberPoints;
@@ -127,13 +91,13 @@ MapGraph::MapGraph(const std::string &path){
         }
 
         DWGraph::DWGraph G = fullGraph;
-        std::list<coord_t> nodes_list;
+        std::list<Coord> nodes_list;
         for(const node_t &u: G.getNodes()) nodes_list.push_back(nodes.at(u));
 
         ClosestPoint *closestPoint_initial = new VStripes(0.025);
         closestPoint_initial->initialize(nodes_list);
         closestPoint_initial->run();
-        coord_t station_closest = closestPoint_initial->getClosestPoint(station_coord);
+        Coord station_closest = closestPoint_initial->getClosestPoint(station_coord);
         delete closestPoint_initial;
         
         station = DWGraph::INVALID_NODE;
@@ -148,7 +112,7 @@ MapGraph::MapGraph(const std::string &path){
     connectedGraph = getConnectedGraph();
     {
         DWGraph::DWGraph G = connectedGraph;
-        std::list<coord_t> nodes_list;
+        std::list<Coord> nodes_list;
         for(const node_t &u: G.getNodes()) nodes_list.push_back(nodes.at(u));
 
         closestPoint = new VStripes(0.025);
@@ -166,13 +130,13 @@ MapGraph::~MapGraph(){
     // delete closestPoint;
 }
 
-void MapGraph::addNode(DWGraph::node_t u, coord_t c){
+void MapGraph::addNode(DWGraph::node_t u, Coord c){
     nodes[u] = c;
     coord2node[c] = u;
-    min_coord.lat = std::min(min_coord.lat, c.lat);
-    min_coord.lon = std::min(min_coord.lon, c.lon);
-    max_coord.lat = std::max(max_coord.lat, c.lat);
-    max_coord.lon = std::max(max_coord.lon, c.lon);
+    min_coord.lat() = std::min(min_coord.lat(), c.lat());
+    min_coord.lon() = std::min(min_coord.lon(), c.lon());
+    max_coord.lat() = std::max(max_coord.lat(), c.lat());
+    max_coord.lon() = std::max(max_coord.lon(), c.lon());
 }
 
 void MapGraph::addWay(MapGraph::way_t w){
@@ -186,8 +150,8 @@ DWGraph::DWGraph MapGraph::getFullGraph() const{
         if(w.nodes.size() < 2) continue;
         auto it1 = w.nodes.begin();
         for(auto it2 = it1++; it1 != w.nodes.end(); ++it1, ++it2){
-            auto d = coord_t::getDistanceSI(nodes.at(*it1), nodes.at(*it2));
-            double factor = double(SECONDS_TO_MICROS)/(w.getRealSpeed());
+            auto d = Coord::getDistanceSI(nodes.at(*it1), nodes.at(*it2));
+            double factor = double(SECONDS_TO_MICROS)/(w.getMaxSpeed()*KPH_TO_MPS);
             G.addEdge(*it2, *it1, weight_t(d*factor));
         }
     }
@@ -215,6 +179,7 @@ DWGraph::DWGraph MapGraph::getConnectedGraph() const{
 }
 */
 
+/*
 DWGraph::DWGraph MapGraph::getReducedGraph() const{
     DWGraph::DWGraph G = connectedGraph;
     std::cout << "Nodes: " << G.getNodes().size() << "\n"
@@ -268,17 +233,12 @@ DWGraph::DWGraph MapGraph::getReducedGraph() const{
 
     return G;
 }
+*/
 
-// DWGraph::node_t MapGraph::getClosestNode(coord_t c) const{
-//     coord_t closest = closestPoint->getClosestPoint(c);
-//     node_t node = coord2node.at(closest);
-//     return node;
-// }
-
-const std::unordered_map<DWGraph::node_t, coord_t> &MapGraph::getNodes() const{
+const std::unordered_map<DWGraph::node_t, Coord> &MapGraph::getNodes() const{
     return nodes;
 }
 
-coord_t MapGraph::getMinCoord() const { return min_coord; }
-coord_t MapGraph::getMaxCoord() const { return max_coord; }
+Coord MapGraph::getMinCoord() const { return min_coord; }
+Coord MapGraph::getMaxCoord() const { return max_coord; }
 const std::list<MapGraph::way_t> &MapGraph::getWays() const { return ways; }

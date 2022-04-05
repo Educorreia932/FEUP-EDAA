@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <random>
 
 #include "EdgeType.h"
@@ -20,9 +21,9 @@
 
 #include <X11/Xlib.h>
 
-void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
-    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(coord_t(41.1594, -8.6199), 20000000);
+void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
     window.setDrawView(&mapView);
@@ -84,8 +85,8 @@ void view_trips(const std::vector<Trip>& trips) {
     for (size_t i : s)
         tripsSmall.push_back(trips[i]);
 
-    DraggableZoomableWindow window(sf::Vector2f(0, 0));
-    MapView mapView(coord_t(41.1594, -8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0,0));
+    MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
     window.setDrawView(&mapView);
@@ -94,9 +95,9 @@ void view_trips(const std::vector<Trip>& trips) {
     windowController.run();
 }
 
-void match_trip(const MapGraph& M, const std::vector<Trip>& trips) {
-    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(coord_t(41.1594, -8.6199), 20000000);
+void match_trip(const MapGraph &M, const std::vector<Trip> &trips){
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
     mapView.addView(&mapGraphOsmView);
     window.setDrawView(&mapView);

@@ -68,9 +68,9 @@ bool Edge::operator==(const Edge& edge) const {
     return start == edge.start && end == edge.end;
 }
 
-bool Edge::operator<(const Edge& edge) const {
-    return start < edge.start || end < edge.end;
-}
+// bool Edge::operator<(const Edge& edge) const {
+//     return start < edge.start || end < edge.end;
+// }
 
 Box::Box(Vector2 bottom_left, Vector2 upper_right) {
     Vector2 bottom_right(upper_right.x, bottom_left.y);

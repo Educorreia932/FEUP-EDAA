@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "coord.h"
+#include "Coord.h"
 
 struct polygon_t {
     enum type : char {
@@ -12,7 +12,7 @@ struct polygon_t {
     };
 
     long long id;
-    std::vector<coord_t> coords;
+    std::vector<Coord> coords;
     type t;
 
     static std::vector<polygon_t> loadPolygons(const std::string &filePath);

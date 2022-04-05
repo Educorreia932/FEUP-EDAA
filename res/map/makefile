@@ -1,5 +1,5 @@
 IFLAGS=-Irapidxml -I../../structures/include -I../../utils/include
-CFILES=../../structures/src/coord.cpp ../../structures/src/point.cpp ../../utils/src/getDirectory.cpp ../../utils/src/urlEncode.cpp
+CFILES=../../structures/src/Coord.cpp ../../structures/src/Vector2.cpp ../../structures/src/point.cpp ../../utils/src/getDirectory.cpp ../../utils/src/urlEncode.cpp
 
 all: processed/AMP.nodes
 
