@@ -18,7 +18,7 @@ static double haversine(const Coord &p1, const Coord &p2){
 
     double a = (pow(sin(dLat/2.0), 2) + 
                 pow(sin(dLon/2.0), 2) *
-                    cos(p1.lat()) * cos(p2.lat()));
+                    cos(lat1_rad) * cos(lat2_rad));
     double c = 2.0 * asin(sqrt(a));
     return c;
 }
