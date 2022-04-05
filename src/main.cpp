@@ -116,8 +116,7 @@ int main(int argc, char* argv[]) {
     XInitThreads();
 
     try {
-        // if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
-        // std::string opt = argv[1];
+        if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         std::string opt = argv[1];
 
         std::chrono::_V2::system_clock::time_point begin, end;
