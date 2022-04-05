@@ -39,11 +39,11 @@ void Astar::initialize(const DWGraph::DWGraph *G_, node_t s_, node_t d_){
     dist.clear();
     hdist.clear();
     prev.clear();
-    for(const node_t &u: G->getNodes()){
-        dist[u] = DWGraph::INF;
-        hdist[u] = DWGraph::INF;
-        prev[u] = DWGraph::INVALID_NODE;
-    }
+    // for(const node_t &u: G->getNodes()){
+    //     dist[u] = DWGraph::INF;
+    //     hdist[u] = DWGraph::INF;
+    //     prev[u] = DWGraph::INVALID_NODE;
+    // }
 }
 
 node_t Astar::getStart() const { return s; }
@@ -58,8 +58,8 @@ void Astar::run(){
         Q.pop();
         if(u == d) break;
         for(Edge e: G->getAdj(u)){
-            weight_t c_ = dist[u] + e.w;
-            if(c_ < dist[e.v]){
+            weight_t c_ = (dist.count(u) ? dist[u] : DWGraph::INF) + e.w;
+            if(!dist.count(e.v) || c_ < dist[e.v]){
                 dist[e.v] = c_;
                 hdist[e.v] = c_ + (*h)(e.v);
                 prev[e.v] = u;

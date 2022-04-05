@@ -155,6 +155,10 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     closestPoint.initialize(points);
     closestPoint.run();
 
+    std::cout << "Generating graph..." << std::endl;
+    DWGraph::DWGraph dwG = G.getFullGraph();
+    std::cout << "Generated graph" << std::endl;
+
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
@@ -165,7 +169,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     mapView.addView(&mapTripMatchView);
     window.setDrawView(&mapView);
 
-    WindowTripController windowTripController(window, mapTripMatchView, trips, closestPoint);
+    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, closestPoint);
     windowTripController.run();
 }
 

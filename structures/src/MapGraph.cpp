@@ -185,6 +185,7 @@ DWGraph::DWGraph MapGraph::getConnectedGraph() const{
 MapGraph MapGraph::splitLongEdges(double threshold) const {
     MapGraph G;
     G.nodes = nodes;
+    G.coord2node = coord2node;
     G.ways = ways;
 
     node_t nextNodeId = 0;
@@ -202,6 +203,7 @@ MapGraph MapGraph::splitLongEdges(double threshold) const {
                 node_t id = nextNodeId++;
                 Coord m = u + (v-u)/2;
                 G.nodes[id] = m;
+                G.coord2node[m] = id;
                 it2 = way.nodes.insert(it2, id);
             } else {
                 ++it1;
@@ -276,3 +278,10 @@ const std::unordered_map<DWGraph::node_t, Coord> &MapGraph::getNodes() const{
 Coord MapGraph::getMinCoord() const { return min_coord; }
 Coord MapGraph::getMaxCoord() const { return max_coord; }
 const std::list<MapGraph::way_t> &MapGraph::getWays() const { return ways; }
+
+DWGraph::node_t MapGraph::coordToNode(const Coord &c) const {
+    return coord2node.at(c);
+}
+Coord MapGraph::nodeToCoord(const DWGraph::node_t &u) const {
+    return nodes.at(u);
+}

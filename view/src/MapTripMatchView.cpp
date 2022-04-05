@@ -20,9 +20,12 @@ MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_):
     endCircle  .setFillColor(Color::Red  ); endCircle  .setOrigin(CIRCLE_SIZE/2, CIRCLE_SIZE/2);
 }
 
-MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_, const Trip &trip_, const vector<Coord> &matches_):
+MapTripMatchView::MapTripMatchView(
+    RenderTarget &window_, MapView &mapView_,
+    const Trip &trip_, const vector<Coord> &matches_, const list<Coord> &path_
+):
     window(window_), mapView(mapView_),
-    trip(trip_), matches(matches_),
+    trip(trip_), matches(matches_), path(path_),
     beginCircle(CIRCLE_SIZE, CIRCLE_POINT_COUNT), endCircle(CIRCLE_SIZE, CIRCLE_POINT_COUNT)
 {
     beginCircle.setFillColor(Color::Green);  beginCircle.setOrigin(CIRCLE_SIZE/2, CIRCLE_SIZE/2);
@@ -30,24 +33,33 @@ MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_, con
     refresh();
 }
 
-void MapTripMatchView::setTripMatches(const Trip &trip_, const vector<Coord> &matches_){
+void MapTripMatchView::setTripMatches(
+    const Trip &trip_, const vector<Coord> &matches_,
+    const list<Coord> &path_
+){
     trip = trip_;
     matches = matches_;
+    path = path_;
 }
 
 void MapTripMatchView::refresh(){
     zip.clear();
 
-    auto it1 = trip.coords.begin(),
-         it2 = ++trip.coords.begin();
-    while(it2 != trip.coords.end()){
-        sf::Vector2f u = mapView.coordToVector2f(*(it1++)),
-                     v = mapView.coordToVector2f(*(it2++));
-        FullLineShape e(u, v, 2);
-        e.setFillColor(Color::Blue);
-        for(size_t i = 0; i < e.getVertexCount(); ++i)
-            zip.push_back(e[i]);
+    if(trip.coords.size() >= 2){
+        for(
+            auto it1 = trip.coords.begin(), it2 = ++trip.coords.begin();
+            it2 != trip.coords.end();
+            ++it1, ++it2
+        ){
+            sf::Vector2f u = mapView.coordToVector2f(*it1),
+                         v = mapView.coordToVector2f(*it2);
+            FullLineShape e(u, v, 2);
+            e.setFillColor(Color::Blue);
+            for(size_t i = 0; i < e.getVertexCount(); ++i)
+                zip.push_back(e[i]);
+        }
     }
+
     for(size_t i = 0; i < trip.coords.size(); ++i){
         sf::Vector2f u = mapView.coordToVector2f(trip.coords[i]),
                      v = mapView.coordToVector2f(matches[i]);
@@ -55,6 +67,17 @@ void MapTripMatchView::refresh(){
         e.setFillColor(Color::Blue);
         for(size_t i = 0; i < e.getVertexCount(); ++i)
             zip.push_back(e[i]);
+    }
+
+    if(path.size() >= 2){
+        for(auto it1 = path.begin(), it2 = ++path.begin(); it2 != path.end(); ++it1, ++it2){
+            sf::Vector2f u = mapView.coordToVector2f(*it1),
+                         v = mapView.coordToVector2f(*it2);
+            FullLineShape e(u, v, 1);
+            e.setFillColor(Color::Magenta);
+            for(size_t i = 0; i < e.getVertexCount(); ++i)
+                zip.push_back(e[i]);
+        }
     }
 
     beginCircle.setPosition(mapView.coordToVector2f(*trip.coords. begin()));

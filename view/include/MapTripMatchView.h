@@ -18,13 +18,18 @@ private:
     MapView &mapView;
     Trip trip;
     std::vector<Coord> matches;
+    std::list<Coord> path;
     std::vector<sf::Vertex> zip;
     sf::CircleShape beginCircle;
     sf::CircleShape endCircle;
 public:
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_);
-    MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_, const Trip &trip_, const std::vector<Coord> &matches_);
-    void setTripMatches(const Trip &trip_, const std::vector<Coord> &matches_);
+    MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_,
+        const Trip &trip_, const std::vector<Coord> &matches_,
+        const std::list<Coord> &path_);
+    void setTripMatches(
+        const Trip &trip_, const std::vector<Coord> &matches_,
+        const std::list<Coord> &path_);
     virtual void refresh();
     virtual void draw();
 };

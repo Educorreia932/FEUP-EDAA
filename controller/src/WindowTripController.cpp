@@ -1,18 +1,34 @@
 #include "WindowTripController.h"
 
 #include <cmath>
-
 #include <iostream>
+
+#include "Astar.h"
 
 using namespace sf;
 using namespace std;
 
+typedef DWGraph::node_t node_t;
+typedef DWGraph::weight_t weight_t;
+
+const double SECONDS_TO_MICROS = 1000000;
+const double KPH_TO_MPS        = (1.0/3.6);
+
 WindowTripController::WindowTripController(
     DraggableZoomableWindow &window_,
     MapTripMatchView &mapTripMatchView_,
+    const MapGraph &mapGraph_,
+    const DWGraph::DWGraph &graph_,
     const vector<Trip> &trips_,
     const ClosestPoint &closestPoint_
-): window(window_), mapTripMatchView(mapTripMatchView_), trips(trips_), closestPoint(closestPoint_) {}
+):
+    window(window_),
+    mapTripMatchView(mapTripMatchView_),
+    mapGraph(mapGraph_),
+    graph(graph_),
+    trips(trips_),
+    closestPoint(closestPoint_)
+{}
 
 void WindowTripController::run(){
     window.recalculateView();
@@ -81,6 +97,27 @@ void WindowTripController::onChangeTrip(){
         currentMatches.at(i) = Coord(closestPoint.getClosestPoint(coords.at(i)));
     }
 
-    mapTripMatchView.setTripMatches(trip, currentMatches);
+    list<Coord> pathCoord;
+    pathCoord.push_back(currentMatches[0]);
+
+    
+    for(size_t i = 0; i+1 < currentMatches.size(); ++i){
+        const Coord &uCoord = currentMatches[i];
+        const Coord &vCoord = currentMatches[i+1];
+        node_t u = mapGraph.coordToNode(uCoord);
+        node_t v = mapGraph.coordToNode(vCoord);
+
+        MapGraph::DistanceHeuristic heuristic(mapGraph.getNodes(), vCoord, double(SECONDS_TO_MICROS)/(120.0*KPH_TO_MPS));
+        Astar astar(&heuristic);
+        astar.initialize(&graph, u, v);
+        astar.run();
+        
+        
+        std::list<node_t> path = astar.getPath();
+        for(auto it = ++path.begin(); it != path.end(); ++it)
+            pathCoord.push_back(mapGraph.nodeToCoord(*it));
+    }
+
+    mapTripMatchView.setTripMatches(trip, currentMatches, pathCoord);
     mapTripMatchView.refresh();
 }
