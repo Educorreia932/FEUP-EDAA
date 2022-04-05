@@ -37,6 +37,7 @@ MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
         case edge_type_t::RESIDENTIAL    : return  30;
         case edge_type_t::LIVING_STREET  : return  10;
         case edge_type_t::SERVICE        : return  20;
+        case edge_type_t::CONSTRUCTION   : return  30;
         case edge_type_t::NO             : throw std::invalid_argument("");
         default                          : throw std::invalid_argument("");
     }

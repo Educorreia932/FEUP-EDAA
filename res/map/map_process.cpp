@@ -150,8 +150,9 @@ unordered_map<string, edge_type_t> edge_accept = {
     {"residential"      , edge_type_t::RESIDENTIAL      },
     {"living_street"    , edge_type_t::LIVING_STREET    },
     {"road"             , edge_type_t::UNCLASSIFIED     },
+    {"construction"     , edge_type_t::CONSTRUCTION     },
     {"bus_stop"         , edge_type_t::SERVICE          },
-    {"track"            , edge_type_t::SERVICE          }
+    {"track"            , edge_type_t::SERVICE          },
 };
 /**
  * @brief Set of way types we are explicitly rejecting.
@@ -162,7 +163,7 @@ unordered_map<string, edge_type_t> edge_accept = {
  */
 unordered_set<string> edge_reject = {
     "steps",        "pedestrian", "footway",   "cycleway",
-    "construction", "path",       "bridleway", "platform", "raceway",
+    "path",       "bridleway", "platform", "raceway",
     "elevator",     "proposed",   "planned",   "bus_stop", "services",
     "crossing", "corridor"};
 // unordered_set<string> service_accept = {"driveway", "parking_aisle", "alley"};
@@ -182,7 +183,7 @@ edge_type_t get_edge_type(xml_node<> *it) {
             auto paccess  = find_tag(it, "access");
             if(paccess == nullptr) return edge_type_t::SERVICE;
             string access = paccess->first_attribute("v")->value();
-            if (access == "private" || access == "no" ) return edge_type_t::NO;
+            // if (access == "private" || access == "no" ) return edge_type_t::NO;
             return edge_type_t::SERVICE;
         }
     }
