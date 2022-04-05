@@ -53,5 +53,5 @@ TEST_CASE("Fortune's Algorithm", "[fortune]") {
 
     VoronoiDiagram diagram = voronoi(sites);
 
-    voronoi_display(diagram);
+    // voronoi_display(diagram);
 }
