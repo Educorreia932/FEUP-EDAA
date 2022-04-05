@@ -37,6 +37,7 @@
 # Build folders (where CMake does its magic)
 build
 res/map/map_process
+res/data/pkdd15-i/convertToBin
 
 # Data
 map.xml
@@ -44,6 +45,7 @@ map.xml
 *.nodes
 *.points
 *.polygons
+*.bin
 
 *.zip
 train.csv

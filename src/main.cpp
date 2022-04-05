@@ -21,6 +21,10 @@
 
 #include <X11/Xlib.h>
 
+using hrc = std::chrono::high_resolution_clock;
+
+const double NANOS_TO_SECS = 1.0/1000000000.0;
+
 void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
@@ -116,21 +120,33 @@ int main(int argc, char* argv[]) {
         // std::string opt = argv[1];
         std::string opt = argv[1];
 
+        std::chrono::_V2::system_clock::time_point begin, end;
+        double dt;
+
         std::cout << "Loading map..." << std::endl;
+        begin = hrc::now();
         MapGraph M("res/map/processed/AMP");
-        std::cout << "Loaded map" << std::endl;
+        end = hrc::now();
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        std::cout << "Loaded map, took " << dt << "s" << std::endl;
 
         std::cout << "Loading polygons..." << std::endl;
+        begin = hrc::now();
         std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
-        std::cout << "Loaded polygons" << std::endl;
+        end = hrc::now();
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        std::cout << "Loaded polygons, took " << dt << "s" << std::endl;
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
         if (opt == "voronoi-display") { voronoi_display(voronoi(M)); return 0; }
 
         std::cout << "Loading trips..." << std::endl;
-        std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
-        std::cout << "Loaded trips" << std::endl;
+        begin = hrc::now();
+        std::vector<Trip> trips = Trip::loadTripsBin("res/data/pkdd15-i/pkdd15-i.trips.bin");
+        end = hrc::now();
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        std::cout << "Loaded trips, took " << dt << "s" << std::endl;
 
         if (opt == "view-trips") { view_trips(trips); return 0; }
         if (opt == "match-trip") { match_trip(M, polygons, trips); return 0; }
