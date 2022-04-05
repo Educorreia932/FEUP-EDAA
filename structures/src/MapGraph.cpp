@@ -7,11 +7,13 @@
 #include <unordered_set>
 #include <vector>
 
-const double SECONDS_TO_MICROS = 1000000;     // Convert seconds to milliseconds
-const double KPH_TO_MPS        = (1.0/3.6);   // Convert km/h to m/s
+using namespace std;
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
+
+const double SECONDS_TO_MICROS = 1000000;     // Convert seconds to milliseconds
+const double KPH_TO_MPS        = (1.0/3.6);   // Convert km/h to m/s
 
 MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
     
@@ -35,6 +37,7 @@ MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
         case edge_type_t::RESIDENTIAL    : return  30;
         case edge_type_t::LIVING_STREET  : return  10;
         case edge_type_t::SERVICE        : return  20;
+        case edge_type_t::CONSTRUCTION   : return  30;
         case edge_type_t::NO             : throw std::invalid_argument("");
         default                          : throw std::invalid_argument("");
     }
@@ -150,7 +153,7 @@ DWGraph::DWGraph MapGraph::getFullGraph() const{
         if(w.nodes.size() < 2) continue;
         auto it1 = w.nodes.begin();
         for(auto it2 = it1++; it1 != w.nodes.end(); ++it1, ++it2){
-            auto d = Coord::getDistanceSI(nodes.at(*it1), nodes.at(*it2));
+            auto d = Coord::getDistanceArc(nodes.at(*it1), nodes.at(*it2));
             double factor = double(SECONDS_TO_MICROS)/(w.getMaxSpeed()*KPH_TO_MPS);
             G.addEdge(*it2, *it1, weight_t(d*factor));
         }
@@ -178,6 +181,39 @@ DWGraph::DWGraph MapGraph::getConnectedGraph() const{
     return G;
 }
 */
+
+MapGraph MapGraph::splitLongEdges(double threshold) const {
+    MapGraph G;
+    G.nodes = nodes;
+    G.coord2node = coord2node;
+    G.ways = ways;
+
+    node_t nextNodeId = 0;
+    for(const auto &p: G.nodes)
+        nextNodeId = max(nextNodeId, p.first);
+    ++nextNodeId;
+
+    for(way_t &way: G.ways){
+        for(auto it1 = way.nodes.begin(), it2 = ++way.nodes.begin(); it2 != way.nodes.end();){
+            const Coord &u = G.nodes.at(*it1);
+            const Coord &v = G.nodes.at(*it2);
+
+            double d = Coord::getDistanceArc(u, v);
+            if(d > threshold){
+                node_t id = nextNodeId++;
+                Coord m = u + (v-u)/2;
+                G.nodes[id] = m;
+                G.coord2node[m] = id;
+                it2 = way.nodes.insert(it2, id);
+            } else {
+                ++it1;
+                ++it2;
+            }
+        }
+    }
+
+    return G;
+}
 
 /*
 DWGraph::DWGraph MapGraph::getReducedGraph() const{
@@ -242,3 +278,10 @@ const std::unordered_map<DWGraph::node_t, Coord> &MapGraph::getNodes() const{
 Coord MapGraph::getMinCoord() const { return min_coord; }
 Coord MapGraph::getMaxCoord() const { return max_coord; }
 const std::list<MapGraph::way_t> &MapGraph::getWays() const { return ways; }
+
+DWGraph::node_t MapGraph::coordToNode(const Coord &c) const {
+    return coord2node.at(c);
+}
+Coord MapGraph::nodeToCoord(const DWGraph::node_t &u) const {
+    return nodes.at(u);
+}

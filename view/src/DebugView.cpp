@@ -22,6 +22,8 @@ void DebugView::recalculateView(){
     v = sf::View(FloatRect(0.0, 0.0, size.x, size.y));
 }
 
+void DebugView::refresh(){}
+
 void DebugView::draw(){
     window->setView(v);
     

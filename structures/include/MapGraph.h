@@ -3,8 +3,7 @@
 #include "DWGraph.h"
 #include "EdgeType.h"
 #include "Coord.h"
-// #include "ClosestPoint.h"
-// #include "Ride.h"
+#include "Astar.h"
 
 #include <map>
 
@@ -44,9 +43,27 @@ public:
     void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
     DWGraph::DWGraph getFullGraph() const;
-    DWGraph::DWGraph getConnectedGraph() const;
+    // DWGraph::DWGraph getConnectedGraph() const;
+    MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
     Coord getMinCoord() const;
     Coord getMaxCoord() const;
     const std::list<way_t> &getWays() const;
+    DWGraph::node_t coordToNode(const Coord &c) const;
+    Coord nodeToCoord(const DWGraph::node_t &u) const;
+
+    class DistanceHeuristic : public Astar::heuristic_t{
+    private:
+        const std::unordered_map<DWGraph::node_t, Coord> &nodes;
+        Coord dst_pos;
+        double factor;
+    public:
+        DistanceHeuristic(const std::unordered_map<DWGraph::node_t, Coord> &nodes_,
+                        Coord dst_pos_,
+                        double factor_): nodes(nodes_), dst_pos(dst_pos_), factor(factor_){}
+        DWGraph::weight_t operator()(DWGraph::node_t u) const{
+            auto d = Coord::getDistanceArc(dst_pos, nodes.at(u));
+            return DWGraph::weight_t(d*factor);
+        }
+    };
 };

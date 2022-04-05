@@ -9,8 +9,9 @@ private:
     double getMetersPerLatDeg() const;
     double getMetersPerLonDeg() const;
 public:
-    Coord();
-    Coord(double lat, double lon);
+    explicit Coord();
+    explicit Coord(double lat, double lon);
+    explicit Coord(const Vector2 &v);
 
     /**
      * @brief Get distance between two positions in SI units (meters).
@@ -19,7 +20,7 @@ public:
      * @param p2        Second position
      * @return double   Distance between them in meters
      */
-    static double getDistanceSI(const Coord &p1, const Coord &p2);
+    static double getDistanceArc(const Coord &p1, const Coord &p2);
     
     double &lat();
     double &lon();

@@ -20,7 +20,8 @@ enum edge_type_t : char{
     UNCLASSIFIED    = 'U',
     RESIDENTIAL     = 'R',
     LIVING_STREET   = 'L',
-    SERVICE         = 'V'
+    SERVICE         = 'V',
+    CONSTRUCTION    = 'C'
 };
 
 #endif //EDGETYPE_H_INCLUDED

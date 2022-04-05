@@ -15,5 +15,6 @@ private:
     std::vector<sf::Vertex> zip;
 public:
     MapTripsView(sf::RenderTarget &window_, MapView &mapView_, const std::vector<Trip> &trips_);
+    virtual void refresh();
     virtual void draw();
 };

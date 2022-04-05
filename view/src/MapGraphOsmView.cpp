@@ -25,7 +25,8 @@ static const std::unordered_map<edge_type_t, bool> dashed_map = {
     {edge_type_t::UNCLASSIFIED  , false},
     {edge_type_t::RESIDENTIAL   , false},
     {edge_type_t::LIVING_STREET , true },
-    {edge_type_t::SERVICE       , true }
+    {edge_type_t::SERVICE       , true },
+    {edge_type_t::CONSTRUCTION  , true }
 };
 static const std::unordered_map<edge_type_t, float> width_map = {
     {edge_type_t::MOTORWAY      ,  7.0},
@@ -41,7 +42,8 @@ static const std::unordered_map<edge_type_t, float> width_map = {
     {edge_type_t::UNCLASSIFIED  ,  3.0},
     {edge_type_t::RESIDENTIAL   ,  3.0},
     {edge_type_t::LIVING_STREET ,  1.0},
-    {edge_type_t::SERVICE       ,  1.0}
+    {edge_type_t::SERVICE       ,  1.0},
+    {edge_type_t::CONSTRUCTION  ,  1.0}
 };
 static const std::unordered_map<edge_type_t, Color> color_map = {
     {edge_type_t::MOTORWAY      , Color(232, 146, 162) },
@@ -50,14 +52,15 @@ static const std::unordered_map<edge_type_t, Color> color_map = {
     {edge_type_t::TRUNK_LINK    , Color(249, 178, 156) },
     {edge_type_t::PRIMARY       , Color(252, 214, 164) },
     {edge_type_t::PRIMARY_LINK  , Color(252, 214, 164) },
-    {edge_type_t::SECONDARY     , Color(247, 250, 191) },
-    {edge_type_t::SECONDARY_LINK, Color(247, 250, 191) },
+    {edge_type_t::SECONDARY     , Color(242, 247, 136) },
+    {edge_type_t::SECONDARY_LINK, Color(242, 247, 136) },
     {edge_type_t::TERTIARY      , Color(200, 200, 200) },
     {edge_type_t::TERTIARY_LINK , Color(200, 200, 200) },
     {edge_type_t::UNCLASSIFIED  , Color(200, 200, 200) },
     {edge_type_t::RESIDENTIAL   , Color(200, 200, 200) },
     {edge_type_t::LIVING_STREET , Color(200, 200, 200) },
-    {edge_type_t::SERVICE       , Color(200, 200, 200) }
+    {edge_type_t::SERVICE       , Color(200, 200, 200) },
+    {edge_type_t::CONSTRUCTION  , Color(150, 150, 150) }
 };
 static const std::list<edge_type_t> order = {
     edge_type_t::MOTORWAY      ,
@@ -73,7 +76,8 @@ static const std::list<edge_type_t> order = {
     edge_type_t::UNCLASSIFIED  ,
     edge_type_t::RESIDENTIAL   ,
     edge_type_t::LIVING_STREET ,
-    edge_type_t::SERVICE
+    edge_type_t::SERVICE       ,
+    edge_type_t::CONSTRUCTION
 };
 
 static const Color buildingOutlineColor(196, 182, 171);
@@ -83,6 +87,12 @@ static const size_t N_CIRCLE = 8;
 MapGraphOsmView::MapGraphOsmView(RenderTarget &window_, MapView &mapView_, const MapGraph &graph_):
     window(window_), mapView(mapView_), graph(graph_)
 {
+    refresh();
+}
+
+void MapGraphOsmView::refresh(){
+    zip.clear();
+
     auto nodes = graph.getNodes();
     auto ways = graph.getWays();
 

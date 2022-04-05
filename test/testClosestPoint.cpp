@@ -2,7 +2,7 @@
 
 #include <bits/stdc++.h>
 
-#include "QuadTreeClosestPoint.h"
+#include "K2DTreeClosestPoint.h"
 #include "DeepVStripes.h"
 
 using namespace std;
@@ -41,7 +41,7 @@ Vector2 findClosestBruteForce(const list<Vector2> &l, const Vector2 &u){
 }
 
 TEST_CASE("Quad Tree", "[quadtree]"){
-    QuadTreeClosestPoint q;
+    K2DTreeClosestPoint q;
     q.initialize(list<Vector2>({
         Vector2(1, 9),
         Vector2(4, 7),
@@ -69,7 +69,7 @@ TEST_CASE("Quad Tree 2", "[quadtree-2]"){
         Vector2(1, 7)
     });
 
-    QuadTreeClosestPoint q;
+    K2DTreeClosestPoint q;
     q.initialize(l);
     q.run();
 
@@ -94,7 +94,7 @@ TEST_CASE("Quad Tree 3", "[quadtree-3]"){
         ));
     }
 
-    QuadTreeClosestPoint q;
+    K2DTreeClosestPoint q;
     q.initialize(l);
     q.run();
 

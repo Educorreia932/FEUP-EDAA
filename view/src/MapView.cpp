@@ -24,6 +24,11 @@ Vector2f MapView::coordToVector2f(const Coord &coord) const{
     return ret;
 }
 
+void MapView::refresh(){
+    for(View *view: views)
+        view->refresh();
+}
+
 void MapView::draw(){
     for(View *view: views)
         view->draw();
