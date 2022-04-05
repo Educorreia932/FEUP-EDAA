@@ -32,4 +32,4 @@ jobs:
 
     - name: Test
       run: |
-        ./tests --rng-seed 0
+        ./build/tests --rng-seed 0
