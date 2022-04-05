@@ -14,7 +14,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories("include" "algorithms/include" "structures/include" "utils/include" "controller/include" "view/include")
+include_directories("algorithms/include" "structures/include" "utils/include" "controller/include" "view/include")
 file(GLOB SRC "algorithms/src/*.cpp" "structures/src/*.cpp" "utils/src/*.cpp")
 file(GLOB SRC_UI "controller/src/*.cpp" "view/src/*.cpp")
 file(GLOB SRC_TEST "test/*.cpp")
