@@ -33,14 +33,14 @@ void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
 }
 
 VoronoiDiagram voronoi(const MapGraph& M) {
-    std::vector<Site> sites;
+    std::vector<Site*> sites;
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes() ){
         Vector2 point = Vector2(node.second.lat(), node.second.lon());
-        sites.push_back(Site{ point });
+        sites.push_back(new Site{ point });
     }
 
-    VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
+    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
     for (Edge edge : diagram.getEdges())
         std::cout << "Start: " << edge.start.x << " " << edge.start.y << " End: " << edge.end.x << " " << edge.end.y << std::endl;

@@ -14,9 +14,12 @@ private:
     void handleSiteEvent(Event event);
     void handleCircleEvent(Event event);
     Arc& locateArcAbove(Site site);
-    Arc* breakArc(Arc* arc, Site site);
+    Arc* breakArc(Arc* arc, Site* site);
     void invalidateCircleEvent(Arc &arc);
     void checkCircleEvents(Arc* arc);
+    
 public:
-    VoronoiDiagram construct(std::vector<Site> sites);
+    FortuneAlgorithm(std::vector<Site*> sites);
+
+    VoronoiDiagram construct();
 };

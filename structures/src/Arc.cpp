@@ -3,17 +3,17 @@
 #include <cmath>
 #include <limits>
 
-Arc::Arc(Site site) : site(site) {
+Arc::Arc(Site* site) : site(site) {
 
 }
 
-Arc::Arc(Site site, Arc* previous, Arc* next) : previous(previous), next(next), site(site) {
+Arc::Arc(Site* site, Arc* previous, Arc* next) : previous(previous), next(next), site(site) {
 
 }
 
 // Get parabola point for x
 Vector2 Arc::getPoint(double x, double sweep_line) {
-    Vector2 focus = site.point;
+    Vector2 focus = site->point;
 
     // Distance between the parabola's focus and its vertex
     // Or distance from the parabola's vertex to its directrix (the sweep line)
@@ -34,8 +34,8 @@ Vector2 Arc::getPoint(double x, double sweep_line) {
 
 // Intersect two parabolas (left intersection)
 Vector2 Arc::intersect(Arc arc, double sweep_line) {
-    Vector2 g1 = site.point;
-    Vector2 g2 = arc.site.point;
+    Vector2 g1 = site->point;
+    Vector2 g2 = arc.site->point;
 
     // Half-point between site and sweep line
     double f1 = (g1.y + sweep_line) / 2.0;
@@ -54,7 +54,7 @@ Vector2 Arc::intersect(Arc arc, double sweep_line) {
 
 // Intersect parabola with edge
 Vector2 Arc::intersect(Edge edge, double sweep_line) {
-    Vector2 focus = site.point;
+    Vector2 focus = site->point;
     double x;
 
     if (edge.m == std::numeric_limits<double>::infinity())

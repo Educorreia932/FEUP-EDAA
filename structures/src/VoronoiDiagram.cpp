@@ -19,6 +19,25 @@ Edge::Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint) : start(start) 
     this->direction = Vector2(-1.0 * (leftpoint.y - rightpoint.y), leftpoint.x - rightpoint.x);
 }
 
+Edge::Edge(Vector2 start, Site* site_1, Site* site_2) : start(start) {
+    Vector2 leftpoint = site_1->point;
+    Vector2 rightpoint = site_2->point;
+
+    this->m = -1.0 / ((leftpoint.y - rightpoint.y) / (leftpoint.x - rightpoint.x));
+    this->c = start.y - this->m * start.x;
+    this->direction = Vector2(-1.0 * (leftpoint.y - rightpoint.y), leftpoint.x - rightpoint.x);
+
+    if (leftpoint.y > rightpoint.y) {
+        site_up = site_1;
+        site_down = site_2;
+    }
+
+    else {
+        site_up = site_2;
+        site_down = site_1;
+    }
+}
+
 bool Edge::intersect(Edge edge, Vector2& intersection) {
     // Edges are parallel
     if (this->m == edge.m)
@@ -68,9 +87,12 @@ bool Edge::operator==(const Edge& edge) const {
     return start == edge.start && end == edge.end;
 }
 
-// bool Edge::operator<(const Edge& edge) const {
-//     return start < edge.start || end < edge.end;
-// }
+double Edge::evaluateY(double x) const {
+    double w = (x - start.x) / (end.x - start.x);
+    double y = (1 - w) * start.y + (w) * end.y;
+
+    return y;
+}
 
 Box::Box(Vector2 bottom_left, Vector2 upper_right) {
     Vector2 bottom_right(upper_right.x, bottom_left.y);
@@ -102,8 +124,6 @@ std::vector<Edge> VoronoiDiagram::getEdges() const {
     return edges;
 }
 
-double Edge::evaluateY(double x) const {
-    double w = (x - start.x)/(end.x - start.x);
-    double y = (1-w)*start.y + (w)*end.y;
-    return y;
+VoronoiDiagram::VoronoiDiagram(std::vector<Site*> sites) : sites(sites) {
+
 }

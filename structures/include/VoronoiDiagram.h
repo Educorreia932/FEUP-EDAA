@@ -24,12 +24,12 @@ public:
     Edge();
     Edge(Vector2 start, Vector2 end);
     Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint);
+    Edge(Vector2 start, Site* site_1, Site* site_2);
 
     bool intersect(Edge edge, Vector2& intersection);
     Edge merge();
     double evaluateY(double x) const;
     
-    // bool operator<(const Edge& edge) const;
     bool operator==(const Edge& edge) const;
 };
 
@@ -46,6 +46,10 @@ class VoronoiDiagram {
 private:
     std::vector<Edge> edges;
 public:
+    std::vector<Site*> sites;
+
+    VoronoiDiagram(std::vector<Site*> sites);
+
     void addEdge(Edge segment);
     std::vector<Edge> getEdges() const;
 };

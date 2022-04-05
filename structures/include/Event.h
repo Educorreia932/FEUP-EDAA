@@ -18,7 +18,7 @@ public:
     Vector2 point;
 
     // Site event
-    Site site;
+    Site* site;
 
     // Circle event
     Arc* arc;
@@ -26,8 +26,8 @@ public:
 
     bool operator<(const Event &event) const;
 public:
-    Event(Site site);                               // Site event
-    Event(Arc* arc, Vector2 point, double radius);  // Circle event
+    Event(Site* site);                               // Site event
+    Event(Arc* arc, Vector2 point, double radius);   // Circle event
 };
 
 #endif
