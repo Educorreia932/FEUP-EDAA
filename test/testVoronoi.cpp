@@ -16,8 +16,7 @@ void voronoi_display(const VoronoiDiagram diagram) {
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "Voronoi diagram", sf::Style::Default, settings);
 
-    window.clear(sf::Color::White);
-
+    std::vector<sf::Vertex> lines;
     // Draw edges
     for (Edge edge : diagram.getEdges()) {
         sf::Color color(
@@ -27,12 +26,8 @@ void voronoi_display(const VoronoiDiagram diagram) {
             255
         );
 
-        sf::Vertex line[] = {
-            sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), color),
-            sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), color)
-        };
-
-        window.draw(line, 2, sf::Lines);
+        lines.push_back(sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), color));
+        lines.push_back(sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), color));
     }
 
     while (window.isOpen()) {
@@ -42,6 +37,8 @@ void voronoi_display(const VoronoiDiagram diagram) {
             if (event.type == sf::Event::Closed)
                 window.close();
 
+        window.clear(sf::Color::White);
+        window.draw(&lines[0], lines.size(), sf::Lines);
         window.display();
     }
 }
