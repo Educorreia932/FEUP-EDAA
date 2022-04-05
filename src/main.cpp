@@ -21,12 +21,12 @@
 
 #include <X11/Xlib.h>
 
-void view(const MapGraph &M, const std::vector<polygon_t> &polygons){std::cout << "L24" << std::endl;
+void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594,-8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
-    window.setDrawView(&mapView); std::cout << "L29" << std::endl;
+    window.setDrawView(&mapView);
 
     WindowController windowController(window);
     windowController.run();
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Loading polygons..." << std::endl;
         std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
-        std::cout << "Loaded polygons" << std::endl; std::cout << "L123" << std::endl;
+        std::cout << "Loaded polygons" << std::endl;
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
