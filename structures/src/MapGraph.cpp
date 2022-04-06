@@ -121,26 +121,19 @@ DWGraph::DWGraph MapGraph::getTimeGraph() const{
     return G;
 }
 
-/*
-DWGraph::DWGraph MapGraph::getConnectedGraph() const{
-    DWGraph::DWGraph G = fullGraph;
-    DUGraph Gu = (DUGraph)G;
-    Reachability *r = new DFS();
-    SCCnode *scc = new KosarajuV(r);
-    scc->initialize(&Gu, station);
-    scc->run();
-    std::list<node_t> nodes_to_remove;
-    for(const DUGraph::node_t &u: Gu.getNodes()){
-        if(!scc->is_scc(u)){
-            nodes_to_remove.push_back(u);
+DWGraph::DWGraph MapGraph::getDistanceGraph() const{
+    DWGraph::DWGraph G;
+    for(const auto &p: nodes) G.addNode(p.first);
+    for(const way_t &w: ways){
+        if(w.nodes.size() < 2) continue;
+        auto it1 = w.nodes.begin();
+        for(auto it2 = it1++; it1 != w.nodes.end(); ++it1, ++it2){
+            auto d = Coord::getDistanceArc(nodes.at(*it1), nodes.at(*it2));
+            G.addEdge(*it2, *it1, weight_t(d));
         }
     }
-    delete scc;
-    delete r;
-    G.removeNodes(nodes_to_remove.begin(), nodes_to_remove.end());
     return G;
 }
-*/
 
 MapGraph MapGraph::splitLongEdges(double threshold) const {
     MapGraph G;
@@ -174,62 +167,6 @@ MapGraph MapGraph::splitLongEdges(double threshold) const {
 
     return G;
 }
-
-/*
-DWGraph::DWGraph MapGraph::getReducedGraph() const{
-    DWGraph::DWGraph G = connectedGraph;
-    std::cout << "Nodes: " << G.getNodes().size() << "\n"
-              << "Edges: " << G.getNumberEdges() << "\n";
-    
-    size_t prev_nodes;
-    do{
-        prev_nodes = G.getNodes().size();
-
-        DWGraph::DWGraph GT = G.getTranspose();
-        auto V = G.getNodes();
-        for(const node_t &u: V){
-            const auto &desc = G.getAdj(u);
-            const auto &pred = GT.getAdj(u);
-
-            // Remove one-way streets
-            if(desc.size() == 1 && pred.size() == 1 && desc.begin()->v != pred.begin()->v){
-                //cout << "Deleting one-way street through " << u << endl;
-                const node_t a = pred.begin()->v;
-                const node_t b = desc.begin()->v;
-                const weight_t w = pred.begin()->w + desc.begin()->w;
-                G.addBestEdge(a, b, w); GT.addBestEdge(b, a, w);
-                G.removeNode(u); GT.removeNode(u);
-            } else
-            if(desc.size() == 2 && pred.size() == 2){
-                auto it = desc.begin();
-                const DWGraph::Edge ua_f = *(it++); // Edge from u to a in forward notation
-                const DWGraph::Edge ub_f = *(it++); // Edge from u to b in forward notation
-                const node_t a = ua_f.v;
-                const node_t b = ub_f.v;
-                const weight_t w_ua = ua_f.w;
-                const weight_t w_ub = ub_f.w;
-                auto it1 = pred.find(ua_f);
-                auto it2 = pred.find(ub_f);
-                if(it1 != pred.end() && it2 != pred.end()){
-                    const DWGraph::Edge au_b = *it1; // Edge from a to u in backwards notation
-                    const DWGraph::Edge bu_b = *it2; // Edge from b to u in backwards notation
-                    const weight_t w_au = au_b.w;
-                    const weight_t w_bu = bu_b.w;
-                    const weight_t w_ab = w_au+w_ub;
-                    const weight_t w_ba = w_bu+w_ua;
-                    G.addBestEdge(a, b, w_ab); GT.addBestEdge(b, a, w_ab);
-                    G.addBestEdge(b, a, w_ba); GT.addBestEdge(a, b, w_ba);
-                    G.removeNode(u); GT.removeNode(u);
-                }
-            }
-        }
-        std::cout << "Nodes: " << G.getNodes().size() << "\n"
-                  << "Edges: " << G.getNumberEdges() << "\n";
-    } while(prev_nodes != G.getNodes().size());
-
-    return G;
-}
-*/
 
 const std::unordered_map<DWGraph::node_t, Coord> &MapGraph::getNodes() const{
     return nodes;

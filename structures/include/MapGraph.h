@@ -39,7 +39,7 @@ public:
     void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
     DWGraph::DWGraph getTimeGraph() const;
-    // DWGraph::DWGraph getConnectedGraph() const;
+    DWGraph::DWGraph getDistanceGraph() const;
     MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
     Coord getMinCoord() const;
