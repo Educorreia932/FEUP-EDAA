@@ -2,15 +2,22 @@
 
 using namespace std;
 
+typedef DWGraph::node_t node_t;
+
 MapMatching::FromClosestPoint::FromClosestPoint(ClosestPointFactory &closestPointFactory_):
     closestPointFactory(closestPointFactory_)
 {}
 
 void MapMatching::FromClosestPoint::initialize(
-    const list<Coord> &points_
+    const MapGraph *mapGraph_
 ){
+    mapGraph = mapGraph_;
     delete closestPoint; closestPoint = nullptr;
-    list<Vector2> l; for(const Coord &c: points_) l.push_back(c);
+
+    auto nodes = mapGraph_->getNodes();
+    list<Vector2> l;
+    for(const auto &p: nodes) l.push_back(p.second);
+
     closestPoint = closestPointFactory.factoryMethod();
     closestPoint->initialize(l);
 }
@@ -19,12 +26,12 @@ void MapMatching::FromClosestPoint::run(){
     closestPoint->run();
 }
 
-vector<Coord> MapMatching::FromClosestPoint::getMatches(
+vector<node_t> MapMatching::FromClosestPoint::getMatches(
     const vector<Coord> &trip_
 ) const {
-    vector<Coord> ret(trip_.size());
+    vector<node_t> ret(trip_.size());
     for(size_t i = 0; i < trip_.size(); ++i){
-        ret[i] = Coord(closestPoint->getClosestPoint(trip_[i]));
+        ret[i] = mapGraph->coordToNode(Coord(closestPoint->getClosestPoint(trip_[i])));
     }
     return ret;
 }

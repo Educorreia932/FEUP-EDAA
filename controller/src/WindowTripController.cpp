@@ -91,7 +91,10 @@ void WindowTripController::run(){
 
 void WindowTripController::onChangeTrip(){
     const Trip &trip = trips.at(tripIndex);
-    std::vector<Coord> currentMatches = mapMatching.getMatches(trip.coords);
+    std::vector<DWGraph::node_t> matchesIds = mapMatching.getMatches(trip.coords);
+    std::vector<Coord> currentMatches(matchesIds.size());
+    for(size_t i = 0; i < matchesIds.size(); ++i)
+        currentMatches[i] = mapGraph.nodeToCoord(matchesIds[i]);
 
     list<Coord> pathCoord;
     pathCoord.push_back(currentMatches[0]);
