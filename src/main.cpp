@@ -126,7 +126,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesM.size() << std::endl;
 
     auto begin = hrc::now();
-    MapGraph G = M.splitLongEdges(5.0);
+    MapGraph G = M.splitLongEdges(10.0);
     auto end = hrc::now();
     double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
@@ -150,12 +150,11 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
 
     std::cout << "Computing map matching..." << std::endl;
-    double d = 0.002; // 0.002 deg is approx. 222m
+    double d = 0.0005; // 0.002 deg is approx. 222m
     double sigma_z = 4.07; // in meters
     double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
     VStripesRadius closestPointsInRadius;
-    ShortestPath::FromOneMany shortestPath(new Dijkstra());
-    HiddenMarkovModel mapMatching(closestPointsInRadius, shortestPath, d, sigma_z, beta);
+    HiddenMarkovModel mapMatching(closestPointsInRadius, d, sigma_z, beta);
     mapMatching.initialize(&G);
     mapMatching.run();
     std::cout << "Computed map matching..." << std::endl;

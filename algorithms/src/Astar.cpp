@@ -3,6 +3,7 @@
 #include <queue>
 #include <iostream>
 #include <chrono>
+#include <cassert>
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
@@ -16,6 +17,8 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
 
+const double INF = 1000000000.0;
+
 Astar::heuristic_t::~heuristic_t(){}
 
 Astar::default_heuristic::default_heuristic(){}
@@ -27,18 +30,20 @@ DWGraph::weight_t Astar::default_heuristic::operator()(DWGraph::node_t) const{
 }
 
 Astar::Astar(const Astar::heuristic_t *h_){
-    this->h = h_;
+    h = h_;
 }
 
 Astar::Astar():Astar(&h_default){}
 
 void Astar::initialize(const DWGraph::DWGraph *G_, node_t s_, node_t d_){
-    this->G = G_;
-    this->s = s_;
-    this->d = d_;
+    G = G_;
+    s = s_;
+    d = d_;
     dist.clear();
     hdist.clear();
     prev.clear();
+    assert(G->getNodes().count(s) != 0);
+    assert(G->getNodes().count(d) != 0);
     // for(const node_t &u: G->getNodes()){
     //     dist[u] = DWGraph::INF;
     //     hdist[u] = DWGraph::INF;
@@ -63,7 +68,7 @@ void Astar::run(){
                 dist[e.v] = c_;
                 hdist[e.v] = c_ + (*h)(e.v);
                 prev[e.v] = u;
-                Q.push(mk(hdist[e.v], e.v));
+                Q.push(mk(c_, e.v));
             }
         }
     }
@@ -75,6 +80,8 @@ node_t Astar::getPrev(node_t u) const{
 
 weight_t Astar::getPathWeight() const{
     return dist.at(d);
+    // if(dist.count(d)) return dist.at(d);
+    // else return INF;
 }
 
 bool Astar::hasVisited(DWGraph::node_t u) const{
