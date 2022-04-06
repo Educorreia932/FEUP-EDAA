@@ -1,5 +1,6 @@
 #include "Viterbi.h"
 
+#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
@@ -28,19 +29,28 @@ void Viterbi::initialize(long T_, long K_,
 
 void Viterbi::run(){
     // Initialize with Pi
-    for(long i = 0; i < K; ++i) DP[0][i] = (*Pi)(i);
+    double maxProb = 0.0;
+    for(long i = 0; i < K; ++i){
+        double p = (*Pi)(i);
+        DP[0][i] = p;
+        maxProb = max(maxProb, p);
+    }
+    if(maxProb > 0.0) for(double &p: DP[0]) p /= maxProb;
 
     // Run stuff
     for(long t = 1; t < T; ++t){
+        maxProb = 0.0;
         for(long j = 0; j < K; ++j){
             for(long i = 0; i < K; ++i){
                 double prob = DP[t-1][i] * (*A)(i,j,t) * (*B)(j,t);
                 if(prob > DP[t][j]){
                     DP  [t][j] = prob;
                     prev[t][j] = i;
+                    maxProb = max(maxProb, prob);
                 }
             }
         }
+        if(maxProb > 0.0) for(double &p: DP[t]) p /= maxProb;
     }
 }
 
@@ -48,7 +58,7 @@ vector<long> Viterbi::getLikeliestPath() const {
     vector<long> ret;
     long j; {
         double pBest = 0.0;
-        for(size_t j_ = 0; j_ < K; ++j_){
+        for(long j_ = 0; j_ < K; ++j_){
             const double &p = DP[T-1][j_];
             if(p > pBest){
                 pBest = p;
@@ -59,11 +69,12 @@ vector<long> Viterbi::getLikeliestPath() const {
     }
 
     ret.push_back(j);
-    for(size_t t = T-1; t > 0; --t){
+    for(long t = T-1; t > 0; --t){
         long i = prev[t][j];
         ret.push_back(i);
         j = i;
     }
+    reverse(ret.begin(), ret.end());
 
     return ret;
 }

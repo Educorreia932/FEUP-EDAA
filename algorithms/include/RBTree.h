@@ -334,7 +334,7 @@ private:
                 return balance_left(new_node);
             }
 
-            assert(0);  // LCOV_EXCL_LINE
+            throw std::runtime_error("RBTree::fuse runtime error"); // LCOV_EXCL_LINE
         }
 
         static node_ptr_type balance(const node_ptr_type& node) {
@@ -411,7 +411,7 @@ private:
                     new_right);
             }
 
-            assert(0);  // LCOV_EXCL_LINE
+            throw std::runtime_error("RBTree::balance_left runtime error"); // LCOV_EXCL_LINE
         }
 
         static node_ptr_type balance_right(const node_ptr_type& node) {
@@ -470,7 +470,7 @@ private:
                     new_right);
             }
 
-            assert(0);  // LCOV_EXCL_LINE
+            throw std::runtime_error("RBTree::balance_right runtime error"); // LCOV_EXCL_LINE
         }
 
         template<

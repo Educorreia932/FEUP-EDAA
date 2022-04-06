@@ -123,7 +123,7 @@ void MapGraphOsmView::refresh(){
 
             auto it1 = way.nodes.begin(),
                 it2 = ++way.nodes.begin();
-            bool first = true;
+            // bool first = true;
             while(it2 != way.nodes.end()){
                 sf::Vector2f u = mapView.coordToVector2f(nodes.at(*(it1++))),
                              v = mapView.coordToVector2f(nodes.at(*(it2++)));
@@ -132,7 +132,7 @@ void MapGraphOsmView::refresh(){
                 else        e = new DashedLineShape(u, v, width);
                 e->setFillColor(color);
                 const VertexArray &shape = *e;
-                const size_t &sz = zip.size();
+                // const size_t &sz = zip.size();
                 // if(!first && !dashed){
                 //     zip.push_back(zip[sz-2]);
                 //     zip.push_back(zip[sz-1]);
@@ -142,7 +142,7 @@ void MapGraphOsmView::refresh(){
                 for(size_t i = 0; i < shape.getVertexCount(); ++i)
                     zip.push_back(shape[i]);
                 delete e; e = nullptr;
-                first = false;
+                // first = false;
             }
 
             // u = mapView.coordToVector2f(nodes.at(*way.nodes.rbegin()));

@@ -88,11 +88,11 @@ public:
     MyA(double beta_, const vector<Coord> &Y_, const VVF &D_):
         beta(beta_), Y(Y_), D(D_){}
     virtual double operator()(long i, long j, long t) const {
-        const Coord &zt0 = Y[t];
-        const Coord &zt1 = Y[t+1];
+        const Coord &zt0 = Y.at(t-1);
+        const Coord &zt1 = Y.at(t);
         double dArc = Coord::getDistanceArc(zt0, zt1);
 
-        const double &dRoute = D[i][j];
+        const double &dRoute = D.at(i).at(j);
 
         double dt = abs(dArc-dRoute);
         return exp(-dt/beta)/beta;
@@ -108,8 +108,8 @@ public:
     MyB(double sigma_z_, const vector<Coord> &S_, const vector<Coord> &Y_):
         sigma_z(sigma_z_), S(S_), Y(Y_){}
     virtual double operator()(long i, long t) const {
-        const Coord &zt = Y[t];
-        const Coord &xti = S[i];
+        const Coord &zt = Y.at(t);
+        const Coord &xti = S.at(i);
         double d = Coord::getDistanceArc(zt, xti);
         return exp(-0.5 * pow(d/sigma_z, 2))/(sqrt(2*M_PI) * sigma_z);
     }
@@ -148,24 +148,15 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, INF));
     for(size_t t = 0; t+1 < T; ++t){
-        // cout << "t=" << t
-        //      << ", candidateStates.at(t).size()=" << candidateStates.at(t).size()
-        //      << endl;
         for(size_t j: candidateStates.at(t+1)){
-            //cout << "  j=" << j << endl;
-            MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS);
-            // Astar astar(&h);
-            Astar astar;
+            MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
+            Astar astar(&h);
             for(size_t i: candidateStates.at(t)){
-                // cout << "    t=" << t << ", "
-                //      << "j=" << j << "(" << /*nodes.at(idxToNode.at(j)).y << "/" << nodes.at(idxToNode.at(j)).x <<*/ idxToNode.at(j) <<  "), "
-                //      << "i=" << i << "(" << /*nodes.at(idxToNode.at(i)).y << "/" << nodes.at(idxToNode.at(i)).x <<*/ idxToNode.at(i) <<  ")"
-                //      << "/" << idxToNode.size() << endl;
-                astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j)); //cout << "L146" << endl;
-                astar.run(); //cout << "L147, K=" << K << endl;
+                astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j));
+                astar.run();
                 distMatrix[i][j] =
                     double(astar.getPathWeight())
-                    *MILLIMS_TO_METERS; //cout << "L148" << endl;
+                    *MILLIMS_TO_METERS;
             }
         }
     }
@@ -182,12 +173,12 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     viterbi.run();
 
     vector<long> v = viterbi.getLikeliestPath();
+
+    assert(v.size() == trip.size());
     
     vector<node_t> matches(v.size());
     for(size_t i = 0; i < v.size(); ++i){
         matches[i] = idxToNode[v[i]];
     }
     return matches;
-
-    return vector<node_t>();
 }
