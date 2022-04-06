@@ -11,14 +11,14 @@ Coord::Coord(const Vector2 &v): Vector2(v){}
 
 static double haversine(const Coord &p1, const Coord &p2){
     double dLat = (p1.lat() - p2.lat()) * DEG_TO_RAD;
+    dLat = sin(dLat/2.0);
+
     double dLon = (p1.lon() - p2.lon()) * DEG_TO_RAD;
+    dLon = sin(dLon/2.0);
 
-    double lat1_rad = p1.lat()*DEG_TO_RAD;
-    double lat2_rad = p2.lat()*DEG_TO_RAD;
-
-    double a = (pow(sin(dLat/2.0), 2) + 
-                pow(sin(dLon/2.0), 2) *
-                    cos(lat1_rad) * cos(lat2_rad));
+    double a = (dLat*dLat + 
+                dLon*dLon *
+                    cos(p1.lat()*DEG_TO_RAD) * cos(p2.lat()*DEG_TO_RAD));
     double c = 2.0 * asin(sqrt(a));
     return c;
 }
