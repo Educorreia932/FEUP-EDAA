@@ -141,6 +141,8 @@ MapGraph MapGraph::splitLongEdges(double threshold) const {
     G.nodes = nodes;
     G.coord2node = coord2node;
     G.ways = ways;
+    G.min_coord = min_coord;
+    G.max_coord = max_coord;
 
     node_t nextNodeId = 0;
     for(const auto &p: G.nodes)

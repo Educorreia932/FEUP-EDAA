@@ -29,3 +29,17 @@ Save the file as `map.xml` in path `map/original/map.xml`
 - [Voronoi Diagram - Philipp Kindermann](https://www.youtube.com/watch?v=pUwEp1hs8MM)
 - [Fortune's Algorithm - Desmos](https://www.desmos.com/calculator/y1ybdnkvvz)
 - [Voronoi Generation - Paul Reed](http://paul-reed.co.uk/fortune.htm#findycoord)
+
+## Strange segfault
+
+When I was running Kosaraju, I kept getting SEGFAULT. I ran valgrind and apparently it said that no more stack could be reserved  (apparently because Linux sets a stack limit of around 8192KB, and my algorithm was recursing pretty deep). To solve this, I removed the stack limit by running
+
+```sh
+ulimit -s unlimited
+```
+
+This change is not permanent, it only applies to the current shell. To make it permanent, add it to the end of your `~/.bashrc` file, or just run this command which does exactly the same thing:
+
+```sh
+sudo echo -e "\nulimit -s unlimited\n" >> ~/.bashrc
+```
