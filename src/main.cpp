@@ -153,7 +153,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
 
     K2DTreeClosestPointFactory factory;
     MapMatching::FromClosestPoint mapMatching(factory);
-    mapMatching.initialize(points);
+    mapMatching.initialize(&G);
     mapMatching.run();
 
     std::cout << "Generating graph..." << std::endl;
