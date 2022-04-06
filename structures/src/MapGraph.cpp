@@ -14,6 +14,7 @@ typedef DWGraph::weight_t weight_t;
 
 const double SECONDS_TO_MICROS = 1000000;     // Convert seconds to milliseconds
 const double KPH_TO_MPS        = (1.0/3.6);   // Convert km/h to m/s
+const double METERS_TO_MILLIMS = 1000;
 
 MapGraph::speed_t MapGraph::way_t::getMaxSpeed() const{
     
@@ -129,7 +130,7 @@ DWGraph::DWGraph MapGraph::getDistanceGraph() const{
         auto it1 = w.nodes.begin();
         for(auto it2 = it1++; it1 != w.nodes.end(); ++it1, ++it2){
             auto d = Coord::getDistanceArc(nodes.at(*it1), nodes.at(*it2));
-            G.addEdge(*it2, *it1, weight_t(d));
+            G.addEdge(*it2, *it1, weight_t(d*METERS_TO_MILLIMS));
         }
     }
     return G;
