@@ -1,5 +1,8 @@
 #include "Viterbi.h"
 
+#include <cassert>
+#include <stdexcept>
+
 using namespace std;
 
 typedef std::vector<double> VF;
@@ -15,6 +18,13 @@ void Viterbi::initialize(long T_, long K_, const VF *Pi_, const VVVF *A_, const 
     Pi = Pi_;
     A  = A_;
     B  = B_;
+
+    assert((*Pi)      .size() == K);
+    assert((*A )      .size() == K);
+    assert((*A )[0]   .size() == K);
+    assert((*A )[0][0].size() == T);
+    assert((*B )      .size() == K);
+    assert((*B )      .size() == T-1);
 
     DP   = VVF(T, VF(K,  0));
     prev = VVI(T, VI(K, -1));
@@ -36,4 +46,28 @@ void Viterbi::run(){
             }
         }
     }
+}
+
+vector<long> Viterbi::getLikeliestPath() const {
+    vector<long> ret;
+    long j; {
+        double pBest = 0.0;
+        for(size_t j_ = 0; j_ < K; ++j_){
+            const double &p = DP[T-1][j_];
+            if(p > pBest){
+                pBest = p;
+                j = j_;
+            }
+        }
+        if(pBest == 0.0) throw runtime_error("Could not find any path");
+    }
+
+    ret.push_back(j);
+    for(size_t t = T-1; t > 0; --t){
+        long i = prev[t][j];
+        ret.push_back(i);
+        j = i;
+    }
+
+    return ret;
 }

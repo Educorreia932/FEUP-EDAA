@@ -11,8 +11,11 @@
 #include "Trip.h"
 #include "polygon.h"
 
-#include "K2DTreeClosestPointFactory.h"
+#include "Dijkstra.h"
 #include "FortuneAlgorithm.h"
+#include "HiddenMarkovModel.h"
+#include "K2DTreeClosestPointFactory.h"
+#include "VStripesRadius.h"
 
 #include "DraggableZoomableWindow.h"
 #include "MapView.h"
@@ -146,15 +149,16 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // meanD /= n;
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
 
-    std::list<Coord> points;
-    for(const auto &p: G.getNodes()){
-        points.push_back(p.second);
-    }
-
-    K2DTreeClosestPointFactory factory;
-    MapMatching::FromClosestPoint mapMatching(factory);
+    std::cout << "Computing map matching..." << std::endl;
+    double d = 0.002; // 0.002 deg is approx. 222m
+    double sigma_z = 4.07; // in meters
+    double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
+    VStripesRadius closestPointsInRadius;
+    ShortestPath::FromOneMany shortestPath(new Dijkstra());
+    HiddenMarkovModel mapMatching(closestPointsInRadius, shortestPath, d, sigma_z, beta);
     mapMatching.initialize(&G);
     mapMatching.run();
+    std::cout << "Computed map matching..." << std::endl;
 
     std::cout << "Generating graph..." << std::endl;
     DWGraph::DWGraph dwG = G.getTimeGraph();

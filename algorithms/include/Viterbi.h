@@ -28,4 +28,5 @@ private:
 public:
     void initialize(long T_, long K_, const VF *Pi_, const VVVF *A_, const VVF *B_);
     void run();
+    std::vector<long> getLikeliestPath() const;
 };
