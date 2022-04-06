@@ -11,6 +11,7 @@
 class Kosaraju : public SCC{
 private:
     const DUGraph *G;
+    DUGraph GT;
     std::unordered_set<DUGraph::node_t> S;
     std::stack<DUGraph::node_t> L;
     std::unordered_map<DUGraph::node_t, DUGraph::node_t> SCCs;
