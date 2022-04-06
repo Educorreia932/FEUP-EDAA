@@ -40,15 +40,6 @@ void Astar::initialize(const DWGraph::DWGraph *G_, node_t s_, node_t d_){
     s = s_;
     d = d_;
     dist.clear();
-    hdist.clear();
-    prev.clear();
-    assert(G->getNodes().count(s) != 0);
-    assert(G->getNodes().count(d) != 0);
-    // for(const node_t &u: G->getNodes()){
-    //     dist[u] = DWGraph::INF;
-    //     hdist[u] = DWGraph::INF;
-    //     prev[u] = DWGraph::INVALID_NODE;
-    // }
 }
 
 node_t Astar::getStart() const { return s; }
@@ -57,33 +48,33 @@ node_t Astar::getDest () const { return d; }
 
 void Astar::run(){
     min_priority_queue Q;
-    dist[s] = 0; hdist[s] = (*h)(s); Q.push(mk(hdist[s], s));
+    dist[s] = mk(0, -1); Q.push(mk((*h)(s), s));
     while(!Q.empty()){
         node_t u = Q.top().second;
         Q.pop();
         if(u == d) break;
-        for(Edge e: G->getAdj(u)){
-            weight_t c_ = (dist.count(u) ? dist[u] : DWGraph::INF) + e.w;
-            if(!dist.count(e.v) || c_ < dist[e.v]){
-                dist[e.v] = c_;
-                hdist[e.v] = c_ + (*h)(e.v);
-                prev[e.v] = u;
-                Q.push(mk(c_, e.v));
+        for(const Edge &e: G->getAdj(u)){
+            auto uit = dist.find(u);
+            weight_t c_ = (uit != dist.end() ? uit->second.first : DWGraph::INF) + e.w;
+            auto dit = dist.find(e.v);
+            if(dit == dist.end() || c_ < dit->second.first){
+                dist[e.v] = mk(c_, u);
+                Q.push(mk(c_ + (*h)(e.v), e.v));
             }
         }
     }
 }
 
 node_t Astar::getPrev(node_t u) const{
-    return prev.at(u);
+    return dist.at(u).second;
 }
 
 weight_t Astar::getPathWeight() const{
-    return dist.at(d);
+    return dist.at(d).first;
     // if(dist.count(d)) return dist.at(d);
     // else return INF;
 }
 
 bool Astar::hasVisited(DWGraph::node_t u) const{
-    return (dist.at(u) != DWGraph::INF);
+    return (dist.at(u).first != DWGraph::INF);
 }

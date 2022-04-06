@@ -152,11 +152,11 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
             MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
             Astar astar(&h);
             for(size_t i: candidateStates.at(t)){
+                double &d = distMatrix[i][j];
+                if(d != INF) continue;
                 astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j));
                 astar.run();
-                distMatrix[i][j] =
-                    double(astar.getPathWeight())
-                    *MILLIMS_TO_METERS;
+                d = double(astar.getPathWeight())*MILLIMS_TO_METERS;
             }
         }
     }

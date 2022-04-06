@@ -39,9 +39,7 @@ private:
     const heuristic_t *h;
     const DWGraph::DWGraph *G;
     DWGraph::node_t s, d;
-    std::unordered_map<DWGraph::node_t, DWGraph::weight_t> dist;
-    std::unordered_map<DWGraph::node_t, DWGraph::weight_t> hdist;
-    std::unordered_map<DWGraph::node_t, DWGraph::node_t  > prev;
+    std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
 public:
 
     /**
