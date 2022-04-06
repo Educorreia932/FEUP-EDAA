@@ -157,7 +157,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     mapMatching.run();
 
     std::cout << "Generating graph..." << std::endl;
-    DWGraph::DWGraph dwG = G.getFullGraph();
+    DWGraph::DWGraph dwG = G.getTimeGraph();
     std::cout << "Generated graph" << std::endl;
 
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
