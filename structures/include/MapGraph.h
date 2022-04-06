@@ -22,10 +22,6 @@ public:
         speed_t getMaxSpeed() const;
     };
 private:
-    DWGraph::DWGraph fullGraph;
-    DWGraph::DWGraph connectedGraph;
-    // ClosestPoint *closestPoint = nullptr;
-
     std::unordered_map<DWGraph::node_t, Coord> nodes;
     std::unordered_map<Coord, DWGraph::node_t> coord2node;
     Coord min_coord = Coord(+90.0, +180.0);
@@ -42,7 +38,7 @@ public:
     ~MapGraph();
     void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
-    DWGraph::DWGraph getFullGraph() const;
+    DWGraph::DWGraph getTimeGraph() const;
     // DWGraph::DWGraph getConnectedGraph() const;
     MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;

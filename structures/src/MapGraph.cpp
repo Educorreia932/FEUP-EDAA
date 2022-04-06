@@ -58,6 +58,7 @@ MapGraph::MapGraph(const std::string &path){
             coord2node[c] = id;
         }
     }
+    size_t numberEdges = 0;
     {
         std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         is.open(path + ".edges");
@@ -66,10 +67,10 @@ MapGraph::MapGraph(const std::string &path){
             way_t way; long long id; char c;
             is >> id >> c >> way.speed; way.edgeType = static_cast<edge_type_t>(c);
             size_t numberNodes; is >> numberNodes;
-            for(size_t j = 0; j < numberNodes; ++j){
+            for(size_t j = 0; j < numberNodes; ++j, ++numberEdges){
                 node_t id; is >> id;
                 way.nodes.push_back(id);
-            }
+            } --numberEdges;
             ways.push_back(way);
         }
     }
@@ -83,50 +84,9 @@ MapGraph::MapGraph(const std::string &path){
         min_coord = Coord(lat_max, lon_min);
         max_coord = Coord(lat_min, lon_max);
     }
-    fullGraph = getFullGraph();
-    /*
-    {
-        Coord station_coord; {
-            std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            is.open(path + ".points");
-            size_t numberPoints; is >> numberPoints;
-            is >> station_coord;
-        }
 
-        DWGraph::DWGraph G = fullGraph;
-        std::list<Coord> nodes_list;
-        for(const node_t &u: G.getNodes()) nodes_list.push_back(nodes.at(u));
-
-        ClosestPoint *closestPoint_initial = new VStripes(0.025);
-        closestPoint_initial->initialize(nodes_list);
-        closestPoint_initial->run();
-        Coord station_closest = closestPoint_initial->getClosestPoint(station_coord);
-        delete closestPoint_initial;
-        
-        station = DWGraph::INVALID_NODE;
-        
-        for(const auto &p: nodes){
-            if(p.second == station_closest) station = p.first;
-        }
-        if(station == DWGraph::INVALID_NODE) throw std::invalid_argument("No such node");
-
-        std::cout << "Station node: " << station << std::endl;
-    }
-    connectedGraph = getConnectedGraph();
-    {
-        DWGraph::DWGraph G = connectedGraph;
-        std::list<Coord> nodes_list;
-        for(const node_t &u: G.getNodes()) nodes_list.push_back(nodes.at(u));
-
-        closestPoint = new VStripes(0.025);
-        closestPoint->initialize(nodes_list);
-        closestPoint->run();
-    }
-    */
-    connectedGraph = fullGraph;
-
-    std::cout << "Nodes: " << connectedGraph.getNodes().size() << std::endl;
-    std::cout << "Edges: " << connectedGraph.getNumberEdges()  << std::endl;
+    std::cout << "Nodes: " << nodes.size() << std::endl;
+    std::cout << "Edges: " << numberEdges  << std::endl;
 }
 
 MapGraph::~MapGraph(){
@@ -146,7 +106,7 @@ void MapGraph::addWay(MapGraph::way_t w){
     ways.push_back(w);
 }
 
-DWGraph::DWGraph MapGraph::getFullGraph() const{
+DWGraph::DWGraph MapGraph::getTimeGraph() const{
     DWGraph::DWGraph G;
     for(const auto &p: nodes) G.addNode(p.first);
     for(const way_t &w: ways){
