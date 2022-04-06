@@ -39,18 +39,13 @@ HiddenMarkovModel::HiddenMarkovModel(
 
 void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
     mapGraph = mapGraph_;
-    auto nodes = mapGraph->getNodes();
-    list<Vector2> l;
-    for(const auto &p: nodes) l.push_back(p.second);
-    closestPointsInRadius.initialize(l, d);
-
-    distGraph = mapGraph->getDistanceGraph();
 
     cout << "Calculating SCC..." << endl;
+    distGraph = mapGraph->getDistanceGraph();
     DUGraph duDistGraph = (DUGraph)distGraph;
-    Kosaraju kosaraju; cout << "L51" << endl;
-    kosaraju.initialize(&duDistGraph); cout << "L52" << endl;
-    kosaraju.run(); cout << "L53" << endl;
+    Kosaraju kosaraju;
+    kosaraju.initialize(&duDistGraph);
+    kosaraju.run();
     node_t root = kosaraju.get_scc(4523960191);
     for(const node_t &u: duDistGraph.getNodes()){
         if(kosaraju.get_scc(u) != root){
@@ -58,6 +53,11 @@ void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
         }
     }
     cout << "Calculated SCC" << endl;
+
+    auto nodes = distGraph.getNodes();
+    list<Vector2> l;
+    for(const node_t &u: nodes) l.push_back(mapGraph->nodeToCoord(u));
+    closestPointsInRadius.initialize(l, d);
 }
 
 void HiddenMarkovModel::run(){
@@ -148,24 +148,24 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, INF));
     for(size_t t = 0; t+1 < T; ++t){
-        cout << "t=" << t
-             << ", candidateStates.at(t).size()=" << candidateStates.at(t).size()
-             << endl;
+        // cout << "t=" << t
+        //      << ", candidateStates.at(t).size()=" << candidateStates.at(t).size()
+        //      << endl;
         for(size_t j: candidateStates.at(t+1)){
-            cout << "  j=" << j << endl;
+            //cout << "  j=" << j << endl;
             MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS);
             // Astar astar(&h);
             Astar astar;
             for(size_t i: candidateStates.at(t)){
-                cout << "    t=" << t << ", "
-                     << "j=" << j << "(" << nodes.at(idxToNode.at(j)).y << "/" << nodes.at(idxToNode.at(j)).x << "), "
-                     << "i=" << i << "(" << nodes.at(idxToNode.at(i)).y << "/" << nodes.at(idxToNode.at(i)).x << ")"
-                     << "/" << idxToNode.size() << endl;
-                astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j)); cout << "L146" << endl;
-                astar.run(); cout << "L147, K=" << K << endl;
+                // cout << "    t=" << t << ", "
+                //      << "j=" << j << "(" << /*nodes.at(idxToNode.at(j)).y << "/" << nodes.at(idxToNode.at(j)).x <<*/ idxToNode.at(j) <<  "), "
+                //      << "i=" << i << "(" << /*nodes.at(idxToNode.at(i)).y << "/" << nodes.at(idxToNode.at(i)).x <<*/ idxToNode.at(i) <<  ")"
+                //      << "/" << idxToNode.size() << endl;
+                astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j)); //cout << "L146" << endl;
+                astar.run(); //cout << "L147, K=" << K << endl;
                 distMatrix[i][j] =
                     double(astar.getPathWeight())
-                    *MILLIMS_TO_METERS; cout << "L148" << endl;
+                    *MILLIMS_TO_METERS; //cout << "L148" << endl;
             }
         }
     }
