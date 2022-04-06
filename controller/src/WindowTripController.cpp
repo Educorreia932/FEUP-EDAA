@@ -91,13 +91,7 @@ void WindowTripController::run(){
 
 void WindowTripController::onChangeTrip(){
     const Trip &trip = trips.at(tripIndex);
-    std::vector<Vector2> coords(trip.coords.size());
-    for(size_t i = 0; i < trip.coords.size(); ++i)
-        coords[i] = trip.coords[i];
-    std::vector<Vector2> ret = mapMatching.getMatches(coords);
-    currentMatches.resize(ret.size());
-    for(size_t i = 0; i < ret.size(); ++i)
-        currentMatches[i] = Coord(ret[i]);
+    std::vector<Coord> currentMatches = mapMatching.getMatches(trip.coords);
 
     list<Coord> pathCoord;
     pathCoord.push_back(currentMatches[0]);

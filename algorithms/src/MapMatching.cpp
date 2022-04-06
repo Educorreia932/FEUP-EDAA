@@ -7,23 +7,24 @@ MapMatching::FromClosestPoint::FromClosestPoint(ClosestPointFactory &closestPoin
 {}
 
 void MapMatching::FromClosestPoint::initialize(
-    const list<Vector2> &points_
+    const list<Coord> &points_
 ){
     delete closestPoint; closestPoint = nullptr;
+    list<Vector2> l; for(const Coord &c: points_) l.push_back(c);
     closestPoint = closestPointFactory.factoryMethod();
-    closestPoint->initialize(points_);
+    closestPoint->initialize(l);
 }
 
 void MapMatching::FromClosestPoint::run(){
     closestPoint->run();
 }
 
-vector<Vector2> MapMatching::FromClosestPoint::getMatches(
-    const vector<Vector2> &trip_
+vector<Coord> MapMatching::FromClosestPoint::getMatches(
+    const vector<Coord> &trip_
 ) const {
-    vector<Vector2> ret(trip_.size());
+    vector<Coord> ret(trip_.size());
     for(size_t i = 0; i < trip_.size(); ++i){
-        ret[i] = closestPoint->getClosestPoint(trip_[i]);
+        ret[i] = Coord(closestPoint->getClosestPoint(trip_[i]));
     }
     return ret;
 }

@@ -4,12 +4,13 @@
 #include <vector>
 
 #include "ClosestPoint.h"
+#include "Coord.h"
 
 class MapMatching {
 public:
-    virtual void initialize(const std::list<Vector2> &points) = 0;
+    virtual void initialize(const std::list<Coord> &points) = 0;
     virtual void run() = 0;
-    virtual std::vector<Vector2> getMatches(const std::vector<Vector2> &trip) const = 0;
+    virtual std::vector<Coord> getMatches(const std::vector<Coord> &trip) const = 0;
 
     class FromClosestPoint;
 };
@@ -21,10 +22,10 @@ private:
 public:
     FromClosestPoint(ClosestPointFactory &closestPointFactory_);
 
-    virtual void initialize(const std::list<Vector2> &points_);
+    virtual void initialize(const std::list<Coord> &points_);
 
     virtual void run();
 
-    virtual std::vector<Vector2> getMatches(const std::vector<Vector2> &trip_) const;
+    virtual std::vector<Coord> getMatches(const std::vector<Coord> &trip_) const;
 };
 

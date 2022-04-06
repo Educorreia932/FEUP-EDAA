@@ -146,7 +146,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // meanD /= n;
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
 
-    std::list<Vector2> points;
+    std::list<Coord> points;
     for(const auto &p: G.getNodes()){
         points.push_back(p.second);
     }
