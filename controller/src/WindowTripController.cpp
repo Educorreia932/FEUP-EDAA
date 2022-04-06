@@ -5,7 +5,7 @@
 
 #include "Astar.h"
 
-using namespace sf;
+using sf::Event, sf::Keyboard, sf::Mouse;
 using namespace std;
 
 typedef DWGraph::node_t node_t;
@@ -20,14 +20,14 @@ WindowTripController::WindowTripController(
     const MapGraph &mapGraph_,
     const DWGraph::DWGraph &graph_,
     const vector<Trip> &trips_,
-    const ClosestPoint &closestPoint_
+    const MapMatching &mapMatching_
 ):
     window(window_),
     mapTripMatchView(mapTripMatchView_),
     mapGraph(mapGraph_),
     graph(graph_),
     trips(trips_),
-    closestPoint(closestPoint_)
+    mapMatching(mapMatching_)
 {}
 
 void WindowTripController::run(){
@@ -91,11 +91,10 @@ void WindowTripController::run(){
 
 void WindowTripController::onChangeTrip(){
     const Trip &trip = trips.at(tripIndex);
-    const std::vector<Coord> &coords = trip.coords;
-    currentMatches.resize(coords.size());
-    for(size_t i = 0; i < coords.size(); ++i){
-        currentMatches.at(i) = Coord(closestPoint.getClosestPoint(coords.at(i)));
-    }
+    std::vector<DWGraph::node_t> matchesIds = mapMatching.getMatches(trip.coords);
+    std::vector<Coord> currentMatches(matchesIds.size());
+    for(size_t i = 0; i < matchesIds.size(); ++i)
+        currentMatches[i] = mapGraph.nodeToCoord(matchesIds[i]);
 
     list<Coord> pathCoord;
     pathCoord.push_back(currentMatches[0]);

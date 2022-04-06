@@ -57,3 +57,8 @@ public:
      */
     virtual bool hasVisited(DWGraph::node_t u) const = 0;
 };
+
+class ShortestPathOneManyFactory {
+public:
+    virtual ShortestPathOneMany *factoryMethod() = 0;
+};

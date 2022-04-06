@@ -4,6 +4,7 @@
 
 #include "K2DTreeClosestPoint.h"
 #include "DeepVStripes.h"
+#include "VStripesRadius.h"
 
 using namespace std;
 
@@ -51,7 +52,7 @@ TEST_CASE("Quad Tree", "[quadtree]"){
         Vector2(7, 3),
         Vector2(8, 8),
         Vector2(1, 7)
-    })); //(Lat, Lon), or (y, x)
+    }));
     q.run();
 
     REQUIRE(q.getClosestPoint(Vector2(9,2)) == Vector2(8,3));
@@ -119,7 +120,7 @@ TEST_CASE("VStripes", "[vstripes]"){
         Vector2(7, 3),
         Vector2(8, 8),
         Vector2(1, 7)
-    })); //(Lat, Lon), or (y, x)
+    }));
     q.run();
 
     REQUIRE(q.getClosestPoint(Vector2(9,2)) == Vector2(8,3));
@@ -136,7 +137,7 @@ TEST_CASE("DeepVStripes", "[deepvstripes]"){
         Vector2(7, 3),
         Vector2(8, 8),
         Vector2(1, 7)
-    })); //(Lat, Lon), or (y, x)
+    }));
     q.run();
 
     REQUIRE(q.getClosestPoint(Vector2(9,2)) == Vector2(8,3));
@@ -190,5 +191,62 @@ TEST_CASE("DeepVStripes 3", "[deepvstripes-3]"){
         );
 
         REQUIRE(q.getClosestPoint(u) == findClosestBruteForce(l, u));
+    }
+}
+
+TEST_CASE("VStripes Closest Points in Radius", "[vstripes-radius-1]"){
+    VStripesRadius q;
+    q.initialize(list<Vector2>({
+        Vector2(1, 9),
+        Vector2(4, 7),
+        Vector2(8, 3),
+        Vector2(4, 5),
+        Vector2(2, 9),
+        Vector2(7, 3),
+        Vector2(8, 8),
+        Vector2(1, 7)
+    }), 2.0);
+    q.run();
+
+    vector<Vector2> v;
+
+    v = q.getClosestPoints(Vector2(9.00,2.00)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(8,3)}));
+    v = q.getClosestPoints(Vector2(8.00,2.00)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(7,3), Vector2(8,3)}));
+    v = q.getClosestPoints(Vector2(8.00,1.01)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(8,3)}));
+}
+
+TEST_CASE("VStripes Closest Points in Radius 2", "[vstripes-radius-3]"){
+    const size_t N = 1000, M = 1000;
+    list<Vector2> l;
+    for(size_t i = 0; i < N; ++i){
+        l.push_back(Vector2(
+            double(rand())/double(RAND_MAX),
+            double(rand())/double(RAND_MAX)
+        ));
+    }
+
+    const double d = 0.05;
+    const double epsilon = d * 0.000000001;
+
+    VStripesRadius q;
+    q.initialize(l, d);
+    q.run();
+
+    for(size_t i = 0; i < M; ++i){
+        Vector2 u(
+            double(rand())/double(RAND_MAX),
+            double(rand())/double(RAND_MAX)
+        );
+        
+        vector<Vector2> v = q.getClosestPoints(u);
+        bool (*cmp)(const Vector2&, const Vector2&) = Vector2::compXY;
+        set<Vector2, bool (*)(const Vector2&, const Vector2&)> s(cmp);
+        s.insert(v.begin(), v.end());
+
+        for(const Vector2 &p: l){
+            double dist = u.getDistance(p);
+            if     (dist > d+epsilon) REQUIRE(s.count(p) == 0);
+            else if(dist < d-epsilon) REQUIRE(s.count(p) == 1);
+        }
     }
 }
