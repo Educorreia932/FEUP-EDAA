@@ -32,6 +32,7 @@ public:
 
     static bool compX(const Vector2 &lhs, const Vector2 &rhs);
     static bool compY(const Vector2 &lhs, const Vector2 &rhs);
+    static bool compXY(const Vector2 &lhs, const Vector2 &rhs);
 };
 
 namespace std {

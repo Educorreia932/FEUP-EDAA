@@ -83,6 +83,11 @@ bool Vector2::compY(const Vector2 &lhs, const Vector2 &rhs){
     return (lhs.y < rhs.y);
 }
 
+bool Vector2::compXY(const Vector2 &lhs, const Vector2 &rhs){
+    if(lhs.x != rhs.x) return lhs.x < rhs.x;
+    else               return lhs.y < rhs.y;
+}
+
 bool collinear(Vector2 a, Vector2 b, Vector2 c) {
     return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y);
 }
