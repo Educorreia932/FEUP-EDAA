@@ -6,6 +6,8 @@
 #include <map>
 
 #include "Astar.h"
+#include "DUGraph.h"
+#include "Kosaraju.h"
 #include "Viterbi.h"
 
 using namespace std;
@@ -43,6 +45,19 @@ void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
     closestPointsInRadius.initialize(l, d);
 
     distGraph = mapGraph->getDistanceGraph();
+
+    cout << "Calculating SCC..." << endl;
+    DUGraph duDistGraph = (DUGraph)distGraph;
+    Kosaraju kosaraju; cout << "L51" << endl;
+    kosaraju.initialize(&duDistGraph); cout << "L52" << endl;
+    kosaraju.run(); cout << "L53" << endl;
+    node_t root = kosaraju.get_scc(4523960191);
+    for(const node_t &u: duDistGraph.getNodes()){
+        if(kosaraju.get_scc(u) != root){
+            distGraph.removeNode(u);
+        }
+    }
+    cout << "Calculated SCC" << endl;
 }
 
 void HiddenMarkovModel::run(){
