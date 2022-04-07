@@ -148,14 +148,18 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, INF));
     for(size_t t = 0; t+1 < T; ++t){
-        for(size_t j: candidateStates.at(t+1)){
-            MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-            AstarFew astar(&h);
-            for(size_t i: candidateStates.at(t)){
+        list<node_t> l;
+        for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+        MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
+        AstarFew astar(&h);
+            
+        for(size_t i: candidateStates.at(t)){
+            astar.initialize(&distGraph, idxToNode.at(i), l);
+            astar.run();
+            for(size_t j: candidateStates.at(t+1)){
                 double &d = distMatrix[i][j];
                 if(d != INF) continue;
-                astar.initialize(&distGraph, idxToNode.at(i), {idxToNode.at(j)});
-                astar.run();
                 d = double(astar.getPathWeight(idxToNode.at(j)))*MILLIMS_TO_METERS;
             }
         }
