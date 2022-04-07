@@ -1,5 +1,5 @@
+#include "Box.h"
 #include "FortuneAlgorithm.h"
-#include "Event.h"
 
 #include <cmath>
 #include <limits>
@@ -29,6 +29,7 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     }
 
     // Finish edges
+    // TODO: Determine bounding box limits
     Box bounding_box = Box(Vector2(0, 0), Vector2(8, 8));
 
     for (Edge* edge : edges) {

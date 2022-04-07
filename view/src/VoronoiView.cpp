@@ -6,9 +6,9 @@ VoronoiView::VoronoiView(sf::RenderTarget &window_, VoronoiDiagram diagram) : wi
     // Edges
     for (Edge edge : diagram.getEdges()) {
         sf::Color color(
-            rand() % 128,
-            rand() % 128,
-            rand() % 128,
+            rand() % 200,
+            rand() % 200,
+            rand() % 200,
             255
         );
 
