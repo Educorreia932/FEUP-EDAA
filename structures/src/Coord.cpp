@@ -18,7 +18,7 @@ static double haversine(double lat1, double lon1, double lat2, double lon2){
 
     double a = (dLat*dLat + 
                 dLon*dLon *
-                    cos(p1.lat()*DEG_TO_RAD) * cos(p2.lat()*DEG_TO_RAD));
+                    cos(lat1*DEG_TO_RAD) * cos(lat2*DEG_TO_RAD));
     double c = 2.0 * asin(sqrt(a));
     return c;
 }
