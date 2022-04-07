@@ -4,15 +4,15 @@
 
 class VStripesRadius: public ClosestPointsInRadius {
 private:
-    std::vector<Vector2> v;
-
+    std::vector<Coord> v;
     double d;
-    double xMin;
-    std::vector<std::vector<Vector2>> stripes;
 
-    void checkStripe(const Vector2 &p, size_t i, std::vector<Vector2> &sols) const;
+    double xMin;
+    std::vector<std::vector<Coord>> stripes;
+
+    void checkStripe(const Coord &p, size_t i, std::vector<Coord> &sols) const;
 public:
-    void initialize(const std::list<Vector2> &points, double width);
+    void initialize(const std::list<Coord> &points, double width);
     void run();
-    std::vector<Vector2> getClosestPoints(Vector2 p) const;
+    std::vector<Coord> getClosestPoints(Coord p) const;
 };

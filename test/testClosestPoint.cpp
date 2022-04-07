@@ -196,30 +196,30 @@ TEST_CASE("DeepVStripes 3", "[deepvstripes-3]"){
 
 TEST_CASE("VStripes Closest Points in Radius", "[vstripes-radius-1]"){
     VStripesRadius q;
-    q.initialize(list<Vector2>({
-        Vector2(1, 9),
-        Vector2(4, 7),
-        Vector2(8, 3),
-        Vector2(4, 5),
-        Vector2(2, 9),
-        Vector2(7, 3),
-        Vector2(8, 8),
-        Vector2(1, 7)
+    q.initialize(list<Coord>({
+        Coord(1, 9),
+        Coord(4, 7),
+        Coord(8, 3),
+        Coord(4, 5),
+        Coord(2, 9),
+        Coord(7, 3),
+        Coord(8, 8),
+        Coord(1, 7)
     }), 2.0);
     q.run();
 
-    vector<Vector2> v;
+    vector<Coord> v;
 
-    v = q.getClosestPoints(Vector2(9.00,2.00)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(8,3)}));
-    v = q.getClosestPoints(Vector2(8.00,2.00)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(7,3), Vector2(8,3)}));
-    v = q.getClosestPoints(Vector2(8.00,1.01)); sort(v.begin(), v.end(), Vector2::compXY); REQUIRE(v == vector<Vector2>({Vector2(8,3)}));
+    v = q.getClosestPoints(Coord(9.00,2.00)); sort(v.begin(), v.end(), Coord::compXY); REQUIRE(v == vector<Coord>({Coord(8,3)}));
+    v = q.getClosestPoints(Coord(8.00,2.00)); sort(v.begin(), v.end(), Coord::compXY); REQUIRE(v == vector<Coord>({Coord(7,3), Coord(8,3)}));
+    v = q.getClosestPoints(Coord(8.00,1.01)); sort(v.begin(), v.end(), Coord::compXY); REQUIRE(v == vector<Coord>({Coord(8,3)}));
 }
 
 TEST_CASE("VStripes Closest Points in Radius 2", "[vstripes-radius-3]"){
     const size_t N = 1000, M = 1000;
-    list<Vector2> l;
+    list<Coord> l;
     for(size_t i = 0; i < N; ++i){
-        l.push_back(Vector2(
+        l.push_back(Coord(
             double(rand())/double(RAND_MAX),
             double(rand())/double(RAND_MAX)
         ));
@@ -233,17 +233,17 @@ TEST_CASE("VStripes Closest Points in Radius 2", "[vstripes-radius-3]"){
     q.run();
 
     for(size_t i = 0; i < M; ++i){
-        Vector2 u(
+        Coord u(
             double(rand())/double(RAND_MAX),
             double(rand())/double(RAND_MAX)
         );
         
-        vector<Vector2> v = q.getClosestPoints(u);
-        bool (*cmp)(const Vector2&, const Vector2&) = Vector2::compXY;
-        set<Vector2, bool (*)(const Vector2&, const Vector2&)> s(cmp);
+        vector<Coord> v = q.getClosestPoints(u);
+        bool (*cmp)(const Coord&, const Coord&) = Coord::compXY;
+        set<Coord, bool (*)(const Coord&, const Coord&)> s(cmp);
         s.insert(v.begin(), v.end());
 
-        for(const Vector2 &p: l){
+        for(const Coord &p: l){
             double dist = u.getDistance(p);
             if     (dist > d+epsilon) REQUIRE(s.count(p) == 0);
             else if(dist < d-epsilon) REQUIRE(s.count(p) == 1);

@@ -150,7 +150,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
 
     std::cout << "Computing map matching..." << std::endl;
-    double d = 0.0005; // 0.002 deg is approx. 222m
+    double d = 50; // in meters
     double sigma_z = 4.07; // in meters
     double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
     VStripesRadius closestPointsInRadius;

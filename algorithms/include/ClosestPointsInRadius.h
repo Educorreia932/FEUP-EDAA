@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-#include "Vector2.h"
+#include "Coord.h"
 
 class ClosestPointsInRadius {
 public:
@@ -12,7 +12,7 @@ public:
      * 
      * @param points List of provided Points
      */
-    virtual void initialize(const std::list<Vector2> &points, double d) = 0;
+    virtual void initialize(const std::list<Coord> &points, double d) = 0;
 
     /**
      * @brief Executes the algorithm
@@ -20,5 +20,5 @@ public:
      */
     virtual void run() = 0;
 
-    virtual std::vector<Vector2> getClosestPoints(Vector2 p) const = 0;
+    virtual std::vector<Coord> getClosestPoints(Coord p) const = 0;
 };

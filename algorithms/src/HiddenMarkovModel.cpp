@@ -55,7 +55,7 @@ void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
     cout << "Calculated SCC" << endl;
 
     auto nodes = distGraph.getNodes();
-    list<Vector2> l;
+    list<Coord> l;
     for(const node_t &u: nodes) l.push_back(mapGraph->nodeToCoord(u));
     closestPointsInRadius.initialize(l, d);
 }
@@ -124,15 +124,15 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     vector<node_t> idxToNode;
     vector<list<long>> candidateStates(trip.size());
     for(size_t t = 0; t < T; ++t){
-        vector<Vector2> v = closestPointsInRadius.getClosestPoints(trip[t]);
-        for(const Vector2 &c: v){
-            if(!Sv.count(Coord(c))){
+        vector<Coord> v = closestPointsInRadius.getClosestPoints(trip[t]);
+        for(const Coord &c: v){
+            if(!Sv.count(c)){
                 long id = Sv.size();
-                Sv[Coord(c)] = id;
-                S.push_back(Coord(c));
-                idxToNode.push_back(mapGraph->coordToNode(Coord(c)));
+                Sv[c] = id;
+                S.push_back(c);
+                idxToNode.push_back(mapGraph->coordToNode(c));
             }
-            candidateStates[t].push_back(Sv.at(Coord(c)));
+            candidateStates[t].push_back(Sv.at(c));
         }
     }
 
