@@ -20,7 +20,8 @@ public:
      * @param p2        Second position
      * @return double   Distance between them in meters
      */
-    static double getDistanceArc(const Coord &p1, const Coord &p2);
+    static double getDistanceArc(const Coord   &p1, const Coord   &p2);
+    static double getDistanceArc(const Vector2 &p1, const Vector2 &p2);
     
     double &lat();
     double &lon();
