@@ -5,7 +5,7 @@
 #include <iostream>
 #include <map>
 
-#include "Astar.h"
+#include "AstarFew.h"
 #include "DUGraph.h"
 #include "Kosaraju.h"
 #include "Viterbi.h"
@@ -150,13 +150,13 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     for(size_t t = 0; t+1 < T; ++t){
         for(size_t j: candidateStates.at(t+1)){
             MapGraph::DistanceHeuristic h(nodes, nodes.at(idxToNode.at(j)), METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-            Astar astar(&h);
+            AstarFew astar(&h);
             for(size_t i: candidateStates.at(t)){
                 double &d = distMatrix[i][j];
                 if(d != INF) continue;
-                astar.initialize(&distGraph, idxToNode.at(i), idxToNode.at(j));
+                astar.initialize(&distGraph, idxToNode.at(i), {idxToNode.at(j)});
                 astar.run();
-                d = double(astar.getPathWeight())*MILLIMS_TO_METERS;
+                d = double(astar.getPathWeight(idxToNode.at(j)))*MILLIMS_TO_METERS;
             }
         }
     }
