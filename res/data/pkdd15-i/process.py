@@ -66,6 +66,11 @@ for row in r1:
         notGoodSet.add(id)
         continue
 
+    if len(polyline) < 1:
+        missing += 1
+        notGoodSet.add(id)
+        continue
+
     prevLat, prevLon = 0, 0
     isGood = True
 

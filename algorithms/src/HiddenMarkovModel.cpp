@@ -156,26 +156,14 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
         AstarFew astar(&h, 650*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
 
-        bool canTransition = false;
-
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
             astar.run();
             for(size_t j: candidateStates.at(t+1)){
                 DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
                 double df = double(d)*MILLIMS_TO_METERS;
-                if(d == iINF){
-                    distMatrix[i][j] = fINF;
-                } else {
-                    distMatrix[i][j] = df;
-                    canTransition = true;
-                }
+                distMatrix[i][j] = (d == iINF ? fINF : df);
             }
-        }
-
-        if(!canTransition){
-            Y.at(t+1) = Y.at(t);
-            candidateStates.at(t+1) = candidateStates.at(t);
         }
     }
     end = hrc::now();
