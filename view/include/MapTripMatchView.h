@@ -20,8 +20,11 @@ private:
     std::vector<Coord> matches;
     std::list<Coord> path;
     std::vector<sf::Vertex> zip;
+    std::vector<sf::Vertex> matchLines;
+    std::vector<sf::Text> texts;
     sf::CircleShape beginCircle;
     sf::CircleShape endCircle;
+    std::list<sf::CircleShape> circles;
 public:
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_);
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_,

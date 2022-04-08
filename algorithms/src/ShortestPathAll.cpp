@@ -1,6 +1,7 @@
 #include "ShortestPathAll.h"
 
 #include <chrono>
+#include "utils.h"
 
 #include <iostream>
 
@@ -31,7 +32,7 @@ void ShortestPathAll::FromOneMany::initialize(const DWGraph::DWGraph *G_, const 
     for(const node_t &u: V){
         Q.push(u);
         for(const node_t &v: V){
-            dist[u][v] = DWGraph::INF;
+            dist[u][v] = iINF;
         }
         dist[u][u] = 0;
     }

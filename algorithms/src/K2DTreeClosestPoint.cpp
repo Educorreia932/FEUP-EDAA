@@ -6,8 +6,6 @@
 
 using namespace std;
 
-const double INF = 1000000000.0L;
-
 size_t size_bits(size_t n){
     return 32 - __builtin_clz(uint32_t(n));
 }
@@ -43,7 +41,7 @@ void K2DTreeClosestPoint::run(){
 
 Vector2 K2DTreeClosestPoint::getClosestPoint(const Vector2 p) const {
     Vector2 cbest;
-    double dbest = INF;
+    double dbest = fINF;
     search(p, 1, cbest, dbest);
     return cbest;
 }

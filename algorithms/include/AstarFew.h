@@ -1,30 +1,18 @@
 #pragma once
 
-#include "ShortestPath.h"
+#include "ShortestPathFew.h"
+
 #include <unordered_map>
+
+#include "Astar.h"
 
 /**
  * @brief AStar algorithm
  * 
  */
-class Astar : public ShortestPath {
+class AstarFew : public ShortestPathFew {
 public:
-    /**
-     * @brief Heuristic Interface
-     * 
-     */
-    class heuristic_t {
-    public:
-        virtual ~heuristic_t();
-
-        /**
-         * @brief Heuristic Function 
-         * 
-         * @param u                     Node to analyse
-         * @return DWGraph::weight_t    Estimated distance/weight from u to the Destination Node
-         */
-        virtual DWGraph::weight_t operator()(DWGraph::node_t u) const = 0;
-    };
+    typedef Astar::heuristic_t heuristic_t;
 private:
     /**
      * @brief Default Heuristic
@@ -37,23 +25,31 @@ private:
     };
     static const default_heuristic h_default;
     const heuristic_t *h;
+    const DWGraph::weight_t dMax;
     const DWGraph::DWGraph *G;
-    DWGraph::node_t s, d;
+    DWGraph::node_t s;
+    std::list<DWGraph::node_t> d;
     std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
 public:
+    /**
+     * @brief Construct from a heuristic and max distance
+     * 
+     * @param h heuristic to use
+     */
+    AstarFew(const heuristic_t *h_, DWGraph::weight_t dMax_);
 
     /**
      * @brief Construct from a heuristic
      * 
      * @param h heuristic to use
      */
-    Astar(const heuristic_t *h);
+    AstarFew(const heuristic_t *h_);
 
     /**
      * @brief Construct without arguments
      * 
      */
-    Astar();
+    AstarFew();
     
     /**
      * @brief Initializes the data members that are required for the algorithm's execution
@@ -62,10 +58,10 @@ public:
      * @param s Starting Node
      * @param d Destination Node
      */
-    void initialize(const DWGraph::DWGraph *G, DWGraph::node_t s, DWGraph::node_t d);
+    void initialize(const DWGraph::DWGraph *G, DWGraph::node_t s, std::list<DWGraph::node_t> d);
 
     DWGraph::node_t getStart() const;
-    DWGraph::node_t getDest () const;
+    std::list<DWGraph::node_t> getDest () const;
 
     /**
      * @brief Execute the algorithm
@@ -80,7 +76,7 @@ public:
      * @return DWGraph::node_t Last Node before getting to u
      */
     DWGraph::node_t getPrev(DWGraph::node_t u) const;
-    DWGraph::weight_t getPathWeight() const;
+    DWGraph::weight_t getPathWeight(DWGraph::node_t u) const;
 
     /**
      * @brief           Checks if a specific node was marked as visited
