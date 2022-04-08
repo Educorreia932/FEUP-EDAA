@@ -42,6 +42,7 @@ void Viterbi::run(){
         maxProb = 0.0;
         for(long j = 0; j < K; ++j){
             for(long i = 0; i < K; ++i){
+                if(DP[t-1][i] <= 0.0) continue;
                 double prob = DP[t-1][i] * (*A)(i,j,t) * (*B)(j,t);
                 if(prob > DP[t][j]){
                     DP  [t][j] = prob;

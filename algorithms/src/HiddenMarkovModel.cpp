@@ -119,12 +119,17 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     const vector<Coord> &Y = trip;
     const size_t &T = Y.size();
 
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+
+    // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+    begin = hrc::now();
     map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
     vector<Coord> S;
     vector<node_t> idxToNode;
     vector<list<long>> candidateStates(trip.size());
     for(size_t t = 0; t < T; ++t){
         vector<Coord> v = closestPointsInRadius.getClosestPoints(trip[t]);
+        assert(!v.empty());
         for(const Coord &c: v){
             if(!Sv.count(c)){
                 long id = Sv.size();
@@ -135,16 +140,14 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
             candidateStates[t].push_back(Sv.at(c));
         }
     }
-
     const size_t &K = Sv.size();
-    
-    // Now I have Y[t] and S[i],
-    // and I need to obtain Pi[i], A[i,j,t] and B[i,t]
 
-    cout << "T=" << T << ", K=" << K << endl;
+    end = hrc::now();
+    dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+    cout << dt << "\t" << T << "\t" << K << "\t";
 
-    cout << "Creating distance matrix..." << endl;
-    auto begin = hrc::now();
+    // ======== DISTANCE MATRIX (A*) ========
+    begin = hrc::now();
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, INF));
     for(size_t t = 0; t+1 < T; ++t){
@@ -152,7 +155,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h);
+        AstarFew astar(&h, 1000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
             
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
@@ -164,20 +167,28 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
             }
         }
     }
-    auto end = hrc::now();
-    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
-    cout << "Created distance matrix, took " << dt << "s" << endl;
+    end = hrc::now();
+    dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+    cout << dt << "\t";
     
+    // ======== HIDDEN MARKOV MODEL (VITERBI) ========
     MyPi Pi(sigma_z, S, Y[0]);
     MyA A(beta, Y, distMatrix);
     MyB B(sigma_z, S, Y);
 
+    begin = hrc::now();
     Viterbi viterbi;
     viterbi.initialize(T, K, &Pi, &A, &B);
     viterbi.run();
 
     vector<long> v = viterbi.getLikeliestPath();
+    end = hrc::now();
+    dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+    cout << dt << "\t";
 
+    cout << endl;
+
+    // Final processing
     assert(v.size() == trip.size());
     
     vector<node_t> matches(v.size());

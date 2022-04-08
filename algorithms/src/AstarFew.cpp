@@ -29,9 +29,9 @@ DWGraph::weight_t AstarFew::default_heuristic::operator()(DWGraph::node_t) const
     return 0;
 }
 
-AstarFew::AstarFew(const AstarFew::heuristic_t *h_){
-    h = h_;
-}
+AstarFew::AstarFew(const AstarFew::heuristic_t *h_, weight_t dMax_):h(h_), dMax(dMax_){}
+
+AstarFew::AstarFew(const AstarFew::heuristic_t *h_):AstarFew(h_, INF){}
 
 AstarFew::AstarFew():AstarFew(&h_default){}
 
@@ -51,8 +51,9 @@ void AstarFew::run(){
     min_priority_queue Q;
     dist[s] = mk(0, -1); Q.push(mk((*h)(s), s));
     while(!Q.empty()){
-        node_t u = Q.top().second;
-        Q.pop();
+        pair<weight_t, node_t> p =  Q.top(); Q.pop();
+        if(p.first > dMax) break;
+        const node_t &u = p.second;
         
         auto uit = dS.find(u);
         if(uit != dS.end()) dS.erase(uit);
@@ -67,6 +68,11 @@ void AstarFew::run(){
                 Q.push(mk(c_ + (*h)(e.v), e.v));
             }
         }
+    }
+
+    for(const node_t &u: dS){
+        if(dist.count(u) == 0)
+            dist[u] = mk(INF, -1);
     }
 }
 

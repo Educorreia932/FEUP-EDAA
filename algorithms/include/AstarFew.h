@@ -25,18 +25,25 @@ private:
     };
     static const default_heuristic h_default;
     const heuristic_t *h;
+    const DWGraph::weight_t dMax;
     const DWGraph::DWGraph *G;
     DWGraph::node_t s;
     std::list<DWGraph::node_t> d;
     std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
 public:
+    /**
+     * @brief Construct from a heuristic and max distance
+     * 
+     * @param h heuristic to use
+     */
+    AstarFew(const heuristic_t *h_, DWGraph::weight_t dMax_);
 
     /**
      * @brief Construct from a heuristic
      * 
      * @param h heuristic to use
      */
-    AstarFew(const heuristic_t *h);
+    AstarFew(const heuristic_t *h_);
 
     /**
      * @brief Construct without arguments
