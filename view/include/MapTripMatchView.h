@@ -22,6 +22,7 @@ private:
     std::vector<sf::Vertex> zip;
     sf::CircleShape beginCircle;
     sf::CircleShape endCircle;
+    std::list<sf::CircleShape> circles;
 public:
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_);
     MapTripMatchView(sf::RenderTarget &window_, MapView &mapView_,

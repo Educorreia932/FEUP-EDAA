@@ -5,8 +5,6 @@
 
 using namespace std;
 
-const double INF = 1000000000.0L;
-
 void VStripesRadius::initialize(const list<Coord> &points, double width){
     stripes.clear();
 

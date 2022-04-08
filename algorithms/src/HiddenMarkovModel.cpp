@@ -8,6 +8,7 @@
 #include "AstarFew.h"
 #include "DUGraph.h"
 #include "Kosaraju.h"
+#include "utils.h"
 #include "Viterbi.h"
 
 using namespace std;
@@ -26,8 +27,6 @@ using hrc = std::chrono::high_resolution_clock;
 const double NANOS_TO_SECS = (1.0/1000000000.0);
 const double MILLIMS_TO_METERS = (1.0/1000.0);
 const double METERS_TO_MILLIMS = 1000.0;
-
-const double INF = 1000000000.0;
 
 HiddenMarkovModel::HiddenMarkovModel(
     ClosestPointsInRadius &closestPointsInRadius_,
@@ -149,21 +148,25 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     // ======== DISTANCE MATRIX (A*) ========
     begin = hrc::now();
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
-    VVF distMatrix(K, VF(K, INF));
-    for(size_t t = 0; t+1 < T; ++t){
+    VVF distMatrix(K, VF(K, fINF)); cout << "\n" << setprecision(7);
+    for(size_t t = 0; t+1 < T; ++t){ cout << "t=" << t << endl;
         list<node_t> l;
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h, 1000000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
+        AstarFew astar(&h, 1000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
             
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
             astar.run();
             for(size_t j: candidateStates.at(t+1)){
-                double &d = distMatrix[i][j];
-                if(d != INF) continue;
-                d = double(astar.getPathWeight(idxToNode.at(j)))*MILLIMS_TO_METERS;
+                if(distMatrix[i][j] != fINF) continue;
+                DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
+                double df = double(d)*MILLIMS_TO_METERS;
+                distMatrix[i][j] = (d == iINF ? fINF : df);
+                // cout << "    i,j=" << i << "(" << S.at(i).y << "/" << S.at(i).x << ")" << ", "
+                //                    << j << "(" << S.at(j).y << "/" << S.at(j).x << ")" << ", "
+                //                    << "df=" << df << endl;
             }
         }
     }

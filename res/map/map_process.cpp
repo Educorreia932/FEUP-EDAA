@@ -60,7 +60,21 @@ private:
         auto poneway = find_tag(it, "oneway");
         if(poneway != nullptr){
             string oneway = poneway->first_attribute("v")->value();
-            if(oneway == "yes") return dir_t::Front;
+            if(oneway == "yes"){
+                auto p_lanes_psv_backward = find_tag(it, "lanes:psv:backward");
+                if(
+                    p_lanes_psv_backward != nullptr &&
+                    atoi(p_lanes_psv_backward->first_attribute("v")->value()) >= 1
+                ) return dir_t::Both;
+
+                auto p_lanes_taxi_backward = find_tag(it, "lanes:taxi:backward");
+                if(
+                    p_lanes_taxi_backward != nullptr &&
+                    atoi(p_lanes_taxi_backward->first_attribute("v")->value()) >= 1
+                ) return dir_t::Both;
+                
+                return dir_t::Front;
+            }
             if(oneway == "no") return dir_t::Both;
             if(oneway == "reversible") return dir_t::Both;
         }

@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <stdexcept>
 
-using namespace std;
+#include "utils.h"
 
-const double INF = 1000000000.0L;
+using namespace std;
 
 VStripes::VStripes(double width):
 d(width){}
@@ -56,7 +56,7 @@ pair<bool,Vector2> VStripes::getClosestPoint_success(Vector2 p) const {
     size_t i = min(long(stripes.size()-1), max(long(0), li));
     
     Vector2 cBest;
-    double dBest = INF;
+    double dBest = fINF;
 
     checkStripe(p, i, dBest, cBest);
     if(long(i-1) >= 0      ) checkStripe(p, i-1, dBest, cBest);

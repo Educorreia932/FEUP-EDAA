@@ -6,6 +6,7 @@
 
 // #include <iostream>
 // #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -71,30 +72,29 @@ void Viterbi::run(){
 
 vector<long> Viterbi::getLikeliestPath() const {
     vector<long> ret;
-    long j; {
+    long t, j; {
         double pBest = 0.0;
-        for(long j_ = 0; j_ < K; ++j_){
-            const double &p = DP[T-1][j_];
-            if(p > pBest){
-                pBest = p;
-                j = j_;
+        for(t = T-1; t >= 0; --t){
+            for(long j_ = 0; j_ < K; ++j_){
+                const double &p = DP[t][j_];
+                if(p > pBest){
+                    pBest = p;
+                    j = j_;
+                }
             }
-        }
-        if(pBest == 0.0){
-            long t;
-            for(t = T-1; t >= 0; --t){
-                for(j = 0; j < K && DP[t][j] == 0.0; ++j){}
-                if(j < K && DP[t][j] != 0.0) break;
-            }
-            stringstream ss;
-            ss << "Could not find any path, t=" << t;
-            throw runtime_error(ss.str());
+            if(pBest != 0.0) break;
         }
     }
 
+    if(t != T-1){
+        stringstream ss;
+        ss << "Could not find any path, t=" << t;
+        throw runtime_error(ss.str());
+    }
+
     ret.push_back(j);
-    for(long t = T-1; t > 0; --t){
-        long i = prev[t][j];
+    for(; t > 0; --t){
+        long i = prev.at(t).at(j);
         ret.push_back(i);
         j = i;
     }

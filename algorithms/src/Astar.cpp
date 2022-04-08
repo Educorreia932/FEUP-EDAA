@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <cassert>
+#include "utils.h"
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
@@ -16,8 +17,6 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
                std::greater<std::pair<weight_t, node_t>>> min_priority_queue;
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
-
-const double INF = 1000000000.0;
 
 Astar::heuristic_t::~heuristic_t(){}
 
@@ -55,7 +54,7 @@ void Astar::run(){
         if(u == d) break;
         for(const Edge &e: G->getAdj(u)){
             auto uit = dist.find(u);
-            weight_t c_ = (uit != dist.end() ? uit->second.first : DWGraph::INF) + e.w;
+            weight_t c_ = (uit != dist.end() ? uit->second.first : iINF) + e.w;
             auto dit = dist.find(e.v);
             if(dit == dist.end() || c_ < dit->second.first){
                 dist[e.v] = mk(c_, u);
@@ -76,5 +75,5 @@ weight_t Astar::getPathWeight() const{
 }
 
 bool Astar::hasVisited(DWGraph::node_t u) const{
-    return (dist.at(u).first != DWGraph::INF);
+    return (dist.at(u).first != iINF);
 }

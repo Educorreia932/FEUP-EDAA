@@ -5,6 +5,8 @@
 #include <chrono>
 #include <cassert>
 
+#include "utils.h"
+
 using namespace std;
 
 typedef DWGraph::node_t node_t;
@@ -19,8 +21,6 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
 
-const double INF = 1000000000.0;
-
 AstarFew::default_heuristic::default_heuristic(){}
 
 const AstarFew::default_heuristic AstarFew::h_default;
@@ -31,7 +31,7 @@ DWGraph::weight_t AstarFew::default_heuristic::operator()(DWGraph::node_t) const
 
 AstarFew::AstarFew(const AstarFew::heuristic_t *h_, weight_t dMax_):h(h_), dMax(dMax_){}
 
-AstarFew::AstarFew(const AstarFew::heuristic_t *h_):AstarFew(h_, INF){}
+AstarFew::AstarFew(const AstarFew::heuristic_t *h_):AstarFew(h_, iINF){}
 
 AstarFew::AstarFew():AstarFew(&h_default){}
 
@@ -61,7 +61,7 @@ void AstarFew::run(){
         
         for(const Edge &e: G->getAdj(u)){
             auto uit = dist.find(u);
-            weight_t c_ = (uit != dist.end() ? uit->second.first : DWGraph::INF) + e.w;
+            weight_t c_ = (uit != dist.end() ? uit->second.first : iINF) + e.w;
             auto dit = dist.find(e.v);
             if(dit == dist.end() || c_ < dit->second.first){
                 dist[e.v] = mk(c_, u);
@@ -72,7 +72,7 @@ void AstarFew::run(){
 
     for(const node_t &u: dS){
         if(dist.count(u) == 0)
-            dist[u] = mk(INF, -1);
+            dist[u] = mk(iINF, -1);
     }
 }
 
@@ -85,5 +85,5 @@ weight_t AstarFew::getPathWeight(node_t u) const{
 }
 
 bool AstarFew::hasVisited(DWGraph::node_t u) const{
-    return (dist.at(u).first != DWGraph::INF);
+    return (dist.at(u).first != iINF);
 }
