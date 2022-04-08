@@ -4,6 +4,9 @@
 #include <cassert>
 #include <stdexcept>
 
+// #include <iostream>
+// #include <iomanip>
+
 using namespace std;
 
 typedef std::vector<double> VF;
@@ -53,6 +56,17 @@ void Viterbi::run(){
         }
         if(maxProb > 0.0) for(double &p: DP[t]) p /= maxProb;
     }
+
+    // cout << setprecision(1);
+    // cout << "\n\t";
+    // for(long t = 0; t < T; ++t) cout << t << "\t";
+    // for(long i = 0; i < K; ++i){
+    //     cout << i << "\t";
+    //     for(long t = 0; t < T; ++t){
+    //         cout << DP[t][i] << "\t";
+    //     }
+    //     cout << endl;
+    // }
 }
 
 vector<long> Viterbi::getLikeliestPath() const {
@@ -66,7 +80,16 @@ vector<long> Viterbi::getLikeliestPath() const {
                 j = j_;
             }
         }
-        if(pBest == 0.0) throw runtime_error("Could not find any path");
+        if(pBest == 0.0){
+            long t;
+            for(t = T-1; t >= 0; --t){
+                for(j = 0; j < K && DP[t][j] == 0.0; ++j){}
+                if(j < K && DP[t][j] != 0.0) break;
+            }
+            stringstream ss;
+            ss << "Could not find any path, t=" << t;
+            throw runtime_error(ss.str());
+        }
     }
 
     ret.push_back(j);

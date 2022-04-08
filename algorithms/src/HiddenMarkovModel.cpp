@@ -155,7 +155,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h, 1000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
+        AstarFew astar(&h, 1000000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
             
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
@@ -169,7 +169,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     }
     end = hrc::now();
     dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
-    cout << dt << "\t";
+    cout << dt << "\t" << flush;
     
     // ======== HIDDEN MARKOV MODEL (VITERBI) ========
     MyPi Pi(sigma_z, S, Y[0]);
