@@ -2,12 +2,16 @@
 
 #include <mapbox/earcut.hpp>
 
+#include "loadFont.h"
+
 using namespace sf;
 using namespace std;
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
 typedef MapGraph::way_t way_t;
+
+const sf::Font FONT = loadFont("/../../res/fonts/inconsolata.ttf");
 
 const double CIRCLE_SIZE = 5;
 const size_t CIRCLE_POINT_COUNT = 24;
@@ -45,6 +49,17 @@ void MapTripMatchView::setTripMatches(
 void MapTripMatchView::refresh(){
     zip.clear();
 
+    texts.clear();
+    int i = 0;
+    for(const Coord &c: trip.coords){
+        sf::Vector2f u = mapView.coordToVector2f(c);
+        sf::Text t(sf::String(to_string(i++)), FONT, 10);
+        t.setFillColor(Color::Black);
+        t.setOrigin(-3, 6);
+        t.setPosition(u);
+        texts.push_back(t);
+    }
+
     if(trip.coords.size() >= 2){
         for(
             auto it1 = trip.coords.begin(), it2 = ++trip.coords.begin();
@@ -60,13 +75,12 @@ void MapTripMatchView::refresh(){
         }
     }
 
+    matchLines.clear();
     for(size_t i = 0; i < min(trip.coords.size(), matches.size()); ++i){
         sf::Vector2f u = mapView.coordToVector2f(trip.coords.at(i)),
                      v = mapView.coordToVector2f(matches.at(i));
-        DashedLineShape e(u, v, 1);
-        e.setFillColor(Color::Blue);
-        for(size_t i = 0; i < e.getVertexCount(); ++i)
-            zip.push_back(e[i]);
+        matchLines.push_back(Vertex(u, Color::Blue));
+        matchLines.push_back(Vertex(v, Color::Blue));
     }
 
     if(path.size() >= 2){
@@ -112,4 +126,7 @@ void MapTripMatchView::draw(){
     window.draw(endCircle);
     for(sf::CircleShape &c: circles)
         window.draw(c);
+    window.draw(&matchLines[0], matchLines.size(), Lines);
+    for(const sf::Text &t: texts)
+        window.draw(t);
 }

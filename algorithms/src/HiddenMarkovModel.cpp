@@ -115,7 +115,7 @@ public:
 };
 
 vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
-    const vector<Coord> &Y = trip;
+    vector<Coord> Y = trip;
     const size_t &T = Y.size();
 
     std::chrono::_V2::system_clock::time_point begin, end; double dt;
@@ -125,9 +125,9 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
     vector<Coord> S;
     vector<node_t> idxToNode;
-    vector<list<long>> candidateStates(trip.size());
+    vector<list<long>> candidateStates(T);
     for(size_t t = 0; t < T; ++t){
-        vector<Coord> v = closestPointsInRadius.getClosestPoints(trip[t]);
+        vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
         assert(!v.empty());
         for(const Coord &c: v){
             if(!Sv.count(c)){
@@ -136,7 +136,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
                 S.push_back(c);
                 idxToNode.push_back(mapGraph->coordToNode(c));
             }
-            candidateStates[t].push_back(Sv.at(c));
+            candidateStates.at(t).push_back(Sv.at(c));
         }
     }
     const size_t &K = Sv.size();
@@ -148,26 +148,34 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     // ======== DISTANCE MATRIX (A*) ========
     begin = hrc::now();
     const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
-    VVF distMatrix(K, VF(K, fINF)); cout << "\n" << setprecision(7);
-    for(size_t t = 0; t+1 < T; ++t){ cout << "t=" << t << endl;
+    VVF distMatrix(K, VF(K, fINF));
+    for(size_t t = 0; t+1 < T; ++t){
         list<node_t> l;
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h, 1000*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
-            
+        AstarFew astar(&h, 650*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
+
+        bool canTransition = false;
+
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
             astar.run();
             for(size_t j: candidateStates.at(t+1)){
-                if(distMatrix[i][j] != fINF) continue;
                 DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
                 double df = double(d)*MILLIMS_TO_METERS;
-                distMatrix[i][j] = (d == iINF ? fINF : df);
-                // cout << "    i,j=" << i << "(" << S.at(i).y << "/" << S.at(i).x << ")" << ", "
-                //                    << j << "(" << S.at(j).y << "/" << S.at(j).x << ")" << ", "
-                //                    << "df=" << df << endl;
+                if(d == iINF){
+                    distMatrix[i][j] = fINF;
+                } else {
+                    distMatrix[i][j] = df;
+                    canTransition = true;
+                }
             }
+        }
+
+        if(!canTransition){
+            Y.at(t+1) = Y.at(t);
+            candidateStates.at(t+1) = candidateStates.at(t);
         }
     }
     end = hrc::now();
@@ -192,7 +200,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     cout << endl;
 
     // Final processing
-    assert(v.size() == trip.size());
+    assert(v.size() == Y.size());
     
     vector<node_t> matches(v.size());
     for(size_t i = 0; i < v.size(); ++i){
