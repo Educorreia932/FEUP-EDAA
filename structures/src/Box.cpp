@@ -37,5 +37,5 @@ bool Box::contains(Vector2 point) {
     return point.x >= bounds[0].start.x &&
         point.x <= bounds[2].start.x &&
         point.y >= bounds[0].start.y &&
-        point.y <= bounds[1].start.y;
+        point.y <= bounds[0].end.y;
 }

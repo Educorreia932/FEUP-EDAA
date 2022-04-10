@@ -19,6 +19,8 @@ private:
     double x1 = -std::numeric_limits<double>::max();
     double y1 = -std::numeric_limits<double>::max();
 
+    Box bounding_box;
+
     void handleSiteEvent(Event event);
     void handleCircleEvent(Event event);
     Arc& locateArcAbove(Site site);

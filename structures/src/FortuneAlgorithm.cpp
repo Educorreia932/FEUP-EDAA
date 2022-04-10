@@ -14,11 +14,14 @@ VoronoiDiagram FortuneAlgorithm::construct() {
         Site* site = diagram.sites[i];
         events.push(Event(site));
 
+        // Set bounding box limits
         x0 = std::min(x0, site->point.x);
         y0 = std::min(y0, site->point.y);
         x1 = std::max(x1, site->point.x);
         y1 = std::max(y1, site->point.y);
     }
+
+    bounding_box = Box(Vector2(x0, y0), Vector2(x1, y1));
 
     while (!events.empty()) {
         Event event = events.top();
@@ -35,8 +38,6 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     }
 
     // Finish edges
-    Box bounding_box = Box(Vector2(x0, y0), Vector2(x1, y1));
-
     for (Edge* edge : edges) {
         Vector2 intersection;
 
@@ -65,8 +66,6 @@ VoronoiDiagram FortuneAlgorithm::construct() {
 
 // Add new parabola
 void FortuneAlgorithm::handleSiteEvent(Event event) {
-    std::cout << event.point.x << " " << event.point.y << std::endl;
-
     // Beachline is empty
     if (root == nullptr) {
         root = new Arc(event.site);
@@ -203,7 +202,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     double radius = sqrt(pow(dx, 2) + pow(dy, 2));
 
     // Check if sweepline hasn't passed possible circle event location
-    if (intersection.y - radius < sweep_line) {
+    if (intersection.y - radius < sweep_line && bounding_box.contains(intersection)) {
         // Remove any circle events now not needed
         invalidateCircleEvent(arc);
 
