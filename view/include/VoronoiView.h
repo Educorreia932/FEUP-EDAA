@@ -10,6 +10,8 @@ class VoronoiView : public View {
         VoronoiDiagram diagram;
         std::vector<sf::Vertex> lines;
         std::vector<sf::CircleShape*> circles;
+        double convertX(double x);
+        double convertY(double y);
     public:
         VoronoiView(sf::RenderTarget &window_, VoronoiDiagram diagram);
         ~VoronoiView();

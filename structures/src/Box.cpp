@@ -1,8 +1,15 @@
 #include "Box.h"
 
+Box::Box() {
+    
+}
+
 Box::Box(Vector2 bottom_left, Vector2 upper_right) {
     Vector2 bottom_right(upper_right.x, bottom_left.y);
     Vector2 upper_left(bottom_left.x, upper_right.y);
+
+    width = upper_right.x - bottom_left.x;
+    height = upper_right.y - bottom_left.y;
 
     bounds[0] = Edge(bottom_left, upper_left);
     bounds[1] = Edge(upper_left, upper_right);

@@ -1,4 +1,3 @@
-#include "Box.h"
 #include "FortuneAlgorithm.h"
 
 #include <cmath>
@@ -11,8 +10,15 @@ FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites) : diagram(sites) {
 
 VoronoiDiagram FortuneAlgorithm::construct() {
     // Generate site events
-    for (int i = 0; i < diagram.sites.size(); i++)
-        events.push(Event(diagram.sites[i]));
+    for (int i = 0; i < diagram.sites.size(); i++) {
+        Site* site = diagram.sites[i];
+        events.push(Event(site));
+
+        x0 = std::min(x0, site->point.x);
+        y0 = std::min(y0, site->point.y);
+        x1 = std::max(x1, site->point.x);
+        y1 = std::max(y1, site->point.y);
+    }
 
     while (!events.empty()) {
         Event event = events.top();
@@ -29,8 +35,7 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     }
 
     // Finish edges
-    // TODO: Determine bounding box limits
-    Box bounding_box = Box(Vector2(0, 0), Vector2(8, 8));
+    Box bounding_box = Box(Vector2(x0, y0), Vector2(x1, y1));
 
     for (Edge* edge : edges) {
         Vector2 intersection;
@@ -53,11 +58,15 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     for (Edge bound : bounding_box.bounds)
         diagram.addEdge(bound);
 
+    diagram.bounding_box = bounding_box;
+
     return diagram;
 }
 
 // Add new parabola
 void FortuneAlgorithm::handleSiteEvent(Event event) {
+    std::cout << event.point.x << " " << event.point.y << std::endl;
+
     // Beachline is empty
     if (root == nullptr) {
         root = new Arc(event.site);

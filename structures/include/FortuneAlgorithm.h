@@ -13,6 +13,12 @@ private:
     Arc* root = nullptr;   // Binary tree for parabola arcs
     double sweep_line = 0; // Current y-position of sweep line
 
+    // Limits for bounding box
+    double x0 = std::numeric_limits<double>::max();
+    double y0 = std::numeric_limits<double>::max();
+    double x1 = -std::numeric_limits<double>::max();
+    double y1 = -std::numeric_limits<double>::max();
+
     void handleSiteEvent(Event event);
     void handleCircleEvent(Event event);
     Arc& locateArcAbove(Site site);
