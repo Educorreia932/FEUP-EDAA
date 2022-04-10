@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-#define RADIUS 5
+#define SCALE 1000
+#define RADIUS 1
 
 VoronoiView::VoronoiView(sf::RenderTarget& window_, VoronoiDiagram diagram) : window(window_), diagram(diagram) {
     // Edges
@@ -46,11 +47,15 @@ VoronoiView::~VoronoiView() {
 }
 
 double VoronoiView::convertX(double x) {
-    return (x - diagram.bounding_box.width) * 100;
+    double offset = diagram.bounding_box.bounds[0].start.x;
+
+    return (x - offset) * SCALE;
 }
 
 double VoronoiView::convertY(double y) {
-    return (-y + diagram.bounding_box.height) * 100;
+    double offset = diagram.bounding_box.bounds[0].end.y;
+
+    return (-y + offset + diagram.bounding_box.height) * SCALE;
 }
 
 void VoronoiView::refresh() {
