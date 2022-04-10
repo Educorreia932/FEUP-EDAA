@@ -10,6 +10,10 @@ Box::Box(Vector2 bottom_left, Vector2 upper_right) {
     bounds[3] = Edge(bottom_right, bottom_left);
 }
 
+Box::Box(double width, double height) : Box(Vector2(0, 0), Vector2(width, height)) {
+    
+}
+
 bool Box::intersect(Edge edge, Vector2& intersection) {
     for (Edge bound : bounds)
         if (bound.intersect(edge, intersection)) {

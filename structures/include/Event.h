@@ -25,6 +25,7 @@ public:
     double radius;
 
     bool operator<(const Event &event) const;
+    bool operator==(const Event &event) const;
 public:
     Event(Site* site);                               // Site event
     Event(Arc* arc, Vector2 point, double radius);   // Circle event

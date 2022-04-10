@@ -5,7 +5,7 @@
 #include <limits>
 #include <iostream>
 
-FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites): diagram(sites) {
+FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites) : diagram(sites) {
 
 }
 
@@ -20,11 +20,11 @@ VoronoiDiagram FortuneAlgorithm::construct() {
 
         // Update sweep line position
         sweep_line = event.point.y;
-                    
+
         if (event.type == Event::SITE)
             handleSiteEvent(event);
 
-        else if (event.valid)
+        else if (invalid_events.find(event) == invalid_events.end())
             handleCircleEvent(event);
     }
 
@@ -42,15 +42,15 @@ VoronoiDiagram FortuneAlgorithm::construct() {
             }
         }
 
-        if (!bounding_box.contains(edge->start)) 
-            if (bounding_box.intersect(*edge, intersection)) 
+        if (!bounding_box.contains(edge->start))
+            if (bounding_box.intersect(*edge, intersection))
                 edge->start = intersection;
 
         if (edge->finished)
             diagram.addEdge(*edge);
     }
 
-    for (Edge bound : bounding_box.bounds) 
+    for (Edge bound : bounding_box.bounds)
         diagram.addEdge(bound);
 
     return diagram;
@@ -156,9 +156,6 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
     Arc* left_arc = new Arc(arc->site);
     Arc* right_arc = new Arc(arc->site);
 
-    // Remove any circle events now not needed
-    invalidateCircleEvent(*arc);
-
     left_arc->s0 = arc->s0;
     right_arc->s1 = arc->s1;
 
@@ -198,14 +195,16 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 
     // Check if sweepline hasn't passed possible circle event location
     if (intersection.y - radius < sweep_line) {
+        // Remove any circle events now not needed
+        invalidateCircleEvent(arc);
+
+        // Create circle event
         Event* circle_event = new Event(arc, Vector2(intersection.x, intersection.y - radius), radius);
         events.push(*circle_event);
     }
 }
 
-void FortuneAlgorithm::invalidateCircleEvent(Arc &arc) {
-    if (arc.event != nullptr) {
-        arc.event->valid = false;
-        arc.event = nullptr;
-    }
+void FortuneAlgorithm::invalidateCircleEvent(Arc* arc) {
+    if (arc->event != nullptr) 
+        invalid_events.insert(*arc->event);        
 }

@@ -1,6 +1,7 @@
 #include "Event.h"
 #include "VoronoiDiagram.h"
 
+#include <set>
 #include <vector>
 
 class FortuneAlgorithm {
@@ -8,6 +9,7 @@ private:
     VoronoiDiagram diagram;
     std::vector<Edge*> edges;
     std::priority_queue<Event> events;
+    std::set<Event> invalid_events;
     Arc* root = nullptr;   // Binary tree for parabola arcs
     double sweep_line = 0; // Current y-position of sweep line
 
@@ -15,9 +17,8 @@ private:
     void handleCircleEvent(Event event);
     Arc& locateArcAbove(Site site);
     Arc* breakArc(Arc* arc, Site* site);
-    void invalidateCircleEvent(Arc &arc);
+    void invalidateCircleEvent(Arc* arc);
     void checkCircleEvents(Arc* arc);
-    
 public:
     FortuneAlgorithm(std::vector<Site*> sites);
 

@@ -12,3 +12,7 @@ bool Event::operator<(const Event &event) const {
     return this->point.y < event.point.y;
 }
 
+bool Event::operator==(const Event &event) const {
+    return this->point == event.point;
+}
+

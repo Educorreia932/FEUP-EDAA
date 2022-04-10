@@ -53,11 +53,12 @@ VoronoiDiagram voronoi(const MapGraph& M) {
 }
 
 void voronoi_display() {
+    // Debug values
     std::vector<Site*> sites = {
         new Site{Vector2(2, 6)},
         new Site{Vector2(5, 5)},
-        new Site{Vector2(5.13, 3.74)},
-        new Site{Vector2(3, 1)}
+        new Site{Vector2(6, 4)},
+        new Site{Vector2(3, 3)}
     };
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
