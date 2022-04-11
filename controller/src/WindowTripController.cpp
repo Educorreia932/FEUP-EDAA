@@ -5,7 +5,7 @@
 
 #include "Astar.h"
 
-using namespace sf;
+using sf::Event, sf::Keyboard, sf::Mouse;
 using namespace std;
 
 typedef DWGraph::node_t node_t;
@@ -20,19 +20,22 @@ WindowTripController::WindowTripController(
     const MapGraph &mapGraph_,
     const DWGraph::DWGraph &graph_,
     const vector<Trip> &trips_,
-    const ClosestPoint &closestPoint_
+    const MapMatching &mapMatching_
 ):
     window(window_),
     mapTripMatchView(mapTripMatchView_),
     mapGraph(mapGraph_),
     graph(graph_),
     trips(trips_),
-    closestPoint(closestPoint_)
+    mapMatching(mapMatching_)
 {}
 
 void WindowTripController::run(){
     window.recalculateView();
+
+    cout << "Idx\tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
     onChangeTrip();
+    
     while (window.isOpen()){
         Event event{};
         while (window.pollEvent(event)){
@@ -90,32 +93,36 @@ void WindowTripController::run(){
 }
 
 void WindowTripController::onChangeTrip(){
+    cout << tripIndex << "\t";
+
     const Trip &trip = trips.at(tripIndex);
-    const std::vector<Coord> &coords = trip.coords;
-    currentMatches.resize(coords.size());
-    for(size_t i = 0; i < coords.size(); ++i){
-        currentMatches.at(i) = Coord(closestPoint.getClosestPoint(coords.at(i)));
-    }
-
     list<Coord> pathCoord;
-    pathCoord.push_back(currentMatches[0]);
+    std::vector<Coord> currentMatches;
+    {
+        std::vector<DWGraph::node_t> matchesIds = mapMatching.getMatches(trip.coords);
+        currentMatches = std::vector<Coord>(matchesIds.size());
+        for(size_t i = 0; i < matchesIds.size(); ++i)
+            currentMatches[i] = mapGraph.nodeToCoord(matchesIds[i]);
 
-    
-    for(size_t i = 0; i+1 < currentMatches.size(); ++i){
-        const Coord &uCoord = currentMatches[i];
-        const Coord &vCoord = currentMatches[i+1];
-        node_t u = mapGraph.coordToNode(uCoord);
-        node_t v = mapGraph.coordToNode(vCoord);
+        pathCoord.push_back(currentMatches[0]);
 
-        MapGraph::DistanceHeuristic heuristic(mapGraph.getNodes(), vCoord, double(SECONDS_TO_MICROS)/(120.0*KPH_TO_MPS));
-        Astar astar(&heuristic);
-        astar.initialize(&graph, u, v);
-        astar.run();
         
-        
-        std::list<node_t> path = astar.getPath();
-        for(auto it = ++path.begin(); it != path.end(); ++it)
-            pathCoord.push_back(mapGraph.nodeToCoord(*it));
+        for(size_t i = 0; i+1 < currentMatches.size(); ++i){
+            const Coord &uCoord = currentMatches[i];
+            const Coord &vCoord = currentMatches[i+1];
+            node_t u = mapGraph.coordToNode(uCoord);
+            node_t v = mapGraph.coordToNode(vCoord);
+
+            MapGraph::DistanceHeuristic heuristic(mapGraph.getNodes(), vCoord, double(SECONDS_TO_MICROS)/(120.0*KPH_TO_MPS));
+            Astar astar(&heuristic);
+            astar.initialize(&graph, u, v);
+            astar.run();
+            
+            
+            std::list<node_t> path = astar.getPath();
+            for(auto it = ++path.begin(); it != path.end(); ++it)
+                pathCoord.push_back(mapGraph.nodeToCoord(*it));
+        }
     }
 
     mapTripMatchView.setTripMatches(trip, currentMatches, pathCoord);

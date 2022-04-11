@@ -7,8 +7,11 @@
 #include "Trip.h"
 #include "polygon.h"
 
-#include "K2DTreeClosestPoint.h"
+#include "Dijkstra.h"
 #include "FortuneAlgorithm.h"
+#include "HiddenMarkovModel.h"
+#include "K2DTreeClosestPointFactory.h"
+#include "VStripesRadius.h"
 
 #include "DraggableZoomableWindow.h"
 #include "MapView.h"
@@ -113,7 +116,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesM.size() << std::endl;
 
     auto begin = hrc::now();
-    MapGraph G = M.splitLongEdges(5.0);
+    MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
     double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
@@ -136,17 +139,18 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     // meanD /= n;
     // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
 
-    std::list<Vector2> points;
-    for(const auto &p: G.getNodes()){
-        points.push_back(p.second);
-    }
-
-    K2DTreeClosestPoint closestPoint;
-    closestPoint.initialize(points);
-    closestPoint.run();
+    std::cout << "Computing map matching..." << std::endl;
+    double d = 50; // in meters
+    double sigma_z = 4.07; // in meters
+    double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
+    VStripesRadius closestPointsInRadius;
+    HiddenMarkovModel mapMatching(closestPointsInRadius, d, sigma_z, beta);
+    mapMatching.initialize(&G);
+    mapMatching.run();
+    std::cout << "Computed map matching..." << std::endl;
 
     std::cout << "Generating graph..." << std::endl;
-    DWGraph::DWGraph dwG = G.getFullGraph();
+    DWGraph::DWGraph dwG = G.getTimeGraph();
     std::cout << "Generated graph" << std::endl;
 
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
@@ -159,7 +163,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     mapView.addView(&mapTripMatchView);
     window.setDrawView(&mapView);
 
-    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, closestPoint);
+    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, mapMatching);
     windowTripController.run();
 }
 

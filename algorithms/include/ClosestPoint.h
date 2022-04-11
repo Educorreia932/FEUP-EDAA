@@ -1,5 +1,4 @@
-#ifndef CLOSESTPOINT_H_INCLUDED
-#define CLOSESTPOINT_H_INCLUDED
+#pragma once
 
 #include <list>
 #include "Vector2.h"
@@ -28,4 +27,7 @@ public:
     virtual Vector2 getClosestPoint(Vector2 p) const = 0;
 };
 
-#endif //CLOSESTPOINT_H_INCLUDED
+class ClosestPointFactory {
+public:
+    virtual ClosestPoint *factoryMethod() = 0;
+};

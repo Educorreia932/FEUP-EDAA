@@ -4,6 +4,7 @@
 #include "EdgeType.h"
 #include "Coord.h"
 #include "Astar.h"
+#include "AstarFew.h"
 
 #include <map>
 
@@ -22,10 +23,6 @@ public:
         speed_t getMaxSpeed() const;
     };
 private:
-    DWGraph::DWGraph fullGraph;
-    DWGraph::DWGraph connectedGraph;
-    // ClosestPoint *closestPoint = nullptr;
-
     std::unordered_map<DWGraph::node_t, Coord> nodes;
     std::unordered_map<Coord, DWGraph::node_t> coord2node;
     Coord min_coord = Coord(+90.0, +180.0);
@@ -42,8 +39,8 @@ public:
     ~MapGraph();
     void addNode(DWGraph::node_t u, Coord c);
     void addWay(way_t w);
-    DWGraph::DWGraph getFullGraph() const;
-    // DWGraph::DWGraph getConnectedGraph() const;
+    DWGraph::DWGraph getTimeGraph() const;
+    DWGraph::DWGraph getDistanceGraph() const;
     MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
     Coord getMinCoord() const;
@@ -63,6 +60,23 @@ public:
                         double factor_): nodes(nodes_), dst_pos(dst_pos_), factor(factor_){}
         DWGraph::weight_t operator()(DWGraph::node_t u) const{
             auto d = Coord::getDistanceArc(dst_pos, nodes.at(u));
+            return DWGraph::weight_t(d*factor);
+        }
+    };
+
+    class DistanceHeuristicFew : public AstarFew::heuristic_t {
+    private:
+        const std::unordered_map<DWGraph::node_t, Coord> &nodes;
+        Coord center;
+        double dist;
+        double factor;
+    public:
+        DistanceHeuristicFew(
+            const std::unordered_map<DWGraph::node_t, Coord> &nodes_,
+            Coord center_, double dist_, double factor_
+        ): nodes(nodes_), center(center_), dist(dist_), factor(factor_){}
+        DWGraph::weight_t operator()(DWGraph::node_t u) const{
+            auto d = std::max(Coord::getDistanceArc(center, nodes.at(u)) - dist, 0.0);
             return DWGraph::weight_t(d*factor);
         }
     };

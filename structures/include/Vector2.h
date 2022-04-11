@@ -30,8 +30,11 @@ public:
     double getDet(Vector2 vector2);
     bool isOn(Vector2 a, Vector2 b) const;
 
+    static double getDistance(const Vector2 &v1, const Vector2 &v2);
+
     static bool compX(const Vector2 &lhs, const Vector2 &rhs);
     static bool compY(const Vector2 &lhs, const Vector2 &rhs);
+    static bool compXY(const Vector2 &lhs, const Vector2 &rhs);
 };
 
 namespace std {

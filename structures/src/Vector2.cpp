@@ -71,6 +71,10 @@ double Vector2::getDistance(const Vector2 &other) const {
     return (*this - other).getNorm();
 }
 
+double Vector2::getDistance(const Vector2 &v1, const Vector2 &v2) {
+    return (v1 - v2).getNorm();
+}
+
 double Vector2::getDet(Vector2 v) {
     return x * v.y - y * v.x;
 }
@@ -81,6 +85,11 @@ bool Vector2::compX(const Vector2 &lhs, const Vector2 &rhs){
 
 bool Vector2::compY(const Vector2 &lhs, const Vector2 &rhs){
     return (lhs.y < rhs.y);
+}
+
+bool Vector2::compXY(const Vector2 &lhs, const Vector2 &rhs){
+    if(lhs.x != rhs.x) return lhs.x < rhs.x;
+    else               return lhs.y < rhs.y;
 }
 
 bool collinear(Vector2 a, Vector2 b, Vector2 c) {

@@ -20,7 +20,9 @@ public:
      * @param p2        Second position
      * @return double   Distance between them in meters
      */
-    static double getDistanceArc(const Coord &p1, const Coord &p2);
+    static double getDistanceArc(const Coord   &p1, const Coord   &p2);
+    static double getDistanceArc(const Vector2 &p1, const Vector2 &p2);
+    static double getDistanceArcSimple(const Coord &p1, const Coord &p2);
     
     double &lat();
     double &lon();
@@ -37,6 +39,13 @@ public:
     Coord operator-(const Coord &rhs) const;
     Coord operator*(double t) const;
     Coord operator/(double t) const;
+
+    static bool compXY(const Coord &c1, const Coord &c2);
+
+    static double MetersToLatDegrees();
+    static double MetersToLonDegrees();
+    static double LatDegreesToMeters();
+    static double LonDegreesToMeters();
 };
 
 namespace std {

@@ -6,6 +6,8 @@
 #include <utility>
 #include <chrono>
 
+#include "utils.h"
+
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
 typedef DWGraph::Edge Edge;
@@ -26,7 +28,7 @@ void Dijkstra::initialize(const DWGraph::DWGraph *G_, DWGraph::node_t s_){
     this->s = s_;
     this->G = G_;
     for(const node_t &u: G->getNodes()){
-        dist[u] = DWGraph::INF;
+        dist[u] = iINF;
         prev[u] = DWGraph::INVALID_NODE;
     }
 }
@@ -57,5 +59,5 @@ weight_t Dijkstra::getPathWeight(node_t d) const{
 }
 
 bool Dijkstra::hasVisited(DWGraph::node_t u) const{
-    return (dist.at(u) != DWGraph::INF);
+    return (dist.at(u) != iINF);
 }
