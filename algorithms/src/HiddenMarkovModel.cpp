@@ -125,7 +125,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
     vector<Coord> S;
     vector<node_t> idxToNode;
-    vector<list<long>> candidateStates(T);
+    vector<set<long>> candidateStates(T);
     for(size_t t = 0; t < T; ++t){
         vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
         assert(!v.empty());
@@ -136,7 +136,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
                 S.push_back(c);
                 idxToNode.push_back(mapGraph->coordToNode(c));
             }
-            candidateStates.at(t).push_back(Sv.at(c));
+            candidateStates.at(t).insert(Sv.at(c));
         }
     }
     const size_t &K = Sv.size();
@@ -165,6 +165,21 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
                 distMatrix[i][j] = (d == iINF ? fINF : df);
             }
         }
+
+        for(
+            auto it = candidateStates.at(t+1).begin();
+            it != candidateStates.at(t+1).end();
+        ){
+            size_t j = *it;
+
+            double dBest = fINF;
+            for(size_t i: candidateStates.at(t)){
+                dBest = min(dBest, distMatrix[i][j]);
+            }
+
+            if(dBest >= fINF) it = candidateStates.at(t+1).erase(it);
+            else ++it;
+        }
     }
     end = hrc::now();
     dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
@@ -177,7 +192,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
 
     begin = hrc::now();
     Viterbi viterbi;
-    viterbi.initialize(T, K, &Pi, &A, &B);
+    viterbi.initialize(T, K, &Pi, &A, &B, candidateStates);
     viterbi.run();
 
     vector<long> v = viterbi.getLikeliestPath();
