@@ -125,7 +125,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
     vector<Coord> S;
     vector<node_t> idxToNode;
-    vector<list<long>> candidateStates(T);
+    vector<set<long>> candidateStates(T);
     for(size_t t = 0; t < T; ++t){
         vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
         assert(!v.empty());
@@ -136,7 +136,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
                 S.push_back(c);
                 idxToNode.push_back(mapGraph->coordToNode(c));
             }
-            candidateStates.at(t).push_back(Sv.at(c));
+            candidateStates.at(t).insert(Sv.at(c));
         }
     }
     const size_t &K = Sv.size();
@@ -156,26 +156,29 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
         MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
         AstarFew astar(&h, 650*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
 
-        bool canTransition = false;
-
         for(size_t i: candidateStates.at(t)){
             astar.initialize(&distGraph, idxToNode.at(i), l);
             astar.run();
             for(size_t j: candidateStates.at(t+1)){
                 DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
                 double df = double(d)*MILLIMS_TO_METERS;
-                if(d == iINF){
-                    distMatrix[i][j] = fINF;
-                } else {
-                    distMatrix[i][j] = df;
-                    canTransition = true;
-                }
+                distMatrix[i][j] = (d == iINF ? fINF : df);
             }
         }
 
-        if(!canTransition){
-            Y.at(t+1) = Y.at(t);
-            candidateStates.at(t+1) = candidateStates.at(t);
+        for(
+            auto it = candidateStates.at(t+1).begin();
+            it != candidateStates.at(t+1).end();
+        ){
+            size_t j = *it;
+
+            double dBest = fINF;
+            for(size_t i: candidateStates.at(t)){
+                dBest = min(dBest, distMatrix[i][j]);
+            }
+
+            if(dBest >= fINF) it = candidateStates.at(t+1).erase(it);
+            else ++it;
         }
     }
     end = hrc::now();
@@ -189,7 +192,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
 
     begin = hrc::now();
     Viterbi viterbi;
-    viterbi.initialize(T, K, &Pi, &A, &B);
+    viterbi.initialize(T, K, &Pi, &A, &B, candidateStates);
     viterbi.run();
 
     vector<long> v = viterbi.getLikeliestPath();

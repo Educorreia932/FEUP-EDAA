@@ -277,8 +277,8 @@ int main(int argc, char *argv[]) {
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        os.precision(7);
         os.open(nodesFilepath);
+        os << fixed << setprecision(7);
         os << nodesInWays.size() << "\n";
         for(const long long nodeId: nodesInWays){
             Coord c = nodes[nodeId];
