@@ -17,13 +17,15 @@ typedef std::vector<VI> VVI;
 void Viterbi::initialize(long T_, long K_,
     InitialProbabilitiesGenerator *Pi_,
     TransitionMatrixGenerator *A_,
-    EmissionMatrixGenerator *B_
+    EmissionMatrixGenerator *B_,
+    vector<set<long>> candidates_
 ){
     T  = T_;
     K  = K_;
     Pi = Pi_;
     A  = A_;
     B  = B_;
+    candidates = candidates_;
 
     DP   = VVF(T, VF(K,  0));
     prev = VVI(T, VI(K, -1));
@@ -42,9 +44,9 @@ void Viterbi::run(){
     // Run stuff
     for(long t = 1; t < T; ++t){
         maxProb = 0.0;
-        for(long j = 0; j < K; ++j){
-            for(long i = 0; i < K; ++i){
-                if(DP[t-1][i] <= 0.0) continue;
+        for(long i: candidates.at(t-1)){
+            if(DP[t-1][i] <= 0.0) continue;
+            for(long j: candidates.at(t)){
                 double prob = DP[t-1][i] * (*A)(i,j,t) * (*B)(j,t);
                 if(prob > DP[t][j]){
                     DP  [t][j] = prob;

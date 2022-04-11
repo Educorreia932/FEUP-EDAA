@@ -58,3 +58,4 @@ train.csv
 .idea/
 cmake-build-debug/
 .ccls-cache/
+out.txt

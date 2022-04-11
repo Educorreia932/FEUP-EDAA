@@ -33,7 +33,7 @@ WindowTripController::WindowTripController(
 void WindowTripController::run(){
     window.recalculateView();
 
-    cout << "Idx\tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
+    cout << "Idx\tID                \tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
     onChangeTrip();
     
     while (window.isOpen()){
@@ -93,12 +93,13 @@ void WindowTripController::run(){
 }
 
 void WindowTripController::onChangeTrip(){
-    cout << tripIndex << "\t";
-
     const Trip &trip = trips.at(tripIndex);
+
+    cout << tripIndex << "\t" << trip.id << "\t";
+
     list<Coord> pathCoord;
     std::vector<Coord> currentMatches;
-    {
+    try {
         std::vector<DWGraph::node_t> matchesIds = mapMatching.getMatches(trip.coords);
         currentMatches = std::vector<Coord>(matchesIds.size());
         for(size_t i = 0; i < matchesIds.size(); ++i)
@@ -123,6 +124,8 @@ void WindowTripController::onChangeTrip(){
             for(auto it = ++path.begin(); it != path.end(); ++it)
                 pathCoord.push_back(mapGraph.nodeToCoord(*it));
         }
+    } catch(const exception &e) {
+        cerr << "Exception: " << e.what() << endl;
     }
 
     mapTripMatchView.setTripMatches(trip, currentMatches, pathCoord);

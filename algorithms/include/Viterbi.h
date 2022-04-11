@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 
 class Viterbi {
 public:
@@ -26,11 +27,13 @@ private:
     const InitialProbabilitiesGenerator *Pi;
     const TransitionMatrixGenerator     *A;
     const EmissionMatrixGenerator       *B;
+    std::vector<std::set<long>> candidates;
 public:
     void initialize(long T_, long K_,
         InitialProbabilitiesGenerator *Pi_,
         TransitionMatrixGenerator *A_,
-        EmissionMatrixGenerator *B_
+        EmissionMatrixGenerator *B_,
+        std::vector<std::set<long>> candidates_
     );
     void run();
     std::vector<long> getLikeliestPath() const;
