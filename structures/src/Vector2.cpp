@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#define EPSILON 0.0000000001
+
 Vector2::Vector2(double x, double y) : x(x), y(y) {
 
 }
@@ -93,7 +95,7 @@ bool Vector2::compXY(const Vector2 &lhs, const Vector2 &rhs){
 }
 
 bool collinear(Vector2 a, Vector2 b, Vector2 c) {
-    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y);
+    return abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) <= EPSILON;
 }
 
 bool within(double p, double q, double r) {

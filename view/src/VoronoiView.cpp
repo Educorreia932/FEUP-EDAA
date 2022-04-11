@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#define SCALE 1000
-#define RADIUS 1
+#define SCALE 10000
+#define RADIUS 0.05
 
 VoronoiView::VoronoiView(sf::RenderTarget& window_, VoronoiDiagram diagram) : window(window_), diagram(diagram) {
     // Edges

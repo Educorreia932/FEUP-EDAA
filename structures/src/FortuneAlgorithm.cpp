@@ -21,6 +21,11 @@ VoronoiDiagram FortuneAlgorithm::construct() {
         y1 = std::max(y1, site->point.y);
     }
 
+    x0 -= 0.0001;
+    y0 -= 0.0001;
+    x1 += 0.0001; 
+    y1 += 0.0001; 
+
     bounding_box = Box(Vector2(x0, y0), Vector2(x1, y1));
 
     while (!events.empty()) {
@@ -41,18 +46,30 @@ VoronoiDiagram FortuneAlgorithm::construct() {
     for (Edge* edge : edges) {
         Vector2 intersection;
 
-        if (!edge->finished) {
+        bool start_inside = bounding_box.contains(edge->start);
+        bool end_inside = bounding_box.contains(edge->end);
+        bool include_edge = true;
+
+        // Edge starts inside the box and finishes outside
+        if (!edge->finished || (start_inside && !end_inside)) {
             if (bounding_box.intersect(*edge, intersection)) {
                 edge->finished = true;
                 edge->end = intersection;
             }
         }
-
-        if (!bounding_box.contains(edge->start))
+        
+        // Edge starts outside the box and finishes inside
+        if (!start_inside && end_inside)
             if (bounding_box.intersect(*edge, intersection))
                 edge->start = intersection;
 
-        if (edge->finished)
+        bool intersects = bounding_box.intersect(*edge, intersection);
+
+        // Edge is completely outside of bounding box
+        if (!start_inside && !end_inside && (!intersects || !intersection.isOn(edge->start, edge->end)))
+            include_edge = false;
+
+        if (include_edge && edge->finished)
             diagram.addEdge(*edge);
     }
 
@@ -202,7 +219,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     double radius = sqrt(pow(dx, 2) + pow(dy, 2));
 
     // Check if sweepline hasn't passed possible circle event location
-    if (intersection.y - radius < sweep_line && bounding_box.contains(intersection)) {
+    if (intersection.y - radius < sweep_line ) {
         // Remove any circle events now not needed
         invalidateCircleEvent(arc);
 
