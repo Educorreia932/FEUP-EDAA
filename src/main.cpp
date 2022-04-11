@@ -1,9 +1,5 @@
-#include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <random>
 
-#include "EdgeType.h"
 #include "MapGraph.h"
 #include "MapTripsView.h"
 #include "MapTripMatchView.h"
@@ -41,10 +37,13 @@ void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
+    Box box = Box(Vector2(-8.69611, 41.16912), Vector2(-8.67926, 41.17671));
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes() ){
-        Vector2 point = Vector2(node.second.lat(), node.second.lon());
-        sites.push_back(new Site{ point });
+        Vector2 point = Vector2(node.second.lon(), node.second.lat());
+
+        if (box.contains(point))
+            sites.push_back(new Site{ point });
     }
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
@@ -52,7 +51,7 @@ VoronoiDiagram voronoi(const MapGraph& M) {
     return diagram;
 }
 
-void voronoi_display() {
+void voronoi_display(const MapGraph& M) {
     // Debug values
     std::vector<Site*> sites = {
         new Site{Vector2(2, 6)},
@@ -61,7 +60,8 @@ void voronoi_display() {
         new Site{Vector2(3, 3)}
     };
 
-    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
+//    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
+    VoronoiDiagram diagram = voronoi(M);
 
     DraggableZoomableWindow window(sf::Vector2f(0,0)); 
     window.setBackgroundColor(sf::Color(255, 255, 255));
@@ -169,7 +169,6 @@ int main(int argc, char* argv[]) {
     try {
         if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         std::string opt = argv[1];
-        if (opt == "voronoi-display") { voronoi_display(); return 0; }
 
         std::chrono::_V2::system_clock::time_point begin, end;
         double dt;
@@ -190,6 +189,7 @@ int main(int argc, char* argv[]) {
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
+        if (opt == "voronoi-display") { voronoi_display(M); return 0; }
 
         std::cout << "Loading trips..." << std::endl;
         begin = hrc::now();
@@ -204,10 +204,13 @@ int main(int argc, char* argv[]) {
         std::cerr << "Invalid option" << std::endl;
         return -1;
     }
+
     catch (const std::invalid_argument& e) {
         std::cout << "Caught exception: " << e.what() << "\n";
         std::cout << "Usage: ./main (view | ...)\n";
+
         return EXIT_FAILURE;
     }
+
     return 0;
 }
