@@ -51,50 +51,50 @@ VoronoiDiagram FortuneAlgorithm::construct() {
         bool include_edge = true;
         bool intersects = bounding_box.intersect(*edge, intersection);
 
-        // // Edge is not finished (doesn't have a end point)
-        // if (!edge->finished) {
-        //     // 1) Edge starts inside the bounding box
-        //     if (start_inside) {
-        //         edge->end = intersection;
-        //         edge->finished = true;
-        //     }
+        // Edge is not finished (doesn't have a end point)
+        if (!edge->finished) {
+            // 1) Edge starts inside the bounding box
+            if (start_inside) {
+                edge->end = intersection;
+                edge->finished = true;
+            }
 
-        //     // 2) Edge starts outside the bounding box and intersects it
-        //     else if (intersects) {
-        //         edge->start = intersection;
+            // 2) Edge starts outside the bounding box and intersects it
+            else if (intersects) {
+                edge->start = intersection;
 
-        //         bounding_box.intersect(*edge, intersection);
+                bounding_box.intersect(*edge, intersection);
 
-        //         edge->end = intersection;
-        //         edge->finished = true;
-        //     }
+                edge->end = intersection;
+                edge->finished = true;
+            }
 
-        //     // 3) Edge starts outside the bounding box and doesn't intersect it
-        //     else 
-        //         include_edge = false;
-        // }
+            // 3) Edge starts outside the bounding box and doesn't intersect it
+            else 
+                include_edge = false;
+        }
 
-        // // Edge is finished
-        // else {
-        //     intersects = intersects && intersection.isOn(edge->start, edge->end);
+        // Edge is finished
+        else {
+            intersects = intersects && intersection.isOn(edge->start, edge->end);
 
-        //     // 4) Edge starts inside and ends outside the bounding box
-        //     if (start_inside && !end_inside) 
-        //         edge->end = intersection;
+            // 4) Edge starts inside and ends outside the bounding box
+            if (start_inside && !end_inside) 
+                edge->end = intersection;
 
-        //     // 5) Edge starts and ends outside the bounding box and doesn't intersect it
-        //     else if (!start_inside && !end_inside && !intersects)
-        //         include_edge = false;
+            // 5) Edge starts and ends outside the bounding box and doesn't intersect it
+            else if (!start_inside && !end_inside && !intersects)
+                include_edge = false;
 
-        //     // 6) Edge starts and ends outside the bounding box and doesn't intersect it
-        //     else {
-        //         edge->start = intersection;
+            // 6) Edge starts and ends outside the bounding box and doesn't intersect it
+            else {
+                edge->start = intersection;
 
-        //         bounding_box.intersect(*edge, intersection);
+                bounding_box.intersect(*edge, intersection);
 
-        //         edge->end = intersection;
-        //     }
-        // }
+                edge->end = intersection;
+            }
+        }
 
         if (include_edge)
             diagram.addEdge(*edge);
@@ -210,6 +210,8 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
 
     left_arc->s0 = arc->s0;
     right_arc->s1 = arc->s1;
+    left_arc->event = arc->event;
+    right_arc->event = arc->event;
 
     left_arc->previous = arc->previous;
     left_arc->next = middle_arc;

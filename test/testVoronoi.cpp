@@ -4,7 +4,9 @@
 
 #include <stdlib.h>
 #include <iostream>
-#define CATCH_CONFIG_MAIN
+
+// #define CATCH_CONFIG_MAIN
+
 VoronoiDiagram voronoi(std::vector<Site*> sites) {
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
