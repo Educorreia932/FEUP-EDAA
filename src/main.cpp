@@ -42,7 +42,8 @@ void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
-    Box box = Box(Vector2(-8.672485, 41.17), Vector2(-8.67154, 41.1701));
+    // Box box = Box(Vector2(-8.69611, 41.16912), Vector2(-8.67926, 41.17671));
+    Box box = Box(Vector2(-8.6725, 41.16912), Vector2(-8.6717, 41.17012));
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
@@ -67,8 +68,8 @@ void voronoi_display(const MapGraph& M) {
         new Site{Vector2(16, 4.4)}
     };
 
-    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
-    // VoronoiDiagram diagram = voronoi(M);
+    // VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
+    VoronoiDiagram diagram = voronoi(M);
 
     DraggableZoomableWindow window(sf::Vector2f(0, 0));
     window.setBackgroundColor(sf::Color(255, 255, 255));
