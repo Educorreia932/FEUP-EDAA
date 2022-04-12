@@ -3,6 +3,8 @@
 #include <functional>
 #include <limits>
 
+class Edge;
+
 class Vector2 {
 public:
     double x;
@@ -29,6 +31,7 @@ public:
     double getDistance(const Vector2 &other) const;
     double getDet(Vector2 vector2);
     bool isOn(Vector2 a, Vector2 b) const;
+    bool isOn(Edge edge) const;
 
     static double getDistance(const Vector2 &v1, const Vector2 &v2);
 

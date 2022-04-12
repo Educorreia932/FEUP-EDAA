@@ -7,11 +7,7 @@
 #include <queue>
 #include <vector>
 
-class Box;
-
-struct Site {
-    Vector2 point;
-};
+class Edge;
 
 class VoronoiDiagram {
 private:

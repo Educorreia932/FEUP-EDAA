@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Site.h"
 #include "Vector2.h"
 
-class Site;
+struct Site;
 
 class Edge {
 public:
@@ -17,7 +18,7 @@ public:
     Site* site_down;
 
     Edge();
-    Edge(Vector2 start, Vector2 end);
+    Edge(Vector2 _start, Vector2 _end, bool _finished=true);
     Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint);
     Edge(Vector2 start, Site* site_1, Site* site_2);
 

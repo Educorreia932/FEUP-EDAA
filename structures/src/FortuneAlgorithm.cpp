@@ -10,7 +10,7 @@ FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites) : diagram(sites) {
 
 VoronoiDiagram FortuneAlgorithm::construct() {
     // Generate site events
-    for (int i = 0; i < diagram.sites.size(); i++) {
+    for (std::size_t i = 0; i < diagram.sites.size(); i++) {
         Site* site = diagram.sites[i];
         events.push(Event(site));
 
@@ -49,27 +49,54 @@ VoronoiDiagram FortuneAlgorithm::construct() {
         bool start_inside = bounding_box.contains(edge->start);
         bool end_inside = bounding_box.contains(edge->end);
         bool include_edge = true;
-
-        // Edge starts inside the box and finishes outside
-        if (!edge->finished || (start_inside && !end_inside)) {
-            if (bounding_box.intersect(*edge, intersection)) {
-                edge->finished = true;
-                edge->end = intersection;
-            }
-        }
-        
-        // Edge starts outside the box and finishes inside
-        if (!start_inside && end_inside)
-            if (bounding_box.intersect(*edge, intersection))
-                edge->start = intersection;
-
         bool intersects = bounding_box.intersect(*edge, intersection);
 
-        // Edge is completely outside of bounding box
-        if (!start_inside && !end_inside && (!intersects || !intersection.isOn(edge->start, edge->end)))
-            include_edge = false;
+        // // Edge is not finished (doesn't have a end point)
+        // if (!edge->finished) {
+        //     // 1) Edge starts inside the bounding box
+        //     if (start_inside) {
+        //         edge->end = intersection;
+        //         edge->finished = true;
+        //     }
 
-        if (include_edge && edge->finished)
+        //     // 2) Edge starts outside the bounding box and intersects it
+        //     else if (intersects) {
+        //         edge->start = intersection;
+
+        //         bounding_box.intersect(*edge, intersection);
+
+        //         edge->end = intersection;
+        //         edge->finished = true;
+        //     }
+
+        //     // 3) Edge starts outside the bounding box and doesn't intersect it
+        //     else 
+        //         include_edge = false;
+        // }
+
+        // // Edge is finished
+        // else {
+        //     intersects = intersects && intersection.isOn(edge->start, edge->end);
+
+        //     // 4) Edge starts inside and ends outside the bounding box
+        //     if (start_inside && !end_inside) 
+        //         edge->end = intersection;
+
+        //     // 5) Edge starts and ends outside the bounding box and doesn't intersect it
+        //     else if (!start_inside && !end_inside && !intersects)
+        //         include_edge = false;
+
+        //     // 6) Edge starts and ends outside the bounding box and doesn't intersect it
+        //     else {
+        //         edge->start = intersection;
+
+        //         bounding_box.intersect(*edge, intersection);
+
+        //         edge->end = intersection;
+        //     }
+        // }
+
+        if (include_edge)
             diagram.addEdge(*edge);
     }
 
@@ -219,7 +246,7 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
     double radius = sqrt(pow(dx, 2) + pow(dy, 2));
 
     // Check if sweepline hasn't passed possible circle event location
-    if (intersection.y - radius < sweep_line ) {
+    if (intersection.y - radius < sweep_line) {
         // Remove any circle events now not needed
         invalidateCircleEvent(arc);
 

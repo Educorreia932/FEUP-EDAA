@@ -1,7 +1,7 @@
 #include "Box.h"
 
 Box::Box() {
-    
+
 }
 
 Box::Box(Vector2 bottom_left, Vector2 upper_right) {
@@ -11,20 +11,20 @@ Box::Box(Vector2 bottom_left, Vector2 upper_right) {
     width = upper_right.x - bottom_left.x;
     height = upper_right.y - bottom_left.y;
 
-    bounds[0] = Edge(bottom_left, upper_left);
-    bounds[1] = Edge(upper_left, upper_right);
-    bounds[2] = Edge(upper_right, bottom_right);
-    bounds[3] = Edge(bottom_right, bottom_left);
+    bounds.push_back(Edge(bottom_left, upper_left));
+    bounds.push_back(Edge(upper_left, upper_right));
+    bounds.push_back(Edge(upper_right, bottom_right));
+    bounds.push_back(Edge(bottom_right, bottom_left));
 }
 
 Box::Box(double width, double height) : Box(Vector2(0, 0), Vector2(width, height)) {
-    
+
 }
 
 bool Box::intersect(Edge edge, Vector2& intersection) {
     for (Edge bound : bounds)
         if (bound.intersect(edge, intersection)) {
-            if (!intersection.isOn(bound.start, bound.end))
+            if (!intersection.isOn(bound) || intersection == edge.start || intersection == edge.end)
                 continue;
 
             return true;

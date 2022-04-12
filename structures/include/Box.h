@@ -1,10 +1,15 @@
+#pragma once
+
 #include "Edge.h"
+#include "Vector2.h"
+
+class Edge;
 
 class Box {
 public:
     double width;
     double height;
-    Edge bounds[4];
+    std::vector<Edge> bounds;
 
     Box();
     Box(Vector2 bottom_left, Vector2 upper_right);

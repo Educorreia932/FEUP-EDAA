@@ -23,13 +23,15 @@
 
 #include <X11/Xlib.h>
 
+#include <iomanip>
+
 using hrc = std::chrono::high_resolution_clock;
 
-const double NANOS_TO_SECS = 1.0/1000000000.0;
+const double NANOS_TO_SECS = 1.0 / 1000000000.0;
 
-void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
+    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
     window.setDrawView(&mapView);
@@ -40,13 +42,15 @@ void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
-    Box box = Box(Vector2(-8.6725, 41.16912), Vector2(-8.67154, 41.17012));
+    Box box = Box(Vector2(-8.672485, 41.17), Vector2(-8.67154, 41.1701));
 
-    for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes() ){
+    for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
 
-        if (box.contains(point))
+        if (box.contains(point)) {
             sites.push_back(new Site{ point });
+            std::cout << std::setprecision(8) << point.x << " " << point.y << std::endl;
+        }
     }
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
@@ -57,16 +61,16 @@ VoronoiDiagram voronoi(const MapGraph& M) {
 void voronoi_display(const MapGraph& M) {
     // Debug values
     std::vector<Site*> sites = {
-        new Site{Vector2(2, 6)},
-        new Site{Vector2(5, 5)},
-        new Site{Vector2(6, 4)},
-        new Site{Vector2(3, 3)}
+        new Site{Vector2(1.57, 4)},
+        new Site{Vector2(9.07, 2.8)},
+        new Site{Vector2(14.87, 3.56)},
+        new Site{Vector2(16, 4.4)}
     };
 
-//    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
-    VoronoiDiagram diagram = voronoi(M);
+    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
+    // VoronoiDiagram diagram = voronoi(M);
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); 
+    DraggableZoomableWindow window(sf::Vector2f(0, 0));
     window.setBackgroundColor(sf::Color(255, 255, 255));
     VoronoiView voronoiView(window, diagram);
     window.setDrawView(&voronoiView);
@@ -84,8 +88,8 @@ void view_trips(const std::vector<Trip>& trips) {
     for (size_t i : s)
         tripsSmall.push_back(trips[i]);
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
     window.setDrawView(&mapView);
@@ -94,9 +98,9 @@ void view_trips(const std::vector<Trip>& trips) {
     windowController.run();
 }
 
-void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const std::vector<Trip>& trips) {
     // double minD, maxD, meanD; size_t n;
-    
+
     // minD = 100000;
     // maxD = -100000;
     // meanD = 0;
@@ -118,7 +122,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     auto begin = hrc::now();
     MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
-    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
+    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
 
     // minD = 100000;
@@ -153,8 +157,8 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     DWGraph::DWGraph dwG = G.getTimeGraph();
     std::cout << "Generated graph" << std::endl;
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
     MapTripMatchView mapTripMatchView(window, mapView);
@@ -181,14 +185,14 @@ int main(int argc, char* argv[]) {
         begin = hrc::now();
         MapGraph M("res/map/processed/AMP");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded map, took " << dt << "s" << std::endl;
 
         std::cout << "Loading polygons..." << std::endl;
         begin = hrc::now();
         std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded polygons, took " << dt << "s" << std::endl;
 
         if (opt == "view") { view(M, polygons); return 0; }
@@ -199,7 +203,7 @@ int main(int argc, char* argv[]) {
         begin = hrc::now();
         std::vector<Trip> trips = Trip::loadTripsBin("res/data/pkdd15-i/pkdd15-i.trips.bin");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded trips, took " << dt << "s" << std::endl;
 
         if (opt == "view-trips") { view_trips(trips); return 0; }

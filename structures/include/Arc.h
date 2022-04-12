@@ -1,8 +1,9 @@
 #ifndef ARC
 #define ARC
 
+#include "Edge.h"
 #include "Event.h"
-#include "VoronoiDiagram.h"
+#include "Site.h"
 
 class Event;
 

@@ -1,4 +1,5 @@
 #include "Vector2.h"
+#include "Edge.h"
 
 #include <cmath>
 
@@ -95,6 +96,9 @@ bool Vector2::compXY(const Vector2 &lhs, const Vector2 &rhs){
 }
 
 bool collinear(Vector2 a, Vector2 b, Vector2 c) {
+    if (a.x == b.x && b.x == c.x)
+        return true;
+        
     return abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) <= EPSILON;
 }
 
@@ -106,6 +110,10 @@ bool Vector2::isOn(Vector2 a, Vector2 b) const {
     Vector2 c = *this;
 
     return collinear(a, b, c) && (a.x != b.x ? within(a.x, c.x, b.x) : within(a.y, c.y, b.y));
+}
+
+bool Vector2::isOn(Edge edge) const {
+    return isOn(edge.start, edge.end);
 }
 
 size_t std::hash<Vector2>::operator()(const Vector2& v) const {
