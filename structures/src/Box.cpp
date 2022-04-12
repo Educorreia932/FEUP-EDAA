@@ -24,7 +24,12 @@ Box::Box(double width, double height) : Box(Vector2(0, 0), Vector2(width, height
 bool Box::intersect(Edge edge, Vector2& intersection) {
     for (Edge bound : bounds)
         if (bound.intersect(edge, intersection)) {
-            if (!intersection.isOn(bound) || intersection == edge.start || intersection == edge.end)
+            if (
+                !intersection.isOn(bound) || 
+                intersection == edge.start || 
+                intersection == edge.end || 
+                (edge.finished && !intersection.isOn(edge))
+            )
                 continue;
 
             return true;

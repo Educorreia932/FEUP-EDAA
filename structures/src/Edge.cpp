@@ -16,15 +16,8 @@ Edge::Edge(Vector2 start, Vector2 leftpoint, Vector2 rightpoint) : start(start) 
     this->direction = Vector2(-1.0 * (leftpoint.y - rightpoint.y), leftpoint.x - rightpoint.x);
 }
 
-Edge::Edge(Vector2 start, Site* site_1, Site* site_2) : start(start) {
-    Vector2 leftpoint = site_1->point;
-    Vector2 rightpoint = site_2->point;
-
-    this->m = -1.0 / ((leftpoint.y - rightpoint.y) / (leftpoint.x - rightpoint.x));
-    this->c = start.y - this->m * start.x;
-    this->direction = Vector2(-1.0 * (leftpoint.y - rightpoint.y), leftpoint.x - rightpoint.x);
-
-    if (leftpoint.y > rightpoint.y) {
+Edge::Edge(Vector2 start, Site* site_1, Site* site_2) : Edge(start, site_1->point, site_2->point) {
+    if (site_1->point.y > site_2->point.y) {
         site_up = site_1;
         site_down = site_2;
     }

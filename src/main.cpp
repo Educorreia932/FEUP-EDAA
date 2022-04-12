@@ -42,14 +42,13 @@ void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
-    // Box box = Box(Vector2(-8.69611, 41.16912), Vector2(-8.67926, 41.17671));
-    Box box = Box(Vector2(-8.676, 41.1755), Vector2(-8.67493, 41.176));
+    Box box = Box(Vector2(-8.69611, 41.16912), Vector2(-8.67926, 41.17671));
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
 
         if (box.contains(point)) {
-            std::cout << std::setprecision(9) << point.y << std::endl;
+            // std::cout << std::setprecision(9) << point.y << std::endl;
             sites.push_back(new Site{ point });
         }
     }
