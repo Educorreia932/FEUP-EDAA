@@ -48,6 +48,11 @@ bool Edge::intersect(Edge edge, Vector2& intersection) {
         y = edge.m * x + edge.c;
     }
 
+    else if (edge.m == std::numeric_limits<double>::infinity() || edge.m == -std::numeric_limits<double>::infinity()) {
+        x = edge.start.x;
+        y = this->m * x + this->c;
+    }
+
     else {
         x = (edge.c - this->c) / (this->m - edge.m);
         y = this->m * x + this->c;

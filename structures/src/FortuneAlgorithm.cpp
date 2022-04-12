@@ -99,6 +99,8 @@ VoronoiDiagram FortuneAlgorithm::construct() {
                 edge->end = intersection;
             }
         }
+        
+        std::cout << edge->start.x << " " << edge->start.y << " " << edge->end.x << " " << edge->end.y << " " << edge->m << std::endl;
 
         if (include_edge)
             diagram.addEdge(*edge);
