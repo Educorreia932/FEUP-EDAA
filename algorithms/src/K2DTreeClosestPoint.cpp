@@ -74,7 +74,7 @@ void K2DTreeClosestPoint::search(const Vector2 &p, size_t r, Vector2 &cbest, dou
         // If there's a chance the closest point is on the brother of the
         // current tree node
         if(p.getDistance(median_coord) < dbest){
-        // if(abs(v-median) < dbest){
+        // if(fabs(v-median) < dbest){
             // The brother of current tree node i is i^1, because we just flip
             // the least significant bit
             search(p, i^1, cbest, dbest);

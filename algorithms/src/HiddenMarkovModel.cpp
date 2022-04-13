@@ -93,7 +93,7 @@ public:
 
         const double &dRoute = D.at(i).at(j);
 
-        double dt = abs(dArc-dRoute);
+        double dt = fabs(dArc-dRoute);
         return exp(-dt/beta)/beta;
     }
 };
