@@ -99,7 +99,7 @@ bool collinear(Vector2 a, Vector2 b, Vector2 c) {
     if (a.x == b.x && b.x == c.x)
         return true;
         
-    return abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) <= EPSILON;
+    return fabs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) <= EPSILON;
 }
 
 bool within(double p, double q, double r) {
