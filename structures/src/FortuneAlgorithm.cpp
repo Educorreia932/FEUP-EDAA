@@ -122,11 +122,11 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     // Starting point for the two new edges
     Vector2 start = arc_above->getPoint(event.site->point.x, sweep_line);
 
+    std::cout << std::setprecision(9) << arc_above->site->point.x << " " << arc_above->site->point.y << std::endl;
+
     Arc* middle_arc = breakArc(arc_above, event.site);
     Arc* left_arc = middle_arc->previous;
     Arc* right_arc = middle_arc->next;
-
-    std::cout << std::setprecision(9) << left_arc->site->point.x << " " << left_arc->site->point.y << std::endl;
 
     Edge* left_edge = new Edge(start, arc_above->site, event.site);
     Edge* right_edge = new Edge(start, event.site, arc_above->site);
@@ -175,7 +175,7 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     left_arc->s1 = boundary_ray;
     right_arc->s0 = boundary_ray;
 
-    std::remove(arcs.begin(), arcs.end(), arc);
+    removeArc(arc);
 
     delete arc;
 
@@ -185,10 +185,11 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
 }
 
 Arc* FortuneAlgorithm::locateArcAbove(Site site) {
-    Arc* arc_above;
+    Arc* arc_above = nullptr;
     Vector2 closest(site.point.x, std::numeric_limits<double>::infinity()); // Closest intersection in y-axis
-    Edge beam(site.point, Vector2(site.point.x - 1, site.point.y), Vector2(site.point.x + 1, site.point.y)); // Vertical line that intersects parabolas
+    Edge beam(site.point, site.point - Vector2(1, 0), site.point + Vector2(1, 0)); // Vertical line that intersects parabolas
 
+    // for (int i = 0; i < arcs.size(); i++) {
     for (int i = arcs.size() - 1; i >= 0; i--) {
         Arc* arc = arcs[i];
         Vector2 intersection = arc->intersect(beam, sweep_line);
@@ -206,6 +207,8 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
     Arc* left_arc = new Arc(arc->site);
     Arc* right_arc = new Arc(arc->site);
     Arc* middle_arc = new Arc(site, left_arc, right_arc);
+
+    removeArc(arc);
 
     arcs.push_back(left_arc);
     arcs.push_back(right_arc);
@@ -228,8 +231,6 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
     if (right_arc->next != nullptr)
         right_arc->next->previous = right_arc;
 
-    // Replace root
-    std::remove(arcs.begin(), arcs.end(), arc);
 
     // Delete old arc
     delete arc;
@@ -264,4 +265,11 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 void FortuneAlgorithm::invalidateCircleEvent(Arc* arc) {
     if (arc->event != nullptr)
         invalid_events.insert(*arc->event);
+}
+
+void FortuneAlgorithm::removeArc(Arc* arc) {
+    std::vector<Arc*>::iterator position = std::find(arcs.begin(), arcs.end(), arc);
+
+    if (position != arcs.end())
+        arcs.erase(position);
 }

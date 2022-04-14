@@ -27,6 +27,7 @@ private:
     Arc* breakArc(Arc* arc, Site* site);
     void invalidateCircleEvent(Arc* arc);
     void checkCircleEvents(Arc* arc);
+    void removeArc(Arc* arc);
 public:
     FortuneAlgorithm(std::vector<Site*> sites);
 
