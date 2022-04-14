@@ -45,5 +45,6 @@ plt.gcf().text(0.01, 0.02, "Averaged 5 samples, 4-points exponential moving aver
 fig.tight_layout()
 
 plt.savefig("deepvstripes-buildtime.png", dpi=600)
+plt.savefig("deepvstripes-buildtime.svg")
 
 plt.show()

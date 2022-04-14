@@ -37,5 +37,6 @@ ax.text(200000, 16500000, f'$y = {linear_regressor.coef_[0][0]:.3f} x {linear_re
 fig.tight_layout()
 
 plt.savefig("2d-tree-buildmem.png", dpi=600)
+plt.savefig("2d-tree-buildmem.svg")
 
 plt.show()

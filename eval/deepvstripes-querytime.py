@@ -40,5 +40,6 @@ plt.gcf().text(0.01, 0.02, "100,000 queries, averaged 10 runs,\n8-points exponen
 fig.tight_layout()
 
 plt.savefig("deepvstripes-querytime.png", dpi=600)
+plt.savefig("deepvstripes-querytime.svg")
 
 plt.show()
