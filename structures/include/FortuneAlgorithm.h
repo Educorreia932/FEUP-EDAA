@@ -10,7 +10,7 @@ private:
     std::vector<Edge*> edges;
     std::priority_queue<Event> events;
     std::set<Event> invalid_events;
-    Arc* root = nullptr;   // Binary tree for parabola arcs
+    std::vector<Arc*> arcs; // List of parabolas
     double sweep_line = 0; // Current y-position of sweep line
 
     // Limits for bounding box
@@ -23,7 +23,7 @@ private:
 
     void handleSiteEvent(Event event);
     void handleCircleEvent(Event event);
-    Arc& locateArcAbove(Site site);
+    Arc* locateArcAbove(Site site);
     Arc* breakArc(Arc* arc, Site* site);
     void invalidateCircleEvent(Arc* arc);
     void checkCircleEvents(Arc* arc);

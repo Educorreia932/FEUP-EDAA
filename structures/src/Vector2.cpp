@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#define EPSILON 0.0000000001
+#define EPSILON 0.0000001
 
 Vector2::Vector2(double x, double y) : x(x), y(y) {
 

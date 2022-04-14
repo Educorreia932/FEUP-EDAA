@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-// #define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_MAIN
 
 VoronoiDiagram voronoi(std::vector<Site*> sites) {
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
@@ -104,5 +104,13 @@ TEST_CASE("Bounding Box", "[box]") {
     edge.end = intersection;
     
     REQUIRE(edge == Edge(Vector2(1, 2), Vector2(3, 0)));
+}
 
+TEST_CASE("Parabola intersection with edge", "[arc]") {
+    Arc arc(new Site{Vector2(1, 2)});
+    Edge edge(Vector2(1, 0), Vector2(0, 0), Vector2(2, 0));
+    double sweep_line = 0;
+    Vector2 intersection = arc.intersect(edge, sweep_line);
+
+    REQUIRE(intersection == Vector2(1, 1));
 }

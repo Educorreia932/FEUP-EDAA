@@ -42,15 +42,13 @@ void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
-    Box box = Box(Vector2(-8.69611, 41.16912), Vector2(-8.67926, 41.17671));
+    Box box = Box(Vector2(-8.67749, 41.164403), Vector2(-8.6768, 41.1649));
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
 
-        if (box.contains(point)) {
-            // std::cout << std::setprecision(9) << point.y << std::endl;
-            sites.push_back(new Site{ point });
-        }
+        if (box.contains(point)) 
+            sites.push_back(new Site{ point }); 
     }
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
@@ -59,15 +57,6 @@ VoronoiDiagram voronoi(const MapGraph& M) {
 }
 
 void voronoi_display(const MapGraph& M) {
-    // Debug values
-    std::vector<Site*> sites = {
-        new Site{Vector2(1.57, 4)},
-        new Site{Vector2(9.07, 2.8)},
-        new Site{Vector2(14.87, 3.56)},
-        new Site{Vector2(16, 4.4)}
-    };
-
-    // VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
     VoronoiDiagram diagram = voronoi(M);
 
     DraggableZoomableWindow window(sf::Vector2f(0, 0));

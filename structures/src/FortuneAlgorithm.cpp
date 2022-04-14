@@ -3,6 +3,7 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <iomanip>
 
 FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites) : diagram(sites) {
 
@@ -20,11 +21,6 @@ VoronoiDiagram FortuneAlgorithm::construct() {
         x1 = std::max(x1, site->point.x);
         y1 = std::max(y1, site->point.y);
     }
-
-    x0 -= 0.0001;
-    y0 -= 0.0001;
-    x1 += 0.0001; 
-    y1 += 0.0001; 
 
     bounding_box = Box(Vector2(x0, y0), Vector2(x1, y1));
 
@@ -70,7 +66,7 @@ VoronoiDiagram FortuneAlgorithm::construct() {
             }
 
             // 3) Edge starts outside the bounding box and doesn't intersect it
-            else 
+            else
                 include_edge = false;
         }
 
@@ -79,7 +75,7 @@ VoronoiDiagram FortuneAlgorithm::construct() {
             intersects = intersects && intersection.isOn(edge->start, edge->end);
 
             // 4.1) Edge starts inside and ends outside the bounding box
-            if (start_inside && !end_inside) 
+            if (start_inside && !end_inside)
                 edge->end = intersection;
 
             // 4.2) Edge starts and ends outside the bounding box and doesn't intersect it
@@ -99,10 +95,8 @@ VoronoiDiagram FortuneAlgorithm::construct() {
                 edge->end = intersection;
             }
         }
-        
-        std::cout << edge->start.x << " " << edge->start.y << " " << edge->end.x << " " << edge->end.y << " " << edge->m << std::endl;
 
-        if (include_edge)
+        if (include_edge && edge->finished)
             diagram.addEdge(*edge);
     }
 
@@ -117,19 +111,25 @@ VoronoiDiagram FortuneAlgorithm::construct() {
 // Add new parabola
 void FortuneAlgorithm::handleSiteEvent(Event event) {
     // Beachline is empty
-    if (root == nullptr) {
-        root = new Arc(event.site);
+    if (arcs.empty()) {
+        arcs.push_back(new Arc(event.site));
 
         return;
     }
 
-    Arc& arc_above = locateArcAbove(*(event.site));
+    Arc* arc_above = locateArcAbove(*event.site);
 
     // Starting point for the two new edges
-    Vector2 start = arc_above.getPoint(event.site->point.x, sweep_line);
+    Vector2 start = arc_above->getPoint(event.site->point.x, sweep_line);
 
-    Edge* left_edge = new Edge(start, arc_above.site, event.site);
-    Edge* right_edge = new Edge(start, event.site, arc_above.site);
+    Arc* middle_arc = breakArc(arc_above, event.site);
+    Arc* left_arc = middle_arc->previous;
+    Arc* right_arc = middle_arc->next;
+
+    std::cout << std::setprecision(9) << left_arc->site->point.x << " " << left_arc->site->point.y << std::endl;
+
+    Edge* left_edge = new Edge(start, arc_above->site, event.site);
+    Edge* right_edge = new Edge(start, event.site, arc_above->site);
 
     // Add edges to diagram 
     edges.push_back(left_edge);
@@ -138,10 +138,6 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
     // Link up the two edges
     left_edge->adjacent = right_edge;
     right_edge->adjacent = left_edge;
-
-    Arc* middle_arc = breakArc(&arc_above, event.site);
-    Arc* left_arc = middle_arc->previous;
-    Arc* right_arc = middle_arc->next;
 
     middle_arc->s0 = left_edge;
     middle_arc->s1 = right_edge;
@@ -179,40 +175,41 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
     left_arc->s1 = boundary_ray;
     right_arc->s0 = boundary_ray;
 
+    std::remove(arcs.begin(), arcs.end(), arc);
+
+    delete arc;
+
     // Check to see if we need to create new circle events
     checkCircleEvents(left_arc);
     checkCircleEvents(right_arc);
 }
 
-Arc& FortuneAlgorithm::locateArcAbove(Site site) {
-    Arc* current_arc = root;
+Arc* FortuneAlgorithm::locateArcAbove(Site site) {
+    Arc* arc_above;
+    Vector2 closest(site.point.x, std::numeric_limits<double>::infinity()); // Closest intersection in y-axis
+    Edge beam(site.point, Vector2(site.point.x - 1, site.point.y), Vector2(site.point.x + 1, site.point.y)); // Vertical line that intersects parabolas
 
-    // TODO: Can be optimized to log n using binary search
-    while (current_arc != nullptr) {
-        // Check if site is under arc boundaries
-        double a = -std::numeric_limits<double>::infinity();
-        double b = std::numeric_limits<double>::infinity();
+    for (int i = arcs.size() - 1; i >= 0; i--) {
+        Arc* arc = arcs[i];
+        Vector2 intersection = arc->intersect(beam, sweep_line);
 
-        if (current_arc->previous != nullptr)
-            a = current_arc->intersect(*current_arc->previous->s1, sweep_line).x;
-
-        if (current_arc->next != nullptr)
-            b = current_arc->intersect(*current_arc->next->s0, sweep_line).x;
-
-        if ((current_arc->previous == nullptr || a <= site.point.x) &&
-            (current_arc->next == nullptr || site.point.x <= b))
-            break;
-
-        current_arc = current_arc->next;
+        if (intersection.y < closest.y) {
+            closest = intersection;
+            arc_above = arc;
+        }
     }
 
-    return *current_arc;
+    return arc_above;
 }
 
 Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
-    Arc* middle_arc = new Arc(site, arc, arc);
     Arc* left_arc = new Arc(arc->site);
     Arc* right_arc = new Arc(arc->site);
+    Arc* middle_arc = new Arc(site, left_arc, right_arc);
+
+    arcs.push_back(left_arc);
+    arcs.push_back(right_arc);
+    arcs.push_back(middle_arc);
 
     left_arc->s0 = arc->s0;
     right_arc->s1 = arc->s1;
@@ -225,17 +222,17 @@ Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {
     if (left_arc->previous != nullptr)
         left_arc->previous->next = left_arc;
 
-    middle_arc->previous = left_arc;
-    middle_arc->next = right_arc;
-
     right_arc->previous = middle_arc;
     right_arc->next = arc->next;
 
     if (right_arc->next != nullptr)
         right_arc->next->previous = right_arc;
 
-    if (arc == root)
-        root = left_arc;
+    // Replace root
+    std::remove(arcs.begin(), arcs.end(), arc);
+
+    // Delete old arc
+    delete arc;
 
     return middle_arc;
 }
@@ -265,6 +262,6 @@ void FortuneAlgorithm::checkCircleEvents(Arc* arc) {
 }
 
 void FortuneAlgorithm::invalidateCircleEvent(Arc* arc) {
-    if (arc->event != nullptr) 
-        invalid_events.insert(*arc->event);        
+    if (arc->event != nullptr)
+        invalid_events.insert(*arc->event);
 }
