@@ -38,7 +38,7 @@ plt.ylabel("Query time ($t$/ns)")
 plt.xticks(range(0, 300000+1, 20000))
 plt.gca().get_xaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'{x/1000:.0f}k' if x >= 1000 else '0'))
 plt.grid()
-plt.legend([f"$d={d}$" for d in l], ncol=2)
+plt.legend([f"$\delta={d}$" for d in l], ncol=2)
 
 plt.gcf().text(0.01, 0.02, "100,000 queries, averaged 10 runs,\n4-points exponential moving average", fontsize=8)
 

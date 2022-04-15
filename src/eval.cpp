@@ -303,8 +303,8 @@ void eval2DTree_BuildMemory(){
         size_t mem = 0;
 
         size_t N = utils::nextPow2(sz);
-        mem += N * sizeof(Coord) * 2; // Data structure
-        mem += N * sizeof(Coord); // Stable sort
+        mem += N * sizeof(Vector2); // Leaf nodes
+        mem += N * sizeof(double); // Non-leaf nodes
 
         os << "," << mem << std::endl;
     }
@@ -761,7 +761,7 @@ int main(int argc, char *argv[]){
         if(opt == "deepvstripes-buildtime"){ evalDeepVStripes_BuildTime(M); return 0; }
         
         std::cout << "Loading trips..." << std::endl;
-        std::vector<Trip> trips = Trip::loadTrips("res/data/pkdd15-i/pkdd15-i.trips");
+        std::vector<Trip> trips = Trip::loadTripsBin("res/data/pkdd15-i/pkdd15-i.trips.bin");
         std::cout << "Loaded trips" << std::endl;
 
         if(opt == "2d-tree-querytime") eval2DTree_QueryTime(M, trips);
