@@ -11,8 +11,7 @@ FortuneAlgorithm::FortuneAlgorithm(std::vector<Site*> sites) : diagram(sites) {
 
 VoronoiDiagram FortuneAlgorithm::construct() {
     // Generate site events
-    for (std::size_t i = 0; i < diagram.sites.size(); i++) {
-        Site* site = diagram.sites[i];
+    for (Site* site : diagram.sites) {
         events.push(Event(site));
 
         // Set bounding box limits
@@ -110,6 +109,8 @@ VoronoiDiagram FortuneAlgorithm::construct() {
 
 // Add new parabola
 void FortuneAlgorithm::handleSiteEvent(Event event) {
+    // std::cout << std::setprecision(7) << event.point.x << " " << event.point.y << std::endl;
+
     // Beachline is empty
     if (arcs.empty()) {
         arcs.push_back(new Arc(event.site));
@@ -121,8 +122,6 @@ void FortuneAlgorithm::handleSiteEvent(Event event) {
 
     // Starting point for the two new edges
     Vector2 start = arc_above->getPoint(event.site->point.x, sweep_line);
-
-    std::cout << std::setprecision(9) << arc_above->site->point.x << " " << arc_above->site->point.y << std::endl;
 
     Arc* middle_arc = breakArc(arc_above, event.site);
     Arc* left_arc = middle_arc->previous;
@@ -185,22 +184,21 @@ void FortuneAlgorithm::handleCircleEvent(Event event) {
 }
 
 Arc* FortuneAlgorithm::locateArcAbove(Site site) {
-    Arc* arc_above = nullptr;
-    Vector2 closest(site.point.x, std::numeric_limits<double>::infinity()); // Closest intersection in y-axis
-    Edge beam(site.point, site.point - Vector2(1, 0), site.point + Vector2(1, 0)); // Vertical line that intersects parabolas
+    double x = site.point.x;
 
-    // for (int i = 0; i < arcs.size(); i++) {
-    for (int i = arcs.size() - 1; i >= 0; i--) {
-        Arc* arc = arcs[i];
-        Vector2 intersection = arc->intersect(beam, sweep_line);
+    for (Arc* arc : arcs) {
+        double a = -std::numeric_limits<double>::infinity();
+        double b = std::numeric_limits<double>::infinity();
 
-        if (intersection.y < closest.y) {
-            closest = intersection;
-            arc_above = arc;
-        }
+        if (arc->previous != nullptr)
+            a = arc->previous->intersect(*arc, sweep_line).x;
+
+        if (arc->next != nullptr)
+            b = arc->intersect(*arc->next, sweep_line).x;
+
+        if (((arc->previous == nullptr) || (x > a)) && ((arc->next == nullptr) || (x < b))) 
+            return arc;
     }
-
-    return arc_above;
 }
 
 Arc* FortuneAlgorithm::breakArc(Arc* arc, Site* site) {

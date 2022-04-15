@@ -11,7 +11,7 @@ Event::Event(Arc* arc, Vector2 point, double radius) : type(CIRCLE), point(point
 }
 
 bool Event::operator<(const Event &event) const {
-    if (fabs(this->point.y - event.point.y) < 0.000001L)
+    if (fabs(this->point.y - event.point.y) < 0.00000001)
         return this->point.x < event.point.x;
 
     return this->point.y < event.point.y;

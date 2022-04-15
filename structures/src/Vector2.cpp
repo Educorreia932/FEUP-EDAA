@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#define EPSILON 0.0000001
+#define EPSILON 0.00000001
 
 Vector2::Vector2(double x, double y) : x(x), y(y) {
 
@@ -55,7 +55,7 @@ Vector2 Vector2::operator/(double t) const {
 }
 
 bool Vector2::operator==(const Vector2 &rhs) const {
-    return x == rhs.x && y == rhs.y;
+    return fabs(x - rhs.x) < EPSILON && fabs(y - rhs.y) < EPSILON;
 }
 
 Vector2 Vector2::getOrthogonal() const {

@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 
 #define CATCH_CONFIG_MAIN
 
@@ -113,4 +114,16 @@ TEST_CASE("Parabola intersection with edge", "[arc]") {
     Vector2 intersection = arc.intersect(edge, sweep_line);
 
     REQUIRE(intersection == Vector2(1, 1));
+}
+
+TEST_CASE("Parabolas intersection", "[arc]") {
+    Arc arc_1(new Site{Vector2(2, 4)});
+    Arc arc_2(new Site{Vector2(5, 10)});
+    double sweep_line = 2;
+
+    Vector2 intersection_1 = arc_1.intersect(arc_2, sweep_line);
+    Vector2 intersection_2 = arc_2.intersect(arc_1, sweep_line);
+
+    REQUIRE(intersection_1 == Vector2(5.4721359, 6.0139320));
+    REQUIRE(intersection_2 == Vector2(-3.47213595, 10.486068));
 }

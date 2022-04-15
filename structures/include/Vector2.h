@@ -12,17 +12,16 @@ public:
 
     explicit Vector2(double x = std::numeric_limits<double>::infinity(), double y = std::numeric_limits<double>::infinity());
 
-    // Unary operators
+    Vector2 operator+(const Vector2 &rhs) const;
+    Vector2 operator-(const Vector2 &rhs) const;
+    Vector2 operator*(double t) const;
+    Vector2 operator/(double t) const;
+
     Vector2& operator+=(const Vector2& other);
     Vector2& operator-=(const Vector2& other);
     Vector2& operator*=(double t);
     Vector2& operator/=(double t);
 
-    // Binary operators
-    Vector2 operator+(const Vector2 &rhs) const;
-    Vector2 operator-(const Vector2 &rhs) const;
-    Vector2 operator*(double t) const;
-    Vector2 operator/(double t) const;
     bool operator==(const Vector2 &rhs) const;
 
     Vector2 getOrthogonal() const;
