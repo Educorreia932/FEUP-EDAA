@@ -49,5 +49,6 @@ plt.gcf().text(0.01, 0.02, "Averaged 5 samples, 2-points exponential moving aver
 fig.tight_layout()
 
 plt.savefig("2d-tree-buildtime.png", dpi=600)
+plt.savefig("2d-tree-buildtime.svg")
 
 plt.show()
