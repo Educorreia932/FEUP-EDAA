@@ -53,8 +53,7 @@ void Astar::run(){
         Q.pop();
         if(u == d) break;
         for(const Edge &e: G->getAdj(u)){
-            auto uit = dist.find(u);
-            weight_t c_ = (uit != dist.end() ? uit->second.first : iINF) + e.w;
+            weight_t c_ = dist.at(u).first + e.w;
             auto dit = dist.find(e.v);
             if(dit == dist.end() || c_ < dit->second.first){
                 dist[e.v] = mk(c_, u);

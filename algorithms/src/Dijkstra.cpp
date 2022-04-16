@@ -20,6 +20,8 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
 
+Dijkstra::Dijkstra(weight_t dMax_):dMax(dMax_){}
+
 node_t Dijkstra::getStart() const{
     return s;
 }
@@ -27,37 +29,36 @@ node_t Dijkstra::getStart() const{
 void Dijkstra::initialize(const DWGraph::DWGraph *G_, DWGraph::node_t s_){
     this->s = s_;
     this->G = G_;
-    for(const node_t &u: G->getNodes()){
-        dist[u] = iINF;
-        prev[u] = DWGraph::INVALID_NODE;
-    }
+    dist.clear();
 }
 
 void Dijkstra::run(){
     min_priority_queue Q;
-    dist[s] = 0; prev[s] = s; Q.push(mk(dist[s], s));
+    dist[s] = mk(0, s); Q.push(mk(0, s));
     while(!Q.empty()){
-        node_t u = Q.top().second;
-        Q.pop();
+        auto p = Q.top(); Q.pop(); //std::cout << "Processing " << p.first << ", " << p.second << ", dMax=" << dMax << std::endl;
+        // if(p.first > dMax) break;
+        node_t u = p.second; //std::cout << "Adj: " << G->getAdj(u).size() << std::endl;
         for(const Edge &e: G->getAdj(u)){
-            weight_t c_ = dist[u] + e.w;
-            if(c_ < dist[e.v]){
-                dist[e.v] = c_;
-                prev[e.v] = u;
-                Q.push(mk(dist[e.v], e.v));
+            weight_t c_ = dist.at(u).first + e.w;
+            auto dit = dist.find(e.v);
+            if(c_ <= dMax && (dit == dist.end() || c_ < dit->second.first)){
+                dist[e.v] = mk(c_, u);
+                Q.push(mk(c_, e.v));
             }
         }
     }
 }
 
 DWGraph::node_t Dijkstra::getPrev(DWGraph::node_t d) const{
-    return prev.at(d);
+    return dist.at(d).second;
 }
 
 weight_t Dijkstra::getPathWeight(node_t d) const{
-    return dist.at(d);
+    if(dist.count(d)) return dist.at(d).first;
+    else return iINF;
 }
 
 bool Dijkstra::hasVisited(DWGraph::node_t u) const{
-    return (dist.at(u) != iINF);
+    return (dist.count(u) && dist.at(u).first != iINF);
 }

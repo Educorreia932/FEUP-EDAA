@@ -88,7 +88,6 @@ void AstarFew::run(){
     dist[s] = mk(0, -1); Q.push(mk((*h)(s), s));
     while(!Q.empty()){
         pair<weight_t, node_t> p =  Q.top(); Q.pop();
-        if(p.first > dMax) break;
         const node_t &u = p.second;
         
         auto uit = dS.find(u);
@@ -99,7 +98,7 @@ void AstarFew::run(){
             auto uit = dist.find(u);
             weight_t c_ = (uit != dist.end() ? uit->second.first : iINF) + e.w;
             auto dit = dist.find(e.v);
-            if(dit == dist.end() || c_ < dit->second.first){
+            if(c_ <= dMax && (dit == dist.end() || c_ < dit->second.first)){
                 dist[e.v] = mk(c_, u);
                 Q.push(mk(c_ + (*h)(e.v), e.v));
             }
