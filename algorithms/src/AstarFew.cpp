@@ -95,10 +95,10 @@ void AstarFew::run(){
         if(dS.empty()) break;
         
         for(const Edge &e: G->getAdj(u)){
-            auto uit = dist.find(u);
-            weight_t c_ = (uit != dist.end() ? uit->second.first : iINF) + e.w;
+            weight_t c_ = dist.at(u).first + e.w;
+            if(c_ > dMax) continue;
             auto dit = dist.find(e.v);
-            if(c_ <= dMax && (dit == dist.end() || c_ < dit->second.first)){
+            if(dit == dist.end() || c_ < dit->second.first){
                 dist[e.v] = mk(c_, u);
                 Q.push(mk(c_ + (*h)(e.v), e.v));
             }

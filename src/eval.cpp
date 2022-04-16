@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "DeepVStripes.h"
-#include "Dijkstra.h"
+#include "DijkstraDist.h"
 #include "EdgeType.h"
 #include "Kosaraju.h"
 #include "MapGraph.h"
@@ -18,6 +18,7 @@
 
 const double METERS_TO_MILLIMS = 1000.0;
 const double MILLIMS_TO_METERS = 1.0/1000.0;
+const double NANOS_TO_SECONDS = 1.0/1000000000.0;
 
 void eval2DTree_BuildTime(const MapGraph &M){
     std::ofstream os("eval/2d-tree-buildtime.csv");
@@ -920,8 +921,9 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
     os << std::fixed;
 
     std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
 
-    const size_t N = 100000; // 1000
+    const size_t N = 100000;
     const double d = 50;
 
     MapGraph G = M.splitLongEdges(30.0);
@@ -935,11 +937,13 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
     closestPointsInRadius.initialize(l, d);
     closestPointsInRadius.run();
 
-    std::unordered_map<DWGraph::node_t, Dijkstra> dijkstras;
+    std::unordered_map<DWGraph::node_t, DijkstraDist> dijkstras;
 
     size_t failed = 0;
 
     os << "i,Dijkstra\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
 
     for(size_t n = 0; n < N; ++n){
         try {
@@ -948,8 +952,14 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
             const std::vector<Coord> &Y = trip;
             const size_t &T = Y.size();
 
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
             if(n%100 == 0)
-                std::cout << "n=" << n << "/" << N << ", idx=" << idx << ", tripId=" << trips[idx].id << ", failed=" << failed << std::endl;
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
 
             // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
             std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
@@ -981,7 +991,7 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
                 for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
                 for(size_t i: candidateStates.at(t)){
-                    auto u = idxToNode.at(i);
+                    DWGraph::node_t u = idxToNode.at(i);
                     if(dijkstras.count(u) == 0){
                         dijkstras.emplace(u, 650*METERS_TO_MILLIMS);
                         dijkstras.at(u).initialize(&distGraph, u);
@@ -989,9 +999,11 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
                     }
 
                     for(size_t j: candidateStates.at(t+1)){
-                        DWGraph::weight_t d = dijkstras.at(idxToNode.at(i)).getPathWeight(idxToNode.at(j));
-                        double df = double(d)*MILLIMS_TO_METERS; //std::cout << "i,j=" << i << "," << j << ", df=" << df << std::endl;
-                        distMatrix[i][j] = (d == iINF ? fINF : df);
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        DWGraph::weight_t d = dijkstras.at(u).getPathWeight(v);
+                        double df = (d == iINF ? fINF : double(d)*MILLIMS_TO_METERS);
+                        distMatrix[i][j] = df;
                     }
                 }
 
@@ -1015,8 +1027,7 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
             dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
             os << n << "," << dt << "\n";
         } catch(const std::exception &e){
-            std::cout << "Failed: " << e.what() << std::endl;
-            --n;
+            // std::cout << "Failed: " << e.what() << std::endl;
             ++failed;
             // throw e;
         }

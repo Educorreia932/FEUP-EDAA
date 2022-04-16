@@ -1,12 +1,15 @@
 // #pragma GCC target("tune=native")
 
-#include "Dijkstra.h"
+#include "DijkstraDist.h"
 
 #include <queue>
 #include <utility>
 #include <chrono>
+#include <exception>
 
 #include "utils.h"
+
+using namespace std;
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
@@ -20,46 +23,46 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
 
-Dijkstra::Dijkstra(weight_t dMax_):dMax(dMax_){}
+DijkstraDist::DijkstraDist(weight_t dMax_):dMax(dMax_){}
 
-node_t Dijkstra::getStart() const{
+node_t DijkstraDist::getStart() const{
     return s;
 }
 
-void Dijkstra::initialize(const DWGraph::DWGraph *G_, DWGraph::node_t s_){
+void DijkstraDist::initialize(const DWGraph::DWGraph *G_, DWGraph::node_t s_){
     this->s = s_;
     this->G = G_;
     dist.clear();
 }
 
-void Dijkstra::run(){
+void DijkstraDist::run(){
     min_priority_queue Q;
-    dist[s] = mk(0, s); Q.push(mk(0, s));
+    dist[s] = 0; Q.push(mk(0, s));
     while(!Q.empty()){
-        auto p = Q.top(); Q.pop(); //std::cout << "Processing " << p.first << ", " << p.second << ", dMax=" << dMax << std::endl;
-        // if(p.first > dMax) break;
-        node_t u = p.second; //std::cout << "Adj: " << G->getAdj(u).size() << std::endl;
+        auto p = Q.top(); Q.pop();
+        node_t u = p.second;
         for(const Edge &e: G->getAdj(u)){
-            weight_t c_ = dist.at(u).first + e.w;
+            weight_t c_ = dist.at(u) + e.w;
             if(c_ > dMax) continue;
             auto dit = dist.find(e.v);
-            if(dit == dist.end() || c_ < dit->second.first){
-                dist[e.v] = mk(c_, u);
+            if(dit == dist.end() || c_ < dit->second){
+                dist[e.v] = c_;
                 Q.push(mk(c_, e.v));
             }
         }
     }
 }
 
-DWGraph::node_t Dijkstra::getPrev(DWGraph::node_t d) const{
-    return dist.at(d).second;
+DWGraph::node_t DijkstraDist::getPrev(DWGraph::node_t d) const{
+    throw logic_error("DijkstraDist::getPrev is not implemented");
 }
 
-weight_t Dijkstra::getPathWeight(node_t d) const{
-    if(dist.count(d)) return dist.at(d).first;
+weight_t DijkstraDist::getPathWeight(node_t d) const{
+    if(dist.count(d)) return dist.at(d);
     else return iINF;
 }
 
-bool Dijkstra::hasVisited(DWGraph::node_t u) const{
-    return (dist.count(u) && dist.at(u).first != iINF);
+bool DijkstraDist::hasVisited(DWGraph::node_t u) const{
+    auto it = dist.find(u);
+    return (it != dist.end());
 }
