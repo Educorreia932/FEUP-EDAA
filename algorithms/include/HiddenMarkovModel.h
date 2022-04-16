@@ -3,11 +3,12 @@
 #include "MapMatching.h"
 
 #include "ClosestPointsInRadius.h"
-#include "ShortestPathOneMany.h"
+#include "ShortestPathFew.h"
 
 class HiddenMarkovModel: public MapMatching {
 private:
     ClosestPointsInRadius &closestPointsInRadius;
+    ShortestPathFew &shortestPathFew;
     const double d;
     const double sigma_z;
     const double beta;
@@ -23,6 +24,7 @@ public:
      */
     HiddenMarkovModel(
         ClosestPointsInRadius &closestPointsInRadius_,
+        ShortestPathFew &shortestPathFew_,
         double d_, double sigma_z_, double beta_
     );
     virtual void initialize(const MapGraph *mapGraph_);

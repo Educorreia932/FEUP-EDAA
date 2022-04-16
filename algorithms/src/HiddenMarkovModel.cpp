@@ -30,9 +30,11 @@ const double METERS_TO_MILLIMS = 1000.0;
 
 HiddenMarkovModel::HiddenMarkovModel(
     ClosestPointsInRadius &closestPointsInRadius_,
+    ShortestPathFew &shortestPathFew_,
     double d_, double sigma_z_, double beta_
 ):
     closestPointsInRadius(closestPointsInRadius_),
+    shortestPathFew(shortestPathFew_),
     d(d_), sigma_z(sigma_z_), beta(beta_)
 {}
 
@@ -147,20 +149,16 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
 
     // ======== DISTANCE MATRIX (A*) ========
     begin = hrc::now();
-    const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, fINF));
     for(size_t t = 0; t+1 < T; ++t){
         list<node_t> l;
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
-        MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h, 650*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
-
         for(size_t i: candidateStates.at(t)){
-            astar.initialize(&distGraph, idxToNode.at(i), l);
-            astar.run();
+            shortestPathFew.initialize(&distGraph, idxToNode.at(i), l);
+            shortestPathFew.run();
             for(size_t j: candidateStates.at(t+1)){
-                DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
+                DWGraph::weight_t d = shortestPathFew.getPathWeight(idxToNode.at(j));
                 double df = double(d)*MILLIMS_TO_METERS;
                 distMatrix[i][j] = (d == iINF ? fINF : df);
             }

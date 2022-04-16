@@ -5,51 +5,34 @@
 #include <unordered_map>
 
 #include "Astar.h"
+#include "Coord.h"
 
 /**
  * @brief AStar algorithm
  * 
  */
 class AstarFew : public ShortestPathFew {
-public:
-    typedef Astar::heuristic_t heuristic_t;
 private:
-    /**
-     * @brief Default Heuristic
-     * 
-     */
-    class default_heuristic : public heuristic_t {
-    public:
-        default_heuristic();
-        DWGraph::weight_t operator()(DWGraph::node_t u) const;
-    };
-    static const default_heuristic h_default;
-    const heuristic_t *h;
-    const DWGraph::weight_t dMax;
+    const std::unordered_map<DWGraph::node_t, Coord> &nodesToCoords;
+    const double factor;
+
+    const Astar::heuristic_t *h = nullptr;
+    
     const DWGraph::DWGraph *G;
     DWGraph::node_t s;
     std::list<DWGraph::node_t> d;
+    const DWGraph::weight_t dMax;
     std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
 public:
-    /**
-     * @brief Construct from a heuristic and max distance
-     * 
-     * @param h heuristic to use
-     */
-    AstarFew(const heuristic_t *h_, DWGraph::weight_t dMax_);
-
-    /**
-     * @brief Construct from a heuristic
-     * 
-     * @param h heuristic to use
-     */
-    AstarFew(const heuristic_t *h_);
-
     /**
      * @brief Construct without arguments
      * 
      */
-    AstarFew();
+    AstarFew(
+        const std::unordered_map<DWGraph::node_t, Coord> &nodesToCoords_,
+        double factor_,
+        DWGraph::weight_t dMax_
+    );
     
     /**
      * @brief Initializes the data members that are required for the algorithm's execution

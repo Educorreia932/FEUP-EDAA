@@ -21,25 +21,61 @@ typedef std::priority_queue<std::pair<weight_t, node_t>,
 typedef std::chrono::high_resolution_clock hrc;
 #define mk(a, b) (std::make_pair((a), (b)))
 
-AstarFew::default_heuristic::default_heuristic(){}
+struct AstarFewHeuristic : public Astar::heuristic_t {
+private:
+    const unordered_map<node_t, Coord> &nodesToCoords;
+    Coord c;
+    double r;
+    double factor;
+public:
+    AstarFewHeuristic(
+        const unordered_map<node_t, Coord> &nodesToCoords_,
+        Coord c_,
+        double r_,
+        double factor_
+    ):nodesToCoords(nodesToCoords_), c(c_),r(r_),factor(factor_){}
+    virtual weight_t operator()(node_t u) const {
+        const Coord &coord = nodesToCoords.at(u);
+        double d = max(0.0, Coord::getDistanceArc(c, coord) - r);
+        return weight_t(d * factor);
+    }
+};
 
-const AstarFew::default_heuristic AstarFew::h_default;
-
-DWGraph::weight_t AstarFew::default_heuristic::operator()(DWGraph::node_t) const{
-    return 0;
-}
-
-AstarFew::AstarFew(const AstarFew::heuristic_t *h_, weight_t dMax_):h(h_), dMax(dMax_){}
-
-AstarFew::AstarFew(const AstarFew::heuristic_t *h_):AstarFew(h_, iINF){}
-
-AstarFew::AstarFew():AstarFew(&h_default){}
+AstarFew::AstarFew(
+    const unordered_map<node_t, Coord> &nodesToCoords_,
+    double factor_,
+    weight_t dMax_
+):
+    nodesToCoords(nodesToCoords_),
+    factor(factor_),
+    dMax(dMax_)
+{}
 
 void AstarFew::initialize(const DWGraph::DWGraph *G_, node_t s_, list<node_t> d_){
     G = G_;
     s = s_;
     d = d_;
     dist.clear();
+
+    double latMin = +fINF, latMax = -fINF, 
+           lonMin = +fINF, lonMax = -fINF;
+    for(const node_t &u: d){
+        const Coord &coord = nodesToCoords.at(u);
+        latMin = min(latMin, coord.lat());
+        latMax = max(latMax, coord.lat());
+        lonMin = min(lonMin, coord.lon());
+        lonMax = max(lonMax, coord.lon());
+    }
+    Coord c = Coord((latMin+latMax)/2.0, (lonMin+lonMax)/2.0);
+
+    double r = 0.0;
+    for(const node_t &u: d){
+        const Coord &coord = nodesToCoords.at(u);
+        r = max(r, Coord::getDistanceArc(coord, c));
+    }
+
+    delete h;
+    h = new AstarFewHeuristic(nodesToCoords, c, r, factor);
 }
 
 node_t AstarFew::getStart() const { return s; }

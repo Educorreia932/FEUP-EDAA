@@ -29,6 +29,7 @@
 using hrc = std::chrono::high_resolution_clock;
 
 const double NANOS_TO_SECS = 1.0/1000000000.0;
+const double METERS_TO_MILLIMS = 1000.0;
 
 void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
     DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
@@ -154,7 +155,8 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     double sigma_z = 4.07; // in meters
     double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
     VStripesRadius closestPointsInRadius;
-    HiddenMarkovModel mapMatching(closestPointsInRadius, d, sigma_z, beta);
+    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS, 650*METERS_TO_MILLIMS);
+    HiddenMarkovModel mapMatching(closestPointsInRadius, shortestPathFew, d, sigma_z, beta);
     mapMatching.initialize(&G);
     mapMatching.run();
     std::cout << "Computed map matching..." << std::endl;
