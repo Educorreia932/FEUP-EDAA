@@ -130,7 +130,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     vector<set<long>> candidateStates(T);
     for(size_t t = 0; t < T; ++t){
         vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
-        assert(!v.empty());
+        if(v.empty()) throw std::runtime_error("Location t=" + to_string(t) + " has no candidates");
         for(const Coord &c: v){
             if(!Sv.count(c)){
                 long id = Sv.size();
