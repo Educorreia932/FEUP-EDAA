@@ -6,7 +6,8 @@
 #include <unordered_map>
 
 #include "DeepVStripes.h"
-#include "DijkstraDist.h"
+#include "DijkstraFew.h"
+#include "DijkstraOnRequest.h"
 #include "EdgeType.h"
 #include "Kosaraju.h"
 #include "MapGraph.h"
@@ -812,13 +813,498 @@ void evalHMM_VStripes(const MapGraph &M, const std::vector<Trip> &trips){
     }
 }
 
+void getCandidates(
+    const MapGraph &G,
+    VStripesRadius &closestPointsInRadius,
+    const std::vector<Coord> &Y,
+    std::vector<Coord> &S,
+    std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> &Sv,
+    std::vector<DWGraph::node_t> &idxToNode,
+    std::vector<std::set<long>> &candidateStates
+){
+    const size_t &T = Y.size();
+
+    for(size_t t = 0; t < T; ++t){
+        std::vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
+        if(v.empty()) throw std::runtime_error("Location t=" + std::to_string(t) + " has no candidates");
+        for(const Coord &c: v){
+            if(!Sv.count(c)){
+                long id = Sv.size();
+                Sv[c] = id;
+                S.push_back(c);
+                idxToNode.push_back(G.coordToNode(c));
+            }
+            candidateStates.at(t).insert(Sv.at(c));
+        }
+    }
+}
+
+void evalHMM_Dijkstra_earlyStopping(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-dijkstra-s.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 100;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    size_t failed = 0;
+
+    os << "i,Dijkstra-s\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%1 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = Sv.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            for(size_t t = 0; t+1 < T; ++t){
+                std::list<DWGraph::node_t> l;
+                for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+                for(size_t i: candidateStates.at(t)){
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    DijkstraFew shortestPaths;
+                    shortestPaths.initialize(&distGraph, u, l);
+                    shortestPaths.run();
+
+                    for(size_t j: candidateStates.at(t+1)){
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        DWGraph::weight_t d = shortestPaths.getPathWeight(v);
+                        double df = (d == iINF ? fINF : double(d)*MILLIMS_TO_METERS);
+                        distMatrix[i][j] = df;
+                    }
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
+void evalHMM_Dijkstra_earlyStopping_dMax(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-dijkstra-sd.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 10000;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    size_t failed = 0;
+
+    os << "i,Dijkstra-sd\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%1 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = Sv.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            for(size_t t = 0; t+1 < T; ++t){
+                std::list<DWGraph::node_t> l;
+                for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+                for(size_t i: candidateStates.at(t)){
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    DijkstraFew shortestPaths(650 * METERS_TO_MILLIMS);
+                    shortestPaths.initialize(&distGraph, u, l);
+                    shortestPaths.run();
+
+                    for(size_t j: candidateStates.at(t+1)){
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        DWGraph::weight_t d = shortestPaths.getPathWeight(v);
+                        double df = (d == iINF ? fINF : double(d)*MILLIMS_TO_METERS);
+                        distMatrix[i][j] = df;
+                    }
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
 void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-astar.csv");
     os << std::fixed;
 
     std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 50;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    size_t failed = 0;
+
+    const std::unordered_map<DWGraph::node_t, Coord> &nodesToCoords = G.getNodes();
+
+    os << "i,A*\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%1 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            for(size_t t = 0; t+1 < T; ++t){
+                std::list<DWGraph::node_t> l;
+                for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+                for(size_t i: candidateStates.at(t)){
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    for(size_t j: candidateStates.at(t+1)){
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        Astar::heuristic_t *h = new MapGraph::DistanceHeuristic(
+                            nodesToCoords,
+                            nodesToCoords.at(v),
+                            650*METERS_TO_MILLIMS
+                        );
+                        Astar shortestPath(h);
+                        shortestPath.initialize(&distGraph, u, v);
+                        shortestPath.run();
+                        DWGraph::weight_t d = shortestPath.getPathWeight();
+                        double df = double(d)*MILLIMS_TO_METERS;
+                        distMatrix[i][j] = (d == iINF ? fINF : df);
+                    }
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
+void evalHMM_Astar_dMax(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-astar-d.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
 
     const size_t N = 1000;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    size_t failed = 0;
+
+    const std::unordered_map<DWGraph::node_t, Coord> &nodesToCoords = G.getNodes();
+
+    os << "i,A*-d\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%1 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            for(size_t t = 0; t+1 < T; ++t){
+                std::list<DWGraph::node_t> l;
+                for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+                for(size_t i: candidateStates.at(t)){
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    for(size_t j: candidateStates.at(t+1)){
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        Astar::heuristic_t *h = new MapGraph::DistanceHeuristic(
+                            nodesToCoords,
+                            nodesToCoords.at(v),
+                            METERS_TO_MILLIMS
+                        );
+                        Astar shortestPath(h, 650*METERS_TO_MILLIMS);
+                        shortestPath.initialize(&distGraph, u, v);
+                        shortestPath.run();
+                        DWGraph::weight_t d = shortestPath.getPathWeight();
+                        double df = double(d)*MILLIMS_TO_METERS;
+                        distMatrix[i][j] = (d == iINF ? fINF : df);
+                    }
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
+void evalHMM_AstarFew(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-astarfew.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 100;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    
+    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS);
+
+    size_t failed = 0;
+
+    os << "i,A*few\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%1 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            for(size_t t = 0; t+1 < T; ++t){
+                std::list<DWGraph::node_t> l;
+                for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+                for(size_t i: candidateStates.at(t)){
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    shortestPathFew.initialize(&distGraph, u, l);
+                    shortestPathFew.run();
+                    for(size_t j: candidateStates.at(t+1)){
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        DWGraph::weight_t d = shortestPathFew.getPathWeight(v);
+                        double df = double(d)*MILLIMS_TO_METERS;
+                        distMatrix[i][j] = (d == iINF ? fINF : df);
+                    }
+                }
+            }
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
+void evalHMM_AstarFew_dMax(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-astarfew-d.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 10000;
     const double d = 50;
 
     MapGraph G = M.splitLongEdges(30.0);
@@ -837,7 +1323,9 @@ void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
 
     size_t failed = 0;
 
-    os << "i,A*\n";
+    os << "i,A*few-d\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
 
     for(size_t n = 0; n < N; ++n){
         try {
@@ -846,28 +1334,22 @@ void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
             const std::vector<Coord> &Y = trip;
             const size_t &T = Y.size();
 
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
             if(n%10 == 0)
-                std::cout << "n=" << n << "/" << N << ", idx=" << idx << ", tripId=" << trips[idx].id << ", failed=" << failed << std::endl;
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
 
             // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
             std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
             std::vector<Coord> S;
             std::vector<DWGraph::node_t> idxToNode;
             std::vector<std::set<long>> candidateStates(T);
-            for(size_t t = 0; t < T; ++t){
-                std::vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
-                if(v.empty()) throw std::runtime_error("Location t=" + std::to_string(t) + " has no candidates");
-                for(const Coord &c: v){
-                    if(!Sv.count(c)){
-                        long id = Sv.size();
-                        Sv[c] = id;
-                        S.push_back(c);
-                        idxToNode.push_back(G.coordToNode(c));
-                    }
-                    candidateStates.at(t).insert(Sv.at(c));
-                }
-            }
-            const size_t &K = Sv.size();
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
 
             // ======== DISTANCE MATRIX ========
             std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
@@ -879,28 +1361,17 @@ void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
                 for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
                 for(size_t i: candidateStates.at(t)){
-                    shortestPathFew.initialize(&distGraph, idxToNode.at(i), l);
+                    DWGraph::node_t u = idxToNode.at(i);
+
+                    shortestPathFew.initialize(&distGraph, u, l);
                     shortestPathFew.run();
                     for(size_t j: candidateStates.at(t+1)){
-                        DWGraph::weight_t d = shortestPathFew.getPathWeight(idxToNode.at(j));
+                        DWGraph::node_t v = idxToNode.at(j);
+
+                        DWGraph::weight_t d = shortestPathFew.getPathWeight(v);
                         double df = double(d)*MILLIMS_TO_METERS;
                         distMatrix[i][j] = (d == iINF ? fINF : df);
                     }
-                }
-
-                for(
-                    auto it = candidateStates.at(t+1).begin();
-                    it != candidateStates.at(t+1).end();
-                ){
-                    size_t j = *it;
-
-                    double dBest = fINF;
-                    for(size_t i: candidateStates.at(t)){
-                        dBest = std::min(dBest, distMatrix[i][j]);
-                    }
-
-                    if(dBest >= fINF) it = candidateStates.at(t+1).erase(it);
-                    else ++it;
                 }
             }
 
@@ -916,7 +1387,7 @@ void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
     }
 }
 
-void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
+void evalHMM_DijkstraCache(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-dijkstra.csv");
     os << std::fixed;
 
@@ -937,11 +1408,12 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
     closestPointsInRadius.initialize(l, d);
     closestPointsInRadius.run();
 
-    std::unordered_map<DWGraph::node_t, DijkstraDist> dijkstras;
+    DijkstraOnRequest shortestPaths;
+    shortestPaths.initialize(&distGraph);
 
     size_t failed = 0;
 
-    os << "i,Dijkstra\n";
+    os << "i,DijkstraCache\n";
 
     begin0 = std::chrono::high_resolution_clock::now();
 
@@ -992,16 +1464,11 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
 
                 for(size_t i: candidateStates.at(t)){
                     DWGraph::node_t u = idxToNode.at(i);
-                    if(dijkstras.count(u) == 0){
-                        dijkstras.emplace(u, 650*METERS_TO_MILLIMS);
-                        dijkstras.at(u).initialize(&distGraph, u);
-                        dijkstras.at(u).run();
-                    }
 
                     for(size_t j: candidateStates.at(t+1)){
                         DWGraph::node_t v = idxToNode.at(j);
 
-                        DWGraph::weight_t d = dijkstras.at(u).getPathWeight(v);
+                        DWGraph::weight_t d = shortestPaths.getPathWeight(u, v);
                         double df = (d == iINF ? fINF : double(d)*MILLIMS_TO_METERS);
                         distMatrix[i][j] = df;
                     }
@@ -1027,7 +1494,8 @@ void evalHMM_Dijkstra(const MapGraph &M, const std::vector<Trip> &trips){
             dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
             os << n << "," << dt << "\n";
         } catch(const std::exception &e){
-            // std::cout << "Failed: " << e.what() << std::endl;
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
             ++failed;
             // throw e;
         }
@@ -1057,9 +1525,17 @@ int main(int argc, char *argv[]){
         if(opt == "deepvstripes-querytime-d") evalDeepVStripes_QueryTime_d(M, trips);
         if(opt == "deepvstripes-querytime") evalDeepVStripes_QueryTime(M, trips);
         if(opt == "deepvstripes-querytime-nd") evalDeepVStripes_QueryTime_nd(M, trips);
+
         if(opt == "hmm-vstripes") evalHMM_VStripes(M, trips);
+
+        if(opt == "hmm-dijkstra-s") evalHMM_Dijkstra_earlyStopping(M, trips);
+        if(opt == "hmm-dijkstra-sd") evalHMM_Dijkstra_earlyStopping_dMax(M, trips);
         if(opt == "hmm-astar") evalHMM_Astar(M, trips);
-        if(opt == "hmm-dijkstra") evalHMM_Dijkstra(M, trips);
+        if(opt == "hmm-astar-d") evalHMM_Astar_dMax(M, trips);
+        if(opt == "hmm-astarfew") evalHMM_AstarFew(M, trips);
+        if(opt == "hmm-astarfew-d") evalHMM_AstarFew_dMax(M, trips);
+        
+        if(opt == "hmm-dijkstra-cache") evalHMM_DijkstraCache(M, trips);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;

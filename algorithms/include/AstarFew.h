@@ -31,7 +31,7 @@ public:
     AstarFew(
         const std::unordered_map<DWGraph::node_t, Coord> &nodesToCoords_,
         double factor_,
-        DWGraph::weight_t dMax_
+        DWGraph::weight_t dMax_ = iINF
     );
     
     /**
