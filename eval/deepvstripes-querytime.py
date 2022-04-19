@@ -27,7 +27,7 @@ ax = df2['q3'    ].plot(ax=ax         , color=(196/255, 145/255, 22/255))
 # ax.fill_between(df2.index, df2['min'], df2['max'], color=(1,0,0,0.2))
 ax.set_xlim(-2000, 300000)
 ax.set_ylim(0, 350)
-ax.set_title("DeepVStripes query execution time ($d=0.0003$)")
+ax.set_title("DeepVStripes query execution time ($\delta=0.0003$)")
 ax.set_xlabel("Number of points in set ($N$)")
 ax.set_ylabel("Query time ($t$/ns)")
 plt.xticks(range(0, 300000+1, 20000))
@@ -40,5 +40,6 @@ plt.gcf().text(0.01, 0.02, "100,000 queries, averaged 10 runs,\n8-points exponen
 fig.tight_layout()
 
 plt.savefig("deepvstripes-querytime.png", dpi=600)
+plt.savefig("deepvstripes-querytime.svg")
 
 plt.show()

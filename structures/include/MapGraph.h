@@ -43,6 +43,7 @@ public:
     DWGraph::DWGraph getDistanceGraph() const;
     MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
+    size_t getNumberOfEdges() const;
     Coord getMinCoord() const;
     Coord getMaxCoord() const;
     const std::list<way_t> &getWays() const;
@@ -60,23 +61,6 @@ public:
                         double factor_): nodes(nodes_), dst_pos(dst_pos_), factor(factor_){}
         DWGraph::weight_t operator()(DWGraph::node_t u) const{
             auto d = Coord::getDistanceArc(dst_pos, nodes.at(u));
-            return DWGraph::weight_t(d*factor);
-        }
-    };
-
-    class DistanceHeuristicFew : public AstarFew::heuristic_t {
-    private:
-        const std::unordered_map<DWGraph::node_t, Coord> &nodes;
-        Coord center;
-        double dist;
-        double factor;
-    public:
-        DistanceHeuristicFew(
-            const std::unordered_map<DWGraph::node_t, Coord> &nodes_,
-            Coord center_, double dist_, double factor_
-        ): nodes(nodes_), center(center_), dist(dist_), factor(factor_){}
-        DWGraph::weight_t operator()(DWGraph::node_t u) const{
-            auto d = std::max(Coord::getDistanceArc(center, nodes.at(u)) - dist, 0.0);
             return DWGraph::weight_t(d*factor);
         }
     };

@@ -9,7 +9,7 @@
 #include "DUGraph.h"
 #include "Kosaraju.h"
 #include "utils.h"
-#include "Viterbi.h"
+#include "ViterbiOptimized.h"
 
 using namespace std;
 
@@ -30,9 +30,11 @@ const double METERS_TO_MILLIMS = 1000.0;
 
 HiddenMarkovModel::HiddenMarkovModel(
     ClosestPointsInRadius &closestPointsInRadius_,
+    ShortestPathFew &shortestPathFew_,
     double d_, double sigma_z_, double beta_
 ):
     closestPointsInRadius(closestPointsInRadius_),
+    shortestPathFew(shortestPathFew_),
     d(d_), sigma_z(sigma_z_), beta(beta_)
 {}
 
@@ -63,56 +65,38 @@ void HiddenMarkovModel::run(){
     closestPointsInRadius.run();
 }
 
-struct MyPi : public Viterbi::InitialProbabilitiesGenerator {
-private:
-    const double sigma_z;
-    const vector<Coord> &S;
-    const Coord zt;
-public:
-    MyPi(double sigma_z_, const vector<Coord> &S_, Coord firstObs):
-        sigma_z(sigma_z_), S(S_), zt(firstObs){}
-    virtual double operator()(long i) const {
-        const Coord &xti = S[i];
-        double d = Coord::getDistanceArc(zt, xti);
-        return exp(-0.5 * pow(d/sigma_z, 2))/(sqrt(2*M_PI) * sigma_z);
-    }
-};
+HiddenMarkovModel::MyPi::MyPi(double sigma_z_, const vector<Coord> &S_, Coord firstObs):
+sigma_z(sigma_z_), S(S_), zt(firstObs){}
 
-struct MyA : public Viterbi::TransitionMatrixGenerator {
-private:
-    const double beta;
-    const vector<Coord> &Y;
-    const VVF &D;
-public:
-    MyA(double beta_, const vector<Coord> &Y_, const VVF &D_):
-        beta(beta_), Y(Y_), D(D_){}
-    virtual double operator()(long i, long j, long t) const {
-        const Coord &zt0 = Y.at(t-1);
-        const Coord &zt1 = Y.at(t);
-        double dArc = Coord::getDistanceArc(zt0, zt1);
+double HiddenMarkovModel::MyPi::operator()(long i) const {
+    const Coord &xti = S[i];
+    double d = Coord::getDistanceArc(zt, xti);
+    return exp(-0.5 * pow(d/sigma_z, 2))/(sqrt(2*M_PI) * sigma_z);
+}
 
-        const double &dRoute = D.at(i).at(j);
+HiddenMarkovModel::MyA::MyA(double beta_, const vector<Coord> &Y_, const VVF &D_):
+beta(beta_), Y(Y_), D(D_){}
 
-        double dt = abs(dArc-dRoute);
-        return exp(-dt/beta)/beta;
-    }
-};
+double HiddenMarkovModel::MyA::operator()(long i, long j, long t) const {
+    const Coord &zt0 = Y.at(t-1);
+    const Coord &zt1 = Y.at(t);
+    double dArc = Coord::getDistanceArc(zt0, zt1);
 
-struct MyB : public Viterbi::EmissionMatrixGenerator {
-private:
-    const double sigma_z;
-    const vector<Coord> &S;
-    const vector<Coord> &Y;
-public:
-    MyB(double sigma_z_, const vector<Coord> &S_, const vector<Coord> &Y_):
-        sigma_z(sigma_z_), S(S_), Y(Y_){}
-    virtual double operator()(long i, long t) const {
-        const Coord &zt = Y.at(t);
-        const Coord &xti = S.at(i);
-        double d = Coord::getDistanceArc(zt, xti);
-        return exp(-0.5 * pow(d/sigma_z, 2))/(sqrt(2*M_PI) * sigma_z);
-    }
-};
+    const double &dRoute = D.at(i).at(j);
+
+    double dt = fabs(dArc-dRoute);
+    return exp(-dt/beta)/beta;
+}
+
+HiddenMarkovModel::MyB::MyB(double sigma_z_, const vector<Coord> &S_, const vector<Coord> &Y_):
+sigma_z(sigma_z_), S(S_), Y(Y_){}
+
+double HiddenMarkovModel::MyB::operator()(long i, long t) const {
+    const Coord &zt = Y.at(t);
+    const Coord &xti = S.at(i);
+    double d = Coord::getDistanceArc(zt, xti);
+    return exp(-0.5 * pow(d/sigma_z, 2))/(sqrt(2*M_PI) * sigma_z);
+}
 
 vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     vector<Coord> Y = trip;
@@ -128,7 +112,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     vector<set<long>> candidateStates(T);
     for(size_t t = 0; t < T; ++t){
         vector<Coord> v = closestPointsInRadius.getClosestPoints(Y.at(t));
-        assert(!v.empty());
+        if(v.empty()) throw std::runtime_error("Location t=" + to_string(t) + " has no candidates");
         for(const Coord &c: v){
             if(!Sv.count(c)){
                 long id = Sv.size();
@@ -147,20 +131,16 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
 
     // ======== DISTANCE MATRIX (A*) ========
     begin = hrc::now();
-    const std::unordered_map<DWGraph::node_t, Coord> &nodes = mapGraph->getNodes();
     VVF distMatrix(K, VF(K, fINF));
     for(size_t t = 0; t+1 < T; ++t){
         list<node_t> l;
         for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
 
-        MapGraph::DistanceHeuristicFew h(nodes, Y[t+1], d*0.75, METERS_TO_MILLIMS); // The constant after METERS_TO_MILLIMS makes the search faster, but sub-optimal
-        AstarFew astar(&h, 650*METERS_TO_MILLIMS); // In 15s, a car can't go much faster than 1000m (=240 km/h)
-
         for(size_t i: candidateStates.at(t)){
-            astar.initialize(&distGraph, idxToNode.at(i), l);
-            astar.run();
+            shortestPathFew.initialize(&distGraph, idxToNode.at(i), l);
+            shortestPathFew.run();
             for(size_t j: candidateStates.at(t+1)){
-                DWGraph::weight_t d = astar.getPathWeight(idxToNode.at(j));
+                DWGraph::weight_t d = shortestPathFew.getPathWeight(idxToNode.at(j));
                 double df = double(d)*MILLIMS_TO_METERS;
                 distMatrix[i][j] = (d == iINF ? fINF : df);
             }
@@ -191,7 +171,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     MyB B(sigma_z, S, Y);
 
     begin = hrc::now();
-    Viterbi viterbi;
+    ViterbiOptimized viterbi;
     viterbi.initialize(T, K, &Pi, &A, &B, candidateStates);
     viterbi.run();
 

@@ -55,4 +55,4 @@ include(test/Catch2/extras/Catch.cmake)
 catch_discover_tests(tests)
 
 # ################ EVAL ################
-add_executable(eval ${SRC} "src/eval.cpp")
+add_executable(eval ${SRC} "eval/eval.cpp")

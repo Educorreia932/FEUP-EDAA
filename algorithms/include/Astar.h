@@ -2,6 +2,7 @@
 
 #include "ShortestPath.h"
 #include <unordered_map>
+#include "utils.h"
 
 /**
  * @brief AStar algorithm
@@ -39,6 +40,7 @@ private:
     const heuristic_t *h;
     const DWGraph::DWGraph *G;
     DWGraph::node_t s, d;
+    DWGraph::weight_t dMax;
     std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
 public:
 
@@ -47,7 +49,7 @@ public:
      * 
      * @param h heuristic to use
      */
-    Astar(const heuristic_t *h);
+    Astar(const heuristic_t *h, DWGraph::weight_t dMax_ = iINF);
 
     /**
      * @brief Construct without arguments

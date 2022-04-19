@@ -59,7 +59,6 @@ MapGraph::MapGraph(const std::string &path){
             coord2node[c] = id;
         }
     }
-    size_t numberEdges = 0;
     {
         std::ifstream is; is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         is.open(path + ".edges");
@@ -68,10 +67,10 @@ MapGraph::MapGraph(const std::string &path){
             way_t way; long long id; char c;
             is >> id >> c >> way.speed; way.edgeType = static_cast<edge_type_t>(c);
             size_t numberNodes; is >> numberNodes;
-            for(size_t j = 0; j < numberNodes; ++j, ++numberEdges){
+            for(size_t j = 0; j < numberNodes; ++j){
                 node_t id; is >> id;
                 way.nodes.push_back(id);
-            } --numberEdges;
+            }
             ways.push_back(way);
         }
     }
@@ -87,7 +86,7 @@ MapGraph::MapGraph(const std::string &path){
     }
 
     std::cout << "Nodes: " << nodes.size() << std::endl;
-    std::cout << "Edges: " << numberEdges  << std::endl;
+    std::cout << "Edges: " << getNumberOfEdges() << std::endl;
 }
 
 MapGraph::~MapGraph(){
@@ -156,8 +155,12 @@ MapGraph MapGraph::splitLongEdges(double threshold) const {
 
             double d = Coord::getDistanceArc(u, v);
             if(d > threshold){
-                node_t id = nextNodeId++;
                 Coord m = u + (v-u)/2;
+
+                node_t id;
+                if(G.coord2node.find(m) != G.coord2node.end()) id = G.coord2node.at(m);
+                else id = nextNodeId++;
+                
                 G.nodes[id] = m;
                 G.coord2node[m] = id;
                 it2 = way.nodes.insert(it2, id);
@@ -173,6 +176,14 @@ MapGraph MapGraph::splitLongEdges(double threshold) const {
 
 const std::unordered_map<DWGraph::node_t, Coord> &MapGraph::getNodes() const{
     return nodes;
+}
+
+size_t MapGraph::getNumberOfEdges() const {
+    size_t ret = 0;
+    for(const way_t &w: ways){
+        ret += w.nodes.size()-1;
+    }
+    return ret;
 }
 
 Coord MapGraph::getMinCoord() const { return min_coord; }
