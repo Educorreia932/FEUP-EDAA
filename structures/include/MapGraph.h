@@ -43,6 +43,7 @@ public:
     DWGraph::DWGraph getDistanceGraph() const;
     MapGraph splitLongEdges(double threshold) const;
     const std::unordered_map<DWGraph::node_t, Coord>& getNodes() const;
+    size_t getNumberOfEdges() const;
     Coord getMinCoord() const;
     Coord getMaxCoord() const;
     const std::list<way_t> &getWays() const;

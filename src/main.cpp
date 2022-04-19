@@ -131,6 +131,8 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     auto end = hrc::now();
     double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
+    std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
+              << G.getNumberOfEdges() << " edges" << std::endl;
 
     // minD = 100000;
     // maxD = -100000;
