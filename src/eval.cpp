@@ -9,6 +9,7 @@
 #include "DijkstraFew.h"
 #include "DijkstraOnRequest.h"
 #include "EdgeType.h"
+#include "HiddenMarkovModel.h"
 #include "Kosaraju.h"
 #include "MapGraph.h"
 #include "K2DTreeClosestPoint.h"
@@ -1502,6 +1503,206 @@ void evalHMM_DijkstraCache(const MapGraph &M, const std::vector<Trip> &trips){
     }
 }
 
+std::vector<std::vector<double>> getDistMatrix(
+    const size_t &K,
+    const size_t &T,
+    const std::vector<std::set<long>> &candidateStates,
+    const std::vector<DWGraph::node_t> &idxToNode,
+    ShortestPathFew &shortestPathFew,
+    const DWGraph::DWGraph &distGraph
+){
+    std::vector<std::vector<double>> distMatrix(K, std::vector<double>(K, fINF));
+
+    for(size_t t = 0; t+1 < T; ++t){
+        std::list<DWGraph::node_t> l;
+        for(size_t j: candidateStates.at(t+1)) l.push_back(idxToNode.at(j));
+
+        for(size_t i: candidateStates.at(t)){
+            DWGraph::node_t u = idxToNode.at(i);
+
+            shortestPathFew.initialize(&distGraph, u, l);
+            shortestPathFew.run();
+            for(size_t j: candidateStates.at(t+1)){
+                DWGraph::node_t v = idxToNode.at(j);
+
+                DWGraph::weight_t d = shortestPathFew.getPathWeight(v);
+                double df = double(d)*MILLIMS_TO_METERS;
+                distMatrix[i][j] = (d == iINF ? fINF : df);
+            }
+        }
+    }
+
+    return distMatrix;
+}
+
+void evalHMM_Viterbi(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-viterbi.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 1000;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    
+    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS, 650*METERS_TO_MILLIMS);
+
+    size_t failed = 0;
+
+    os << "i,Viterbi\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%10 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix = getDistMatrix(K, T, candidateStates, idxToNode, shortestPathFew, distGraph);
+
+            // ======== VITERBI ========
+            const double sigma_z = 4.07;
+            const double beta = 3;
+
+            HiddenMarkovModel::MyPi Pi(sigma_z, S, Y[0]);
+            HiddenMarkovModel::MyA A(beta, Y, distMatrix);
+            HiddenMarkovModel::MyB B(sigma_z, S, Y);
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            Viterbi viterbi;
+            viterbi.initialize(T, K, &Pi, &A, &B);
+            viterbi.run();
+            std::vector<long> v = viterbi.getLikeliestPath();
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
+void evalHMM_ViterbiOptimized(const MapGraph &M, const std::vector<Trip> &trips){
+    std::ofstream os("eval/hmm-viterbi-o.csv");
+    os << std::fixed;
+
+    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+
+    const size_t N = 10000;
+    const double d = 50;
+
+    MapGraph G = M.splitLongEdges(30.0);
+    DWGraph::DWGraph distGraph = getSCC(G);
+
+    auto nodes = distGraph.getNodes();
+    std::list<Coord> l;
+    for(const DWGraph::node_t &u: nodes) l.push_back(G.nodeToCoord(u));
+
+    VStripesRadius closestPointsInRadius;
+    closestPointsInRadius.initialize(l, d);
+    closestPointsInRadius.run();
+
+    
+    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS, 650*METERS_TO_MILLIMS);
+
+    size_t failed = 0;
+
+    os << "i,Viterbi-o\n";
+
+    begin0 = std::chrono::high_resolution_clock::now();
+
+    for(size_t n = 0; n < N; ++n){
+        try {
+            const size_t idx = rand()%trips.size();
+            const auto &trip = trips[idx].coords;
+            const std::vector<Coord> &Y = trip;
+            const size_t &T = Y.size();
+
+            end0 = std::chrono::high_resolution_clock::now();
+            dt0 = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end0-begin0).count());
+            if(n%10 == 0)
+                std::cout << "n=" << n << "/" << N << ", idx=" << idx
+                          << ", tripId=" << trips[idx].id << ", failed=" << failed
+                          << ", Total time: " << dt0/n * NANOS_TO_SECONDS * N
+                          << ", ETA: " << dt0/n * NANOS_TO_SECONDS * (N - n) << "s"
+                          << std::endl;
+
+            // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
+            std::map<Coord, long, bool (*)(const Vector2&, const Vector2&)> Sv(Vector2::compXY);
+            std::vector<Coord> S;
+            std::vector<DWGraph::node_t> idxToNode;
+            std::vector<std::set<long>> candidateStates(T);
+            getCandidates(G, closestPointsInRadius, Y, S, Sv, idxToNode, candidateStates);
+            const size_t &K = S.size();
+
+            // ======== DISTANCE MATRIX ========
+            std::vector<std::vector<double>> distMatrix = getDistMatrix(K, T, candidateStates, idxToNode, shortestPathFew, distGraph);
+
+            // ======== VITERBI ========
+            const double sigma_z = 4.07;
+            const double beta = 3;
+
+            HiddenMarkovModel::MyPi Pi(sigma_z, S, Y[0]);
+            HiddenMarkovModel::MyA A(beta, Y, distMatrix);
+            HiddenMarkovModel::MyB B(sigma_z, S, Y);
+
+            begin = std::chrono::high_resolution_clock::now();
+
+            ViterbiOptimized viterbi;
+            viterbi.initialize(T, K, &Pi, &A, &B, candidateStates);
+            viterbi.run();
+            std::vector<long> v = viterbi.getLikeliestPath();
+
+            end = std::chrono::high_resolution_clock::now();
+            dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
+            os << n << "," << dt << "\n";
+        } catch(const std::exception &e){
+            std::cout << "Failed: " << e.what() << std::endl;
+            --n;
+            ++failed;
+            // throw e;
+        }
+    }
+}
+
 int main(int argc, char *argv[]){
     srand(1234);
     try {
@@ -1534,7 +1735,10 @@ int main(int argc, char *argv[]){
         if(opt == "hmm-astar-d") evalHMM_Astar_dMax(M, trips);
         if(opt == "hmm-astarfew") evalHMM_AstarFew(M, trips);
         if(opt == "hmm-astarfew-d") evalHMM_AstarFew_dMax(M, trips);
-        
+
+        if(opt == "hmm-viterbi") evalHMM_Viterbi(M, trips);
+        if(opt == "hmm-viterbi-o") evalHMM_ViterbiOptimized(M, trips);
+
         if(opt == "hmm-dijkstra-cache") evalHMM_DijkstraCache(M, trips);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
