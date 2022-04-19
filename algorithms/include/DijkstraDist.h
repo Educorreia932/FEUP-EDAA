@@ -10,15 +10,15 @@
  * @brief Dijkstra's algorithm
  * 
  */
-class Dijkstra : public ShortestPathOneMany {
+class DijkstraDist : public ShortestPathOneMany {
 private:
     const DWGraph::DWGraph *G;
     DWGraph::node_t s;
     const DWGraph::weight_t dMax;
-    std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
+    std::unordered_map<DWGraph::node_t, DWGraph::weight_t> dist;
     DWGraph::node_t getStart() const;
 public:
-    Dijkstra(DWGraph::weight_t dMax_ = iINF);
+    DijkstraDist(DWGraph::weight_t dMax_ = iINF);
 
     /**
      * @brief Initializes the data members that are required for the algorithm's execution

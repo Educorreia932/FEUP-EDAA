@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ShortestPathOneMany.h"
+#include "ShortestPathFew.h"
 
 #include <unordered_map>
 
@@ -10,15 +10,16 @@
  * @brief Dijkstra's algorithm
  * 
  */
-class Dijkstra : public ShortestPathOneMany {
+class DijkstraFew : public ShortestPathFew {
 private:
     const DWGraph::DWGraph *G;
     DWGraph::node_t s;
+    std::list<DWGraph::node_t> d;
     const DWGraph::weight_t dMax;
-    std::unordered_map<DWGraph::node_t, std::pair<DWGraph::weight_t, DWGraph::node_t>> dist;
-    DWGraph::node_t getStart() const;
+    std::unordered_map<DWGraph::node_t, DWGraph::weight_t> dist;
+    
 public:
-    Dijkstra(DWGraph::weight_t dMax_ = iINF);
+    DijkstraFew(DWGraph::weight_t dMax_ = iINF);
 
     /**
      * @brief Initializes the data members that are required for the algorithm's execution
@@ -26,7 +27,7 @@ public:
      * @param G Directed Weighted Graph
      * @param s Starting Node
      */
-    void initialize(const DWGraph::DWGraph *G, DWGraph::node_t s);
+    void initialize(const DWGraph::DWGraph *G, DWGraph::node_t s, std::list<DWGraph::node_t> d_);
 
     /**
      * @brief Execute the algorithm
@@ -43,6 +44,9 @@ public:
     DWGraph::node_t getPrev(DWGraph::node_t d) const;
     DWGraph::weight_t getPathWeight(DWGraph::node_t d) const;
 
+    virtual DWGraph::node_t getStart() const;
+    virtual std::list<DWGraph::node_t> getDest () const;
+    
     /**
      * @brief Checks if a specific node was marked as visited
      * 
