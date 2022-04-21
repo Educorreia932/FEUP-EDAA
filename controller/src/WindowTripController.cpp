@@ -33,7 +33,6 @@ WindowTripController::WindowTripController(
 void WindowTripController::run(){
     window.recalculateView();
 
-    cout << "Idx\tID                \tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
     onChangeTrip();
     
     while (window.isOpen()){

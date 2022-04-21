@@ -63,6 +63,7 @@ void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
 
 void HiddenMarkovModel::run(){
     closestPointsInRadius.run();
+    cout << "Idx\tID                \tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
 }
 
 HiddenMarkovModel::MyPi::MyPi(double sigma_z_, const vector<Coord> &S_, Coord firstObs):

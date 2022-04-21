@@ -15,6 +15,8 @@ const sf::Font FONT = loadFont("/../../res/fonts/inconsolata.ttf");
 
 const double CIRCLE_SIZE = 5;
 const size_t CIRCLE_POINT_COUNT = 24;
+const double MARKER_SIZE = 1.5;
+const size_t MARKER_POINT_COUNT = 3;
 
 MapTripMatchView::MapTripMatchView(RenderTarget &window_, MapView &mapView_):
     window(window_), mapView(mapView_),
@@ -68,7 +70,7 @@ void MapTripMatchView::refresh(){
         ){
             sf::Vector2f u = mapView.coordToVector2f(*it1),
                          v = mapView.coordToVector2f(*it2);
-            FullLineShape e(u, v, 2);
+            FullLineShape e(u, v, 1);
             e.setFillColor(Color::Blue);
             for(size_t i = 0; i < e.getVertexCount(); ++i)
                 zip.push_back(e[i]);
@@ -79,8 +81,8 @@ void MapTripMatchView::refresh(){
     for(size_t i = 0; i < min(trip.coords.size(), matches.size()); ++i){
         sf::Vector2f u = mapView.coordToVector2f(trip.coords.at(i)),
                      v = mapView.coordToVector2f(matches.at(i));
-        matchLines.push_back(Vertex(u, Color::Blue));
-        matchLines.push_back(Vertex(v, Color::Blue));
+        matchLines.push_back(Vertex(u, Color::Cyan));
+        matchLines.push_back(Vertex(v, Color::Cyan));
     }
 
     if(path.size() >= 2){
@@ -100,20 +102,20 @@ void MapTripMatchView::refresh(){
     circles.clear();
     for(const Coord &c: trip.coords){
         sf::Vector2f u = mapView.coordToVector2f(c);
-        sf::CircleShape circ(2,3);
-        circ.setOrigin(2,2);
+        sf::CircleShape circ(MARKER_SIZE,MARKER_POINT_COUNT);
+        circ.setOrigin(MARKER_SIZE,MARKER_SIZE);
         circ.setPosition(u);
-        circ.setFillColor(Color::Red);
+        circ.setFillColor(Color::Blue);
         circ.setOutlineColor(Color::Black);
         circ.setOutlineThickness(0.05);
         circles.push_back(circ);
     }
     for(const Coord &c: matches){
         sf::Vector2f u = mapView.coordToVector2f(c);
-        sf::CircleShape circ(2,3);
-        circ.setOrigin(2,2);
+        sf::CircleShape circ(MARKER_SIZE,MARKER_POINT_COUNT);
+        circ.setOrigin(MARKER_SIZE,MARKER_SIZE);
         circ.setPosition(u);
-        circ.setFillColor(Color::Green);
+        circ.setFillColor(Color::Magenta);
         circ.setOutlineColor(Color::Black);
         circ.setOutlineThickness(0.05);
         circles.push_back(circ);
