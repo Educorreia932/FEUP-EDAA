@@ -56,6 +56,7 @@ public:
      * 
      */
     class FromOneMany;
+    class FromFew;
 };
 
 class ShortestPathAll::FromOneMany : public ShortestPathAll {
