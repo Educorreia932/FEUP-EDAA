@@ -85,7 +85,7 @@ void eval2DTree_BuildTime(const MapGraph &M){
         for(size_t i = 0; i < sz; ++i)
             l.push_back(coords.at(i));
 
-        std::chrono::_V2::system_clock::time_point begin, end;
+        hrc::time_point begin, end;
 
         K2DTreeClosestPoint t;
         
@@ -206,7 +206,7 @@ void eval2DTree_QueryTime(const MapGraph &M, const std::vector<Trip> &trips){
         t.initialize(l);
         t.run();
         for(const Coord &u: test_coords){
-            std::chrono::_V2::system_clock::time_point begin, end;
+            hrc::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
                 t.getClosestPoint(u);

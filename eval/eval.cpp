@@ -19,6 +19,8 @@
 
 #include "utils.h"
 
+using hrc = std::chrono::high_resolution_clock;
+
 const double METERS_TO_MILLIMS = 1000.0;
 const double MILLIMS_TO_METERS = 1.0/1000.0;
 const double NANOS_TO_SECONDS = 1.0/1000000000.0;

@@ -14,6 +14,7 @@
 #include "Dijkstra.h"
 #include "FortuneAlgorithm.h"
 #include "HiddenMarkovModel.h"
+#include "HiddenMarkovModelMany.h"
 #include "K2DTreeClosestPointFactory.h"
 #include "DeepVStripesFactory.h"
 #include "VStripesRadius.h"
@@ -180,6 +181,20 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     windowTripController.run();
 }
 
+void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
+    MapGraph G = M.splitLongEdges(30.0);
+    VStripesRadius closestPointsInRadius;
+
+    const double d = 50.0;
+    double sigma_z = 5.925232; // in meters
+    double beta = 6.677601;
+    const size_t nThreads = 8;
+
+    HiddenMarkovModelMany hmm(closestPointsInRadius, d, sigma_z, beta, nThreads);
+    hmm.initialize(&G, trips);
+    hmm.run();
+}
+
 int main(int argc, char* argv[]) {
     XInitThreads();
 
@@ -187,7 +202,7 @@ int main(int argc, char* argv[]) {
         if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         std::string opt = argv[1];
 
-        std::chrono::_V2::system_clock::time_point begin, end;
+        hrc::time_point begin, end;
         double dt;
 
         std::cout << "Loading map..." << std::endl;
@@ -218,6 +233,8 @@ int main(int argc, char* argv[]) {
         if (opt == "view-trips") { view_trips(trips); return 0; }
         if (opt == "match-trip-nn") { match_trip_nn(M, polygons, trips); return 0; }
         if (opt == "match-trip") { match_trip(M, polygons, trips); return 0; }
+
+        if (opt == "match-all-trips") { match_all_trips(M, trips); return 0; }
 
         std::cerr << "Invalid option" << std::endl;
         return -1;

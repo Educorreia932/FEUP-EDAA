@@ -5,8 +5,8 @@ std::deque<std::list<Coord>> observations;
 std::vector<std::set<DWGraph::node_t>> candidates;
 VStripesRadius hmm_closestPointsInRadius;
 
-void evalHMM_precalc_worker(size_t idx, const MapGraph &G, const size_t &NUM_PROBLEMS, const std::chrono::_V2::system_clock::time_point &begin){
-    std::chrono::_V2::system_clock::time_point end; double dt;
+void evalHMM_precalc_worker(size_t idx, const MapGraph &G, const size_t &NUM_PROBLEMS, const hrc::time_point &begin){
+    hrc::time_point end; double dt;
 
     std::set<DWGraph::node_t> &cands = candidates.at(idx);
     while(true){
@@ -66,7 +66,7 @@ void evalHMM_precalc(const MapGraph &M, const std::vector<Trip> &trips){
         }
     }
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    hrc::time_point begin, end; double dt;
     begin = std::chrono::high_resolution_clock::now();
 
     std::list<std::thread> threads;

@@ -87,7 +87,7 @@ void evalDeepVStripes_BuildTime(const MapGraph &M){
             for(size_t i = l.size(); i < sz; ++i)
                 l.push_back(coords[i]);
             
-            std::chrono::_V2::system_clock::time_point begin, end;
+            hrc::time_point begin, end;
 
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
@@ -198,7 +198,7 @@ void evalDeepVStripes_QueryTime_d(const MapGraph &M, const std::vector<Trip> &tr
         t.run();
 
         for(const Coord &u: test_coords){
-            std::chrono::_V2::system_clock::time_point begin, end;
+            hrc::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
                 t.getClosestPoint(u);
@@ -299,7 +299,7 @@ void evalDeepVStripes_QueryTime(const MapGraph &M, const std::vector<Trip> &trip
         t.initialize(l);
         t.run();
         for(const Coord &u: test_coords){
-            std::chrono::_V2::system_clock::time_point begin, end;
+            hrc::time_point begin, end;
             begin = std::chrono::high_resolution_clock::now();
             for(size_t i = 0; i < REPEAT; ++i){
                 t.getClosestPoint(u);
@@ -417,7 +417,7 @@ void evalDeepVStripes_QueryTime_nd(const MapGraph &M, const std::vector<Trip> &t
             t.initialize(l);
             t.run();
             
-            std::chrono::_V2::system_clock::time_point begin, end;
+            hrc::time_point begin, end;
 
             begin = std::chrono::high_resolution_clock::now();
             for(const Coord &u: test_coords){
