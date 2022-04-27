@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <stdexcept>
 #include <set>
 #include <memory>
 #include <stack>

@@ -1,9 +1,5 @@
-#include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <random>
 
-#include "EdgeType.h"
 #include "MapGraph.h"
 #include "MapTripsView.h"
 #include "MapTripMatchView.h"
@@ -20,20 +16,23 @@
 #include "DraggableZoomableWindow.h"
 #include "MapView.h"
 #include "MapOsmView.h"
+#include "VoronoiView.h"
 
 #include "WindowController.h"
 #include "WindowTripController.h"
 
 #include <X11/Xlib.h>
 
+#include <iomanip>
+
 using hrc = std::chrono::high_resolution_clock;
 
 const double NANOS_TO_SECS = 1.0/1000000000.0;
 const double METERS_TO_MILLIMS = 1000.0;
 
-void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
+    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapOsmView mapOsmView(window, mapView, M, polygons);
     mapView.addView(&mapOsmView);
     window.setDrawView(&mapView);
@@ -43,47 +42,32 @@ void view(const MapGraph &M, const std::vector<polygon_t> &polygons){
 }
 
 VoronoiDiagram voronoi(const MapGraph& M) {
-    std::vector<Site> sites;
+    std::vector<Site*> sites;
+    // Box box = Box(Vector2(-8.67749, 41.164403), Vector2(-8.6768, 41.1649));
+    Box box = Box(Vector2(-8.67188, 41.149), Vector2(-8.6715, 41.15));
 
-    for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes() ){
-        Vector2 point = Vector2(node.second.lat(), node.second.lon());
-        sites.push_back(Site{ point });
+    for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
+        Vector2 point = Vector2(node.second.lon(), node.second.lat());
+
+        if (box.contains(point)) 
+            sites.push_back(new Site{ point }); 
     }
 
-    VoronoiDiagram diagram = FortuneAlgorithm().construct(sites);
-
-    for (Edge edge : diagram.getEdges())
-        std::cout << "Start: " << edge.start.x << " " << edge.start.y << " End: " << edge.end.x << " " << edge.end.y << std::endl;
+    VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
     return diagram;
 }
 
-void voronoi_display(const VoronoiDiagram diagram) {
-    sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
+void voronoi_display(const MapGraph& M) {
+    VoronoiDiagram diagram = voronoi(M);
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Voronoi diagram", sf::Style::Default, settings);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0));
+    window.setBackgroundColor(sf::Color(255, 255, 255));
+    VoronoiView voronoiView(window, diagram);
+    window.setDrawView(&voronoiView);
 
-    while (window.isOpen()) {
-        sf::Event event;
-
-        window.clear(sf::Color::White);
-
-        while (window.pollEvent(event))
-            if (event.type == sf::Event::Closed)
-                window.close();
-
-        for (Edge edge : diagram.getEdges()) {
-            sf::Vertex line[] = {
-                sf::Vertex(sf::Vector2f(edge.start.x * 100, (-edge.start.y + 8) * 100), sf::Color(255, 0, 0, 255)),
-                sf::Vertex(sf::Vector2f(edge.end.x * 100, (-edge.end.y + 8) * 100), sf::Color(255, 0, 0, 255))
-            };
-
-            window.draw(line, 2, sf::Lines);
-        }
-
-        window.display();
-    }
+    WindowController windowController(window);
+    windowController.run();
 }
 
 void view_trips(const std::vector<Trip>& trips) {
@@ -95,8 +79,8 @@ void view_trips(const std::vector<Trip>& trips) {
     for (size_t i : s)
         tripsSmall.push_back(trips[i]);
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapTripsView mapTripsView(window, mapView, tripsSmall);
     mapView.addView(&mapTripsView);
     window.setDrawView(&mapView);
@@ -105,9 +89,9 @@ void view_trips(const std::vector<Trip>& trips) {
     windowController.run();
 }
 
-void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const std::vector<Trip>& trips) {
     // double minD, maxD, meanD; size_t n;
-    
+
     // minD = 100000;
     // maxD = -100000;
     // meanD = 0;
@@ -129,7 +113,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     auto begin = hrc::now();
     MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
-    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
+    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
     std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
               << G.getNumberOfEdges() << " edges" << std::endl;
@@ -167,8 +151,8 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     DWGraph::DWGraph dwG = G.getTimeGraph();
     std::cout << "Generated graph" << std::endl;
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
     MapTripMatchView mapTripMatchView(window, mapView);
@@ -195,25 +179,25 @@ int main(int argc, char* argv[]) {
         begin = hrc::now();
         MapGraph M("res/map/processed/AMP");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded map, took " << dt << "s" << std::endl;
 
         std::cout << "Loading polygons..." << std::endl;
         begin = hrc::now();
         std::vector<polygon_t> polygons = polygon_t::loadPolygons("res/map/processed/AMP.polygons");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded polygons, took " << dt << "s" << std::endl;
 
         if (opt == "view") { view(M, polygons); return 0; }
         if (opt == "voronoi") { voronoi(M); return 0; }
-        if (opt == "voronoi-display") { voronoi_display(voronoi(M)); return 0; }
+        if (opt == "voronoi-display") { voronoi_display(M); return 0; }
 
         std::cout << "Loading trips..." << std::endl;
         begin = hrc::now();
         std::vector<Trip> trips = Trip::loadTripsBin("res/data/pkdd15-i/pkdd15-i.trips.bin");
         end = hrc::now();
-        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*NANOS_TO_SECS;
+        dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * NANOS_TO_SECS;
         std::cout << "Loaded trips, took " << dt << "s" << std::endl;
 
         if (opt == "view-trips") { view_trips(trips); return 0; }
@@ -222,10 +206,13 @@ int main(int argc, char* argv[]) {
         std::cerr << "Invalid option" << std::endl;
         return -1;
     }
+
     catch (const std::invalid_argument& e) {
         std::cout << "Caught exception: " << e.what() << "\n";
         std::cout << "Usage: ./main (view | ...)\n";
+
         return EXIT_FAILURE;
     }
+
     return 0;
 }

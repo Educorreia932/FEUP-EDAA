@@ -11,7 +11,6 @@ using namespace std;
 
 typedef DWGraph::node_t node_t;
 typedef DWGraph::weight_t weight_t;
-typedef DWGraph::Edge Edge;
 template<class K, class V> using umap = std::unordered_map<K, V>;
 typedef umap<node_t, weight_t> dist_t;
 typedef umap<node_t, node_t  > prev_t;
@@ -94,7 +93,7 @@ void AstarFew::run(){
         if(uit != dS.end()) dS.erase(uit);
         if(dS.empty()) break;
         
-        for(const Edge &e: G->getAdj(u)){
+        for(const DWGraph::Edge &e: G->getAdj(u)){
             weight_t c_ = dist.at(u).first + e.w;
             if(c_ > dMax) continue;
             weight_t ch_ = c_ + (*h)(e.v);
