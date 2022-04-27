@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -29,6 +30,7 @@
 #include <X11/Xlib.h>
 
 using hrc = std::chrono::high_resolution_clock;
+namespace fs = std::filesystem;
 
 const double NANOS_TO_SECS = 1.0/1000000000.0;
 const double METERS_TO_MILLIMS = 1000.0;
@@ -193,6 +195,28 @@ void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
     HiddenMarkovModelMany hmm(closestPointsInRadius, d, sigma_z, beta, nThreads);
     hmm.initialize(&G, trips);
     hmm.run();
+
+    if(!fs::exists("res/matched"))
+        fs::create_directories("res/matched");
+
+    std::ofstream os("res/matched/matched.txt");
+
+    size_t index = 0;
+    for(const Trip &trip: trips){
+        if(index%1000 == 0) std::cout << "Index: " << index << std::endl;
+        ++index;
+        try {
+            const std::vector<DWGraph::node_t> &matches = hmm.getMatches(trip.id);
+            os << trip.id << " " << matches.size() << "\n";
+            for(const DWGraph::node_t &u: matches){
+                os << u << "\n";
+            }
+        } catch(const std::exception &e){
+
+        }
+    }
+
+    os.close();
 }
 
 int main(int argc, char* argv[]) {
