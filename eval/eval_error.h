@@ -73,8 +73,8 @@ void evalErrorPointwise_hmm(const MapGraph &M, const std::vector<Trip> &trips){
 
     std::cerr << "Computing map matching..." << std::endl;
     double d = 50; // in meters
-    double sigma_z = 4.07; // in meters
-    double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
+    double sigma_z = 5.925232; // in meters
+    double beta = 6.677601; // From https://www.mapzen.com/blog/data-driven-map-matching/
     VStripesRadius closestPointsInRadius;
     DijkstraOnRequest shortestPathFew;
     ShortestPathFew::FromAll shortestPathAll(shortestPathFew);
