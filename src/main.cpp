@@ -203,7 +203,7 @@ void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
 
     size_t index = 0;
     for(const Trip &trip: trips){
-        if(index%1000 == 0) std::cout << "Index: " << index << std::endl;
+        if(index%100000 == 0) std::cout << "Index: " << index << std::endl;
         ++index;
         try {
             const std::vector<DWGraph::node_t> &matches = hmm.getMatches(trip.id);

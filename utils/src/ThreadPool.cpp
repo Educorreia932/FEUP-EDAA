@@ -1,6 +1,10 @@
 #include "ThreadPool.h"
 
+#include <iostream>
+
 using namespace std;
+
+const std::chrono::milliseconds utils::ThreadPool::TIMEOUT = std::chrono::milliseconds(100);
 
 void utils::ThreadPool::Task::wait(){
     std::unique_lock<std::mutex> lock(m);
@@ -19,8 +23,17 @@ void utils::ThreadPool::Task::runFinal(){
 }
 
 void utils::ThreadPool::workerFunction(){
+    Task *task;
     for(;;){
-        Task *task = tasks.popWait();
+        {
+            unique_lock<mutex> lk(m);
+            while(tasks.empty()){
+                cv.wait_for(lk, TIMEOUT);
+                if(exit) return;
+            }
+            task = tasks.front();
+            tasks.pop();
+        }
         task->runFinal();
     }
 }
@@ -31,6 +44,18 @@ utils::ThreadPool::ThreadPool(size_t n){
     }
 }
 
+utils::ThreadPool::~ThreadPool(){
+    {
+        lock_guard guard(m);
+        exit = true;
+    }
+    cv.notify_all();
+    for(thread &t: threads)
+        t.join();
+}
+
 void utils::ThreadPool::submit(Task *task){
+    lock_guard guard(m);
     tasks.push(task);
+    cv.notify_all();
 }

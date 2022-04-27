@@ -1,11 +1,11 @@
 #pragma once
 
+#include <chrono>
+#include <condition_variable>
 #include <list>
-#include <thread>
 #include <mutex>
 #include <queue>
-
-#include "SharedQueue.h"
+#include <thread>
 
 namespace utils {
     class ThreadPool {
@@ -35,10 +35,16 @@ namespace utils {
     private:
         void workerFunction();
         std::list<std::thread> threads;
-        
-        SharedQueue<Task*> tasks;
+
+        std::queue<Task*> tasks;
+        std::mutex m;
+        std::condition_variable cv;
+
+        static const std::chrono::milliseconds TIMEOUT;
+        bool exit = false;
     public:
         ThreadPool(size_t n);
+        ~ThreadPool();
         void submit(Task *task);
     };
 }
