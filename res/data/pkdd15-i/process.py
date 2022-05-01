@@ -2,9 +2,34 @@ import sys
 import csv
 import json
 import time
-import math
+from math import sin, cos, asin, sqrt, pi
 
 INF = 180.0
+
+DEG_TO_METERS = 111000
+KPH_TO_MPS = 1/3.6
+
+DEG_TO_RAD = pi / 180.0
+
+def haversine(lat1, lon1, lat2, lon2):
+    # distance between latitudes
+    # and longitudes
+    dLat = (lat2 - lat1) * DEG_TO_RAD
+    dLon = (lon2 - lon1) * DEG_TO_RAD
+ 
+    # convert to radians
+    lat1 = (lat1) * DEG_TO_RAD
+    lat2 = (lat2) * DEG_TO_RAD
+ 
+    # apply formulae
+    a = (sin(dLat / 2)**2 +
+         sin(dLon / 2)**2 *
+             cos(lat1) * cos(lat2))
+    c = 2 * asin(sqrt(a))
+    return c
+
+def dist(lat1, lon1, lat2, lon2):
+    return haversine(lat1, lon1, lat2, lon2) * 6371000
 
 input_filename = sys.argv[1]
 f1 = open(input_filename, "r")
@@ -13,15 +38,17 @@ r1 = csv.reader(f1)
 cols = next(r1)
 
 TRIP_ID_IDX      = cols.index("TRIP_ID")
+TAXI_ID_IDX      = cols.index("TAXI_ID")
 TIMESTAMP_IDX    = cols.index("TIMESTAMP")
 MISSING_DATA_IDX = cols.index("MISSING_DATA")
 POLYLINE_IDX     = cols.index("POLYLINE")
 
-total, missing, speedErrors, coordErrors, totalPoints = 0, 0, 0, 0, 0
+total, totalPoints, missing, speedErrors, coordErrors, totalPointsGood = 0, 0, 0, 0, 0, 0
 
 start = time.time()
 
 notGoodSet = set()
+taxisSet = set()
 
 # MINLON, MINLAT, MAXLON, MAXLAT = -9.5,38.5,-6.5,43.0
 MINLON, MINLAT, MAXLON, MAXLAT = -8.7863,40.9980,-8.4718,41.3722
@@ -33,10 +60,19 @@ for row in r1:
         print(f"i={total}", file=sys.stderr)
 
     id           = row[TRIP_ID_IDX]
+    taxiId       = int(row[TAXI_ID_IDX])
     missing_data = row[MISSING_DATA_IDX]
     polyline     = json.loads(row[POLYLINE_IDX])
 
+    taxisSet.add(taxiId)
+    totalPoints += len(polyline)
+
     if missing_data != "False":
+        missing += 1
+        notGoodSet.add(id)
+        continue
+
+    if len(polyline) < 1:
         missing += 1
         notGoodSet.add(id)
         continue
@@ -48,10 +84,8 @@ for row in r1:
         lat, lon = c[1], c[0]
 
         if prevLat != 0 and prevLon != 0:
-            dx = prevLon-lon
-            dy = prevLat-lat
-            d = math.sqrt(dx*dx + dy*dy)
-            if d > 0.0005*15*4: # 0.0005 deg/s = 200kph, 15s, 4 is a margin factor
+            d = dist(prevLat, prevLon, lat, lon)
+            if d > 150*KPH_TO_MPS*15: # 15s, 200kph is a margin factor
                 # print(f"DANGER! {id}: {prevLat}, {prevLon} and {lat},{lon} are too far appart to be correct", file=sys.stderr)
                 speedErrors += 1
                 isGood = False
@@ -69,7 +103,7 @@ for row in r1:
         notGoodSet.add(id)
         continue
 
-    totalPoints += len(polyline)
+    totalPointsGood += len(polyline)
 
 f2 = open(input_filename, "r")
 r2 = csv.reader(f2)
@@ -82,9 +116,12 @@ for row in r2:
     totalGood += 1
 
 print(totalGood)
-print("Number of runs: ", totalGood, file=sys.stderr)
-print("Number of runs with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
-print(f"Total number of coordinates: {totalPoints}", file=sys.stderr)
+print(f"Number of trips: {total}", file=sys.stderr)
+print(f"Number of taxis: {len(taxisSet)}", file=sys.stderr)
+print(f"Number of coordinates: {totalPoints}", file=sys.stderr)
+print(f"Number of good trips: ", totalGood, file=sys.stderr)
+print(f"Number of trips with missing/speedErrors/coordErrors: ", missing, speedErrors, coordErrors, file=sys.stderr)
+print(f"Total number of coordinates in good trips: {totalPointsGood}", file=sys.stderr)
 
 f3 = open(input_filename, "r")
 r3 = csv.reader(f3)

@@ -1,6 +1,15 @@
-all: pkdd15-i/pkdd15-i.runs
+IFLAGS=-I../../structures/include
+CFILES=../../structures/src/Coord.cpp ../../structures/src/Vector2.cpp ../../structures/src/Trip.cpp
 
-pkdd15-i/pkdd15-i.runs: pkdd15-i/process.py pkdd15-i/train.csv
+all: pkdd15-i/pkdd15-i.trips pkdd15-i/pkdd15-i.trips.bin
+
+pkdd15-i/pkdd15-i.trips.bin: pkdd15-i/convertToBin pkdd15-i/pkdd15-i.trips
+	pkdd15-i/convertToBin
+
+pkdd15-i/convertToBin: pkdd15-i/convertToBin.cpp $(CFILES)
+	g++ -Wall -std=c++17 pkdd15-i/convertToBin.cpp $(CFILES) -o $@ $(IFLAGS)
+
+pkdd15-i/pkdd15-i.trips: pkdd15-i/process.py pkdd15-i/train.csv
 	python3 pkdd15-i/process.py pkdd15-i/train.csv > $@
 
 pkdd15-i/train.csv: pkdd15-i/train.zip

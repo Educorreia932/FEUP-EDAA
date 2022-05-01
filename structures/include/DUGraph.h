@@ -12,7 +12,7 @@
  */
 class DUGraph {
 public:
-    typedef size_t node_t;
+    typedef long long node_t;
 private:
     std::list<node_t> nodes;
     std::unordered_map< node_t, std::list<node_t> > adj;

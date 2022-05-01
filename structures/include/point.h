@@ -2,8 +2,8 @@
 #define POINT_H_INCLUDED
 
 #include <iostream>
-#include "coord.h"
-#include "urlencode.h"
+#include "Coord.h"
+#include "utils.h"
 
 #include "DUGraph.h"
 
@@ -14,7 +14,7 @@
 class point_t {
 private:
     std::string name = "";
-    coord_t coord = coord_t();
+    Coord coord = Coord();
 public:
     /**
      * @brief Construct without arguments
@@ -23,10 +23,10 @@ public:
     point_t();
 
     void setName(const std::string &s);
-    void setCoord(const coord_t &c);
+    void setCoord(const Coord &c);
 
     std::string getName() const;
-    coord_t getCoord() const;
+    Coord getCoord() const;
 
 };
 

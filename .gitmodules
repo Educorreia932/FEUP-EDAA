@@ -1,9 +1,12 @@
-[submodule "lib/GraphViewerCpp"]
-	path = lib/GraphViewerCpp
-	url = https://github.com/dmfrodrigues/GraphViewerCpp.git
 [submodule "test/Catch2"]
 	path = test/Catch2
 	url = https://github.com/catchorg/Catch2.git
 [submodule "res/map/rapidxml"]
 	path = res/map/rapidxml
 	url = https://github.com/dwd/rapidxml.git
+[submodule "lib/SFML"]
+	path = lib/SFML
+	url = https://github.com/SFML/SFML.git
+[submodule "lib/earcut.hpp"]
+	path = lib/earcut.hpp
+	url = https://github.com/mapbox/earcut.hpp.git

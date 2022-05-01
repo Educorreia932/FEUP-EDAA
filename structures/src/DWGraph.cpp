@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "utils.h"
+
 DWGraph::Edge::Edge(node_t v_, weight_t w_):v(v_),w(w_){}
 
 void DWGraph::DWGraph::assert_integrity() const{
@@ -87,7 +89,7 @@ DWGraph::DWGraph DWGraph::DWGraph::getTranspose() const{
 }
 
 DWGraph::weight_t DWGraph::DWGraph::getPathWeight(const std::list<node_t> &path) const{
-    if(path.empty()) return INF;
+    if(path.empty()) return iINF;
     weight_t ret = 0;
     auto it = path.begin();
     auto prev = it++;

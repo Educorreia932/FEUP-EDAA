@@ -4,11 +4,12 @@ namespace fs = std::filesystem;
 
 #include "rapidxml.hpp"
 #include "EdgeType.h"
-#include "coord.h"
+#include "Coord.h"
 #include "DWGraph.h"
 #include "point.h"
+#include "polygon.h"
 
-#include "dir.h"
+#include "utils.h"
 
 using namespace std;
 using namespace rapidxml;
@@ -49,7 +50,7 @@ public:
 private:
     void get_way(xml_node<> *it){
         id = atoll(it->first_attribute("id")->value());
-        for(auto j = it->first_node("nd"); string(j->name()) == "nd"; j = j->next_sibling()){
+        for(auto j = it->first_node("nd"); j != nullptr && string(j->name()) == "nd"; j = j->next_sibling()){
             this->push_back(atoll(j->first_attribute("ref")->value()));
         }
     }
@@ -59,7 +60,21 @@ private:
         auto poneway = find_tag(it, "oneway");
         if(poneway != nullptr){
             string oneway = poneway->first_attribute("v")->value();
-            if(oneway == "yes") return dir_t::Front;
+            if(oneway == "yes"){
+                auto p_lanes_psv_backward = find_tag(it, "lanes:psv:backward");
+                if(
+                    p_lanes_psv_backward != nullptr &&
+                    atoi(p_lanes_psv_backward->first_attribute("v")->value()) >= 1
+                ) return dir_t::Both;
+
+                auto p_lanes_taxi_backward = find_tag(it, "lanes:taxi:backward");
+                if(
+                    p_lanes_taxi_backward != nullptr &&
+                    atoi(p_lanes_taxi_backward->first_attribute("v")->value()) >= 1
+                ) return dir_t::Both;
+                
+                return dir_t::Front;
+            }
             if(oneway == "no") return dir_t::Both;
             if(oneway == "reversible") return dir_t::Both;
         }
@@ -86,6 +101,7 @@ public:
     dir_t dir;
     speed_t speed;
     edge_type_t edgeType;
+    way_t(){}
     way_t(xml_node<> *it, edge_type_t eType): edgeType(eType) {
         get_way(it);
         dir = get_dir(it);
@@ -103,8 +119,8 @@ public:
             default: throw invalid_argument("");
         }
     }
-    coord_t get_mean_coord(const unordered_map<DWGraph::node_t, coord_t> &nodes) const{
-        coord_t ret(0,0);
+    Coord get_mean_coord(const unordered_map<DWGraph::node_t, Coord> &nodes) const{
+        Coord ret(0,0);
         for(auto it = begin(); it != end(); ++it){
             ret = ret + nodes.at(*it);
         }
@@ -148,8 +164,9 @@ unordered_map<string, edge_type_t> edge_accept = {
     {"residential"      , edge_type_t::RESIDENTIAL      },
     {"living_street"    , edge_type_t::LIVING_STREET    },
     {"road"             , edge_type_t::UNCLASSIFIED     },
+    {"construction"     , edge_type_t::CONSTRUCTION     },
     {"bus_stop"         , edge_type_t::SERVICE          },
-    {"track"            , edge_type_t::SERVICE          }
+    {"track"            , edge_type_t::SERVICE          },
 };
 /**
  * @brief Set of way types we are explicitly rejecting.
@@ -160,7 +177,7 @@ unordered_map<string, edge_type_t> edge_accept = {
  */
 unordered_set<string> edge_reject = {
     "steps",        "pedestrian", "footway",   "cycleway",
-    "construction", "path",       "bridleway", "platform", "raceway",
+    "path",       "bridleway", "platform", "raceway",
     "elevator",     "proposed",   "planned",   "bus_stop", "services",
     "crossing", "corridor"};
 // unordered_set<string> service_accept = {"driveway", "parking_aisle", "alley"};
@@ -180,7 +197,7 @@ edge_type_t get_edge_type(xml_node<> *it) {
             auto paccess  = find_tag(it, "access");
             if(paccess == nullptr) return edge_type_t::SERVICE;
             string access = paccess->first_attribute("v")->value();
-            if (access == "private" || access == "no" ) return edge_type_t::NO;
+            // if (access == "private" || access == "no" ) return edge_type_t::NO;
             return edge_type_t::SERVICE;
         }
     }
@@ -196,11 +213,12 @@ int main(int argc, char *argv[]) {
     
     const string prefix = string(argv[1]);
 
-    const string dir = getDirectory(prefix);
+    const string dir = utils::getDirectory(prefix);
 
-    const string nodesFilepath  = prefix + ".nodes";
-    const string edgesFilepath  = prefix + ".edges";
-    const string pointsFilepath = prefix + ".points";
+    const string nodesFilepath    = prefix + ".nodes";
+    const string edgesFilepath    = prefix + ".edges";
+    const string pointsFilepath   = prefix + ".points";
+    const string polygonsFilepath = prefix + ".polygons";
 
     // Create destination directory
     if(dir != ""){
@@ -225,6 +243,21 @@ int main(int argc, char *argv[]) {
     xml_document<> doc;
     doc.parse<0>(text);
 
+    // Get nodes
+    unordered_map<long long, Coord> nodes;
+    for (
+        auto it = doc.first_node()->first_node("node");
+        string(it->name()) == "node";
+        it = it->next_sibling()
+    ) {
+        DWGraph::node_t u = atoll(it->first_attribute("id")->value());
+        Coord c(
+            atof(it->first_attribute("lat")->value()),
+            atof(it->first_attribute("lon")->value())
+        );
+        nodes[u] = c;
+    }
+
     // Get ways
     list<way_t> ways;
     unordered_set<long long> nodesInWays;
@@ -240,31 +273,16 @@ int main(int argc, char *argv[]) {
         for(const DWGraph::node_t &u: way) nodesInWays.insert(u);
     }
 
-    // Get nodes
-    unordered_map<long long, coord_t> nodes;
-    for (
-        auto it = doc.first_node()->first_node("node");
-        string(it->name()) == "node";
-        it = it->next_sibling()
-    ) {
-        DWGraph::node_t u = atoll(it->first_attribute("id")->value());
-        coord_t c(
-            atof(it->first_attribute("lat")->value()),
-            atof(it->first_attribute("lon")->value())
-        );
-        nodes[u] = c;
-    }
-
     // Print nodes
     {
         ofstream os;
         os.exceptions(ifstream::failbit | ifstream::badbit);
-        os.precision(7);
         os.open(nodesFilepath);
+        os << fixed << setprecision(7);
         os << nodesInWays.size() << "\n";
         for(const long long nodeId: nodesInWays){
-            coord_t c = nodes[nodeId];
-            os << nodeId << " " << c.getLat() << " " << c.getLon() << "\n";
+            Coord c = nodes[nodeId];
+            os << nodeId << " " << c.lat() << " " << c.lon() << "\n";
         }
     }
 
@@ -291,7 +309,7 @@ int main(int argc, char *argv[]) {
             if(pname != NULL){
                 point_t p;
                 p.setName(pname->first_attribute("v")->value());
-                p.setCoord(coord_t(atof(it->first_attribute("lat")->value()),
+                p.setCoord(Coord(atof(it->first_attribute("lat")->value()),
                                    atof(it->first_attribute("lon")->value())));
                 points.push_back(p);
             }
@@ -316,8 +334,145 @@ int main(int argc, char *argv[]) {
         os.open(pointsFilepath);
         os << points.size() << "\n";
         for(const auto &p: points){
-            os << urlencode(p.getName(), " \t\n") << " " << p.getCoord().getLat() << " " << p.getCoord().getLon() << "\n";
+            os << utils::urlEncode(p.getName(), " \t\n") << " " << p.getCoord().lat() << " " << p.getCoord().lon() << "\n";
         }
     }
+
+    // Get polygons
+    list<polygon_t> polygons; {
+        unordered_map<long long, list<long long>> membersOfRelations;
+        unordered_map<long long, polygon_t::type> typeOfRelations;
+        for (
+            auto it = doc.first_node()->first_node("relation");
+            it != NULL && string(it->name()) == "relation";
+            it = it->next_sibling()
+        ) {
+            auto id = atoll(it->first_attribute("id")->value());
+
+            bool good = false;
+            polygon_t::type t;
+
+            if(id == 3870917){
+                good = true;
+                t = polygon_t::type::LAND;
+            } else {
+                auto natural = find_tag(it, "natural");
+                if(natural != NULL){
+                    if(string(natural->first_attribute("v")->value()) == "water"){
+                        good = true;
+                        t = polygon_t::type::WATER;
+                    }
+                }
+            }
+
+            if(good){
+                typeOfRelations[id] = t;
+                for(
+                    auto it2 = it->first_node("member");
+                    it2 != NULL && string(it2->name()) == "member";
+                    it2 = it2->next_sibling()
+                ){
+                    if(t == polygon_t::type::WATER || t == polygon_t::type::LAND){
+                        if(
+                            string(it2->first_attribute("type")->value()) == "way" &&
+                            string(it2->first_attribute("role")->value()) == "outer"    
+                        ){
+                            membersOfRelations[id].push_back(atoll(it2->first_attribute("ref")->value()));
+                        }
+                    }
+                }
+            }
+        }
+
+        unordered_map<long long, way_t> ways;
+        for (
+            auto it = doc.first_node()->first_node("way");
+            string(it->name()) == "way";
+            it = it->next_sibling()
+        ) {
+            way_t way(it, edge_type_t::NO);
+            ways[way.id] = way;
+
+            auto building = find_tag(it, "building");
+            if(building != NULL){
+                polygons.push_back(polygon_t());
+                polygon_t &polygon = *polygons.rbegin();
+                polygon.id = way.id;
+                polygon.t = polygon_t::type::BUILDING;
+                for(const auto &u: way)
+                    polygon.coords.push_back(nodes.at(u));
+            }
+
+            auto natural = find_tag(it, "natural");
+            if(natural != NULL && string(natural->first_attribute("v")->value()) == "water"){
+                polygons.push_back(polygon_t());
+                polygon_t &polygon = *polygons.rbegin();
+                polygon.id = way.id;
+                polygon.t = polygon_t::type::WATER;
+                for(const auto &u: way)
+                    polygon.coords.push_back(nodes.at(u));
+            }
+        }
+
+        for(const auto &p: membersOfRelations){
+            long long id = p.first;
+            list<long long> members = p.second;
+
+            for(auto it = members.begin(); it != members.end();){
+                if(ways.count(*it) == 0) it = members.erase(it);
+                else ++it;
+            }
+
+            polygon_t::type t = typeOfRelations.at(id);
+            
+            list<DWGraph::node_t> nodesList;
+            
+            auto it = members.begin();
+            
+            nodesList.insert(nodesList.begin(), ways.at(*it).begin(), ways.at(*it).end());
+            members.erase(it);
+
+            size_t prevSize = members.size()+1;
+            while(members.size() != prevSize){
+                prevSize = members.size();
+                for(auto it = members.begin(); it != members.end(); ++it){
+                    const way_t &w = ways[*it];
+                    if(*w. begin() == *nodesList.rbegin()){ nodesList.insert(nodesList.end  (), ++w. begin(), w. end()); members.erase(it); break; }
+                    if(*w. begin() == *nodesList. begin()){ nodesList.insert(nodesList.begin(), ++w.rbegin(), w.rend()); members.erase(it); break; }
+                    if(*w.rbegin() == *nodesList. begin()){ nodesList.insert(nodesList.begin(), ++w. begin(), w. end()); members.erase(it); break; }
+                    if(*w.rbegin() == *nodesList.rbegin()){ nodesList.insert(nodesList.end  (), ++w.rbegin(), w.rend()); members.erase(it); break; }
+                }
+            }
+
+            polygons.push_back(polygon_t());
+            polygon_t &polygon = *polygons.rbegin();
+            polygon.id = id;
+            polygon.t = t;
+            for(const DWGraph::node_t &u: nodesList){
+                polygon.coords.push_back(nodes.at(u));
+            }
+
+            if(id == 3870917){
+                polygon.coords.push_back(Coord(40.8160979, -8.4718));
+                polygon.coords.push_back(Coord(41.3759964, -8.4718));
+            }
+        }
+    }
+
+    // Print polygons
+    {
+        ofstream os;
+        os.exceptions(ifstream::failbit | ifstream::badbit);
+        os << fixed << setprecision(7);
+        os.open(polygonsFilepath);
+        os << polygons.size() << "\n";
+        for(const polygon_t &polygon: polygons){
+            os << polygon.id << " " << char(polygon.t) << " " << polygon.coords.size() << "\n";
+            for(const Coord &c: polygon.coords){
+                os << c.lat() << " " << c.lon() << "\n";
+            }
+        }
+    }
+
     return 0;
 }
