@@ -1,46 +1,56 @@
 # Advanced Data Structures and Algorithms 🚕
 
-In Ubuntu, you better install SFML from apt.
+## Taxi Trajectory Analysis
 
-```sh
-sudo apt install libsfml-dev
-```
+Our project consists in analysing a set of taxi trips and their trajectories in the city of Porto.
+
+It was divided into two parts, the first one consisting in developing a map matching solution.
+
+## Group
+
+- Diogo Rodrigues (diogo.rodrigues@fe.up.pt)
+- Eduardo Correia (up201806613@fe.up.pt)
+- João António Sousa (up201806613@fe.up.pt)
+
+## Installing
+
+If you are cloning from GitHub, you should pull all submodules with:
 
 ```sh
 git submodule update --init --recursive
 ```
 
+In Ubuntu, you better install SFML from `apt`.
+
 ```sh
-mkdir build
-cd build
+sudo apt install libsfml-dev
+```
+
+## Build
+
+Retrieve `map.xml` and process it:
+
+```sh
+cd res
+make
+```
+
+Create build directory:
+
+```sh
+mdkir build
+```
+
+Build project using CMAKE:
+
+```sh
+cd build 
 cmake ..
 cmake --build .
-./da_proj view
 ```
 
-XML file was obtained from: https://overpass-api.de/api/map?bbox=-8.7863,40.9980,-8.4718,41.3722
-
-Save the file as `map.xml` in path `map/original/map.xml`
-
-## Voronoi notes
-
-- Using `valid` flag for *events* is not very effective and practical, however it's necessary, since priority queue (at least C++ implementation) doesn't support removal of an element that isn't the top one.
-
-- [Voronoi Diagram - Philipp Kindermann](https://www.youtube.com/watch?v=pUwEp1hs8MM)
-- [Fortune's Algorithm - Desmos](https://www.desmos.com/calculator/y1ybdnkvvz)
-- [Voronoi Generation - Paul Reed](http://paul-reed.co.uk/fortune.htm#findycoord)
-- https://www.cs.jhu.edu/~misha/Spring20/11a.pdf
-
-## Strange segfault
-
-When I was running Kosaraju, I kept getting SEGFAULT. I ran valgrind and apparently it said that no more stack could be reserved  (apparently because Linux sets a stack limit of around 8192KB, and my algorithm was recursing pretty deep). To solve this, I removed the stack limit by running
+## Usage
 
 ```sh
-ulimit -s unlimited
-```
-
-This change is not permanent, it only applies to the current shell. To make it permanent, add it to the end of your `~/.bashrc` file, or just run this command which does exactly the same thing:
-
-```sh
-sudo echo -e "\nulimit -s unlimited\n" >> ~/.bashrc
+da_proj <view|view-trips|match-trip>
 ```
