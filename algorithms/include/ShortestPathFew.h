@@ -3,6 +3,7 @@
 #include <list>
 
 #include "DWGraph.h"
+#include "ShortestPathAll.h"
 
 /**
  * @brief Shortest Path Interface
@@ -56,4 +57,21 @@ public:
      * @return false    Otherwise
      */
     virtual bool hasVisited(DWGraph::node_t u) const = 0;
+
+    class FromAll;
+};
+
+class ShortestPathFew::FromAll : public ShortestPathFew {
+private:
+    ShortestPathAll &shortestPathAll;
+    DWGraph::node_t s;
+public:
+    FromAll(ShortestPathAll &shortestPathAll_);
+    virtual void initialize(const DWGraph::DWGraph *G, DWGraph::node_t s, std::list<DWGraph::node_t> d);
+    virtual void run();
+    virtual DWGraph::node_t getStart() const;
+    virtual std::list<DWGraph::node_t> getDest () const;
+    virtual DWGraph::node_t getPrev(DWGraph::node_t d) const;
+    virtual DWGraph::weight_t getPathWeight(DWGraph::node_t d) const;
+    virtual bool hasVisited(DWGraph::node_t u) const;
 };

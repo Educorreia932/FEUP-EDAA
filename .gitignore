@@ -38,6 +38,7 @@
 build
 res/map/map_process
 res/data/pkdd15-i/convertToBin
+res/matched
 
 # Data
 map.xml

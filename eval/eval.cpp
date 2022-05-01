@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "DeepVStripes.h"
+#include "DeepVStripesFactory.h"
 #include "DijkstraFew.h"
 #include "DijkstraOnRequest.h"
 #include "EdgeType.h"
@@ -18,6 +19,8 @@
 
 #include "utils.h"
 
+using hrc = std::chrono::high_resolution_clock;
+
 const double METERS_TO_MILLIMS = 1000.0;
 const double MILLIMS_TO_METERS = 1.0/1000.0;
 const double NANOS_TO_SECONDS = 1.0/1000000000.0;
@@ -26,6 +29,7 @@ const double NANOS_TO_SECONDS = 1.0/1000000000.0;
 #include "eval_deepvstripes.h"
 #include "eval_hmm.h"
 #include "eval_hmm_precalc.h"
+#include "eval_error.h"
 
 int main(int argc, char *argv[]){
     srand(1234);
@@ -66,6 +70,9 @@ int main(int argc, char *argv[]){
         if(opt == "hmm-dijkstra-cache") evalHMM_DijkstraCache(M, trips);
 
         if(opt == "hmm-precalc") evalHMM_precalc(M, trips);
+
+        if(opt == "error-pointwise-nn") evalErrorPointwise_nn(M, trips);
+        if(opt == "error-pointwise-hmm") evalErrorPointwise_hmm(M, trips);
     } catch(const std::invalid_argument &e){
         std::cout << "Caught exception: " << e.what() << "\n";
         return -1;

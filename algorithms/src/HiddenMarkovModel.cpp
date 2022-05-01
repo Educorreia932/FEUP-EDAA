@@ -63,6 +63,7 @@ void HiddenMarkovModel::initialize(const MapGraph *mapGraph_){
 
 void HiddenMarkovModel::run(){
     closestPointsInRadius.run();
+    cout << "Idx\tID                \tVStripes (s)\tT\tK\tA* (s)   \tViterbi (s)\t" << endl;
 }
 
 HiddenMarkovModel::MyPi::MyPi(double sigma_z_, const vector<Coord> &S_, Coord firstObs):
@@ -102,7 +103,7 @@ vector<node_t> HiddenMarkovModel::getMatches(const vector<Coord> &trip) const{
     vector<Coord> Y = trip;
     const size_t &T = Y.size();
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    hrc::time_point begin, end; double dt;
 
     // ======== CLOSEST POINTS/CANDIDATE STATES (VSTRIPES) ========
     begin = hrc::now();

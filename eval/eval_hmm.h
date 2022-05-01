@@ -35,7 +35,7 @@ void evalHMM_VStripes(const MapGraph &M, const std::vector<Trip> &trips){
     closestPointsInRadius.initialize(l, d);
     closestPointsInRadius.run();
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
+    hrc::time_point begin, end; double dt;
 
     os << "i,VStripes\n";
 
@@ -89,8 +89,8 @@ void evalHMM_Dijkstra_earlyStopping(const MapGraph &M, const std::vector<Trip> &
     std::ofstream os("eval/hmm-dijkstra-s.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 100;
     const double d = 50;
@@ -178,8 +178,8 @@ void evalHMM_Dijkstra_earlyStopping_dMax(const MapGraph &M, const std::vector<Tr
     std::ofstream os("eval/hmm-dijkstra-sd.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 10000;
     const double d = 50;
@@ -267,8 +267,8 @@ void evalHMM_Astar(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-astar.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 50;
     const double d = 50;
@@ -362,8 +362,8 @@ void evalHMM_Astar_dMax(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-astar-d.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 1000;
     const double d = 50;
@@ -457,8 +457,8 @@ void evalHMM_AstarFew(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-astarfew.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 100;
     const double d = 50;
@@ -547,8 +547,8 @@ void evalHMM_AstarFew_dMax(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-astarfew-d.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 10000;
     const double d = 50;
@@ -637,8 +637,8 @@ void evalHMM_DijkstraCache(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-dijkstra.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 100000;
     const double d = 50;
@@ -784,8 +784,8 @@ void evalHMM_Viterbi(const MapGraph &M, const std::vector<Trip> &trips){
     std::ofstream os("eval/hmm-viterbi.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 1000;
     const double d = 50;
@@ -868,8 +868,8 @@ void evalHMM_ViterbiOptimized(const MapGraph &M, const std::vector<Trip> &trips)
     std::ofstream os("eval/hmm-viterbi-o.csv");
     os << std::fixed;
 
-    std::chrono::_V2::system_clock::time_point begin, end; double dt;
-    std::chrono::_V2::system_clock::time_point begin0, end0; double dt0;
+    hrc::time_point begin, end; double dt;
+    hrc::time_point begin0, end0; double dt0;
 
     const size_t N = 10000;
     const double d = 50;

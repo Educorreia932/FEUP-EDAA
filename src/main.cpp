@@ -1,3 +1,6 @@
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 
 #include "MapGraph.h"
@@ -10,7 +13,9 @@
 #include "Dijkstra.h"
 #include "FortuneAlgorithm.h"
 #include "HiddenMarkovModel.h"
+#include "HiddenMarkovModelMany.h"
 #include "K2DTreeClosestPointFactory.h"
+#include "DeepVStripesFactory.h"
 #include "VStripesRadius.h"
 
 #include "DraggableZoomableWindow.h"
@@ -26,6 +31,7 @@
 #include <iomanip>
 
 using hrc = std::chrono::high_resolution_clock;
+namespace fs = std::filesystem;
 
 const double NANOS_TO_SECS = 1.0/1000000000.0;
 const double METERS_TO_MILLIMS = 1000.0;
@@ -89,27 +95,43 @@ void view_trips(const std::vector<Trip>& trips) {
     windowController.run();
 }
 
-void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const std::vector<Trip>& trips) {
-    // double minD, maxD, meanD; size_t n;
+void match_trip_nn(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+    auto begin = hrc::now();
+    MapGraph G = M.splitLongEdges(30.0);
+    auto end = hrc::now();
+    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
+    std::cout << "Took " << dt << "s to split long edges" << std::endl;
+    std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
+              << G.getNumberOfEdges() << " edges" << std::endl;
 
-    // minD = 100000;
-    // maxD = -100000;
-    // meanD = 0;
-    // n = 0;
-    // const auto &nodesM = M.getNodes();
-    // for(const MapGraph::way_t &way: M.getWays()){
-    //     if(way.nodes.size() < 2) continue;
-    //     for(auto it1 = way.nodes.begin(), it2 = ++way.nodes.begin(); it2 != way.nodes.end(); ++it1, ++it2){
-    //         double d = Coord::getDistanceArc(nodesM.at(*it1), nodesM.at(*it2));
-    //         minD = std::min(minD, d);
-    //         maxD = std::max(maxD, d);
-    //         meanD += d;
-    //         n++;
-    //     }
-    // }
-    // meanD /= n;
-    // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesM.size() << std::endl;
+    std::cout << "Generating time graph..." << std::endl;
+    DWGraph::DWGraph dwG = G.getTimeGraph();
+    std::cout << "Generated time graph" << std::endl;
 
+    std::cout << "Computing map matching..." << std::endl;
+    const double delta = 0.0003;
+    const size_t L = 12;
+    DeepVStripesFactory closestPointFactory(delta, L);
+    MapMatching::FromClosestPoint mapMatching(closestPointFactory);
+    mapMatching.initialize(&G);
+    mapMatching.run();
+    // std::cout << "Computed map matching..." << std::endl;
+
+    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
+    MapGraphOsmView mapGraphOsmView(window, mapView, M);
+    MapTripMatchView mapTripMatchView(window, mapView);
+    mapView.addView(&mapTerrainOsmView);
+    mapView.addView(&mapGraphOsmView);
+    mapView.addView(&mapTripMatchView);
+    window.setDrawView(&mapView);
+
+    WindowTripController windowTripController(window, mapTripMatchView, G, dwG, trips, mapMatching);
+    windowTripController.run();
+}
+
+void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
     auto begin = hrc::now();
     MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
@@ -118,23 +140,9 @@ void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const
     std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
               << G.getNumberOfEdges() << " edges" << std::endl;
 
-    // minD = 100000;
-    // maxD = -100000;
-    // meanD = 0;
-    // n = 0;
-    // const auto &nodesG = G.getNodes();
-    // for(const MapGraph::way_t &way: G.getWays()){
-    //     if(way.nodes.size() < 2) continue;
-    //     for(auto it1 = way.nodes.begin(), it2 = ++way.nodes.begin(); it2 != way.nodes.end(); ++it1, ++it2){
-    //         double d = Coord::getDistanceArc(nodesG.at(*it1), nodesG.at(*it2));
-    //         minD = std::min(minD, d);
-    //         maxD = std::max(maxD, d);
-    //         meanD += d;
-    //         n++;
-    //     }
-    // }
-    // meanD /= n;
-    // std::cout << "[" << minD << ", " << maxD << "], " << meanD << ", nNodes: " << nodesG.size() << std::endl;
+    std::cout << "Generating time graph..." << std::endl;
+    DWGraph::DWGraph dwG = G.getTimeGraph();
+    std::cout << "Generated time graph" << std::endl;
 
     std::cout << "Computing map matching..." << std::endl;
     double d = 50; // in meters
@@ -145,11 +153,7 @@ void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const
     HiddenMarkovModel mapMatching(closestPointsInRadius, shortestPathFew, d, sigma_z, beta);
     mapMatching.initialize(&G);
     mapMatching.run();
-    std::cout << "Computed map matching..." << std::endl;
-
-    std::cout << "Generating graph..." << std::endl;
-    DWGraph::DWGraph dwG = G.getTimeGraph();
-    std::cout << "Generated graph" << std::endl;
+    // std::cout << "Computed map matching..." << std::endl;
 
     DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
     MapView mapView(Coord(41.1594, -8.6199), 20000000);
@@ -165,6 +169,42 @@ void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const
     windowTripController.run();
 }
 
+void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
+    MapGraph G = M.splitLongEdges(30.0);
+    VStripesRadius closestPointsInRadius;
+
+    const double d = 50.0;
+    double sigma_z = 5.925232; // in meters
+    double beta = 6.677601;
+    const size_t nThreads = 8;
+
+    HiddenMarkovModelMany hmm(closestPointsInRadius, d, sigma_z, beta, nThreads);
+    hmm.initialize(&G, trips);
+    hmm.run();
+
+    if(!fs::exists("res/matched"))
+        fs::create_directories("res/matched");
+
+    std::ofstream os("res/matched/matched.txt");
+
+    size_t index = 0;
+    for(const Trip &trip: trips){
+        if(index%100000 == 0) std::cout << "Index: " << index << std::endl;
+        ++index;
+        try {
+            const std::vector<DWGraph::node_t> &matches = hmm.getMatches(trip.id);
+            os << trip.id << " " << matches.size() << "\n";
+            for(const DWGraph::node_t &u: matches){
+                os << u << "\n";
+            }
+        } catch(const std::exception &e){
+
+        }
+    }
+
+    os.close();
+}
+
 int main(int argc, char* argv[]) {
     XInitThreads();
 
@@ -172,7 +212,7 @@ int main(int argc, char* argv[]) {
         if (argc < 2) throw std::invalid_argument("at least one argument must be provided");
         std::string opt = argv[1];
 
-        std::chrono::_V2::system_clock::time_point begin, end;
+        hrc::time_point begin, end;
         double dt;
 
         std::cout << "Loading map..." << std::endl;
@@ -201,7 +241,10 @@ int main(int argc, char* argv[]) {
         std::cout << "Loaded trips, took " << dt << "s" << std::endl;
 
         if (opt == "view-trips") { view_trips(trips); return 0; }
+        if (opt == "match-trip-nn") { match_trip_nn(M, polygons, trips); return 0; }
         if (opt == "match-trip") { match_trip(M, polygons, trips); return 0; }
+
+        if (opt == "match-all-trips") { match_all_trips(M, trips); return 0; }
 
         std::cerr << "Invalid option" << std::endl;
         return -1;
