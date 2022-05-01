@@ -29,6 +29,7 @@ Save the file as `map.xml` in path `map/original/map.xml`
 - [Voronoi Diagram - Philipp Kindermann](https://www.youtube.com/watch?v=pUwEp1hs8MM)
 - [Fortune's Algorithm - Desmos](https://www.desmos.com/calculator/y1ybdnkvvz)
 - [Voronoi Generation - Paul Reed](http://paul-reed.co.uk/fortune.htm#findycoord)
+- https://www.cs.jhu.edu/~misha/Spring20/11a.pdf
 
 ## Strange segfault
 

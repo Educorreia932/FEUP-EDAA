@@ -3,17 +3,17 @@
 #include <cmath>
 #include <limits>
 
-Arc::Arc(Site site) : site(site) {
+Arc::Arc(Site* site) : site(site) {
 
 }
 
-Arc::Arc(Site site, Arc* previous, Arc* next) : previous(previous), next(next), site(site) {
+Arc::Arc(Site* site, Arc* previous, Arc* next) : previous(previous), next(next), site(site) {
 
 }
 
 // Get parabola point for x
 Vector2 Arc::getPoint(double x, double sweep_line) {
-    Vector2 focus = site.point;
+    Vector2 focus = site->point;
 
     // Distance between the parabola's focus and its vertex
     // Or distance from the parabola's vertex to its directrix (the sweep line)
@@ -32,29 +32,35 @@ Vector2 Arc::getPoint(double x, double sweep_line) {
     return Vector2(x, y);
 }
 
-// Intersect two parabolas (left intersection)
+// Intersect two parabolas 
 Vector2 Arc::intersect(Arc arc, double sweep_line) {
-    Vector2 g1 = site.point;
-    Vector2 g2 = arc.site.point;
+    Vector2 point1 = this->site->point;
+    Vector2 point2 = arc.site->point;
 
-    // Half-point between site and sweep line
-    double f1 = (g1.y + sweep_line) / 2.0;
-    double f2 = (g2.y + sweep_line) / 2.0;
+    double x1 = point1.x, y1 = point1.y, x2 = point2.x, y2 = point2.y;
+    
+    double d1 = 1.0 / (2.0 * (y1 - sweep_line));
+	double d2 = 1.0 / (2.0 * (y2 - sweep_line));
 
-    // Quadratic formula
-    double a = 1 / (4 * f1) - 1 / (4 * f2); // TODO: If a is 0, solve linear equation
-    double b = -g1.x / (2 * f1) - (-g2.x / (2 * f2));
-    double c = pow(g1.x, 2) / (4 * f1) + g1.y + f1 - (pow(g2.x, 2) / (4 * f2) + g2.y + f2);
+	double a = d1 - d2;
+	double b = 2.0 * (x2 * d2 - x1 * d1);
+	double c = (y1 * y1 + x1 * x1 - sweep_line * sweep_line) * d1 - (y2 * y2 + x2 * x2 - sweep_line * sweep_line) * d2;
+	double delta = b * b - 4.0 * a * c;
+    double x;
 
-    double x = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-    double y = (1 / (4 * f1)) * pow(x, 2) - (g1.x / (2 * f1)) * x + pow(g1.x, 2) / (4 * f1) + g1.y + f1;
+    // a is 0
+    if (fabs(a) < 0.00000001)
+        x = - c / b;
 
-    return Vector2(x, y);
+    else
+        x = (-b + std::sqrt(delta)) / (2.0 * a);
+
+    return getPoint(x, sweep_line);
 }
 
 // Intersect parabola with edge
 Vector2 Arc::intersect(Edge edge, double sweep_line) {
-    Vector2 focus = site.point;
+    Vector2 focus = site->point;
     double x;
 
     if (edge.m == std::numeric_limits<double>::infinity())

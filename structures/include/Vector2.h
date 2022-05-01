@@ -3,6 +3,8 @@
 #include <functional>
 #include <limits>
 
+class Edge;
+
 class Vector2 {
 public:
     double x;
@@ -10,17 +12,16 @@ public:
 
     explicit Vector2(double x = std::numeric_limits<double>::infinity(), double y = std::numeric_limits<double>::infinity());
 
-    // Unary operators
+    Vector2 operator+(const Vector2 &rhs) const;
+    Vector2 operator-(const Vector2 &rhs) const;
+    Vector2 operator*(double t) const;
+    Vector2 operator/(double t) const;
+
     Vector2& operator+=(const Vector2& other);
     Vector2& operator-=(const Vector2& other);
     Vector2& operator*=(double t);
     Vector2& operator/=(double t);
 
-    // Binary operators
-    Vector2 operator+(const Vector2 &rhs) const;
-    Vector2 operator-(const Vector2 &rhs) const;
-    Vector2 operator*(double t) const;
-    Vector2 operator/(double t) const;
     bool operator==(const Vector2 &rhs) const;
 
     Vector2 getOrthogonal() const;
@@ -29,6 +30,7 @@ public:
     double getDistance(const Vector2 &other) const;
     double getDet(Vector2 vector2);
     bool isOn(Vector2 a, Vector2 b) const;
+    bool isOn(Edge edge) const;
 
     static double getDistance(const Vector2 &v1, const Vector2 &v2);
 

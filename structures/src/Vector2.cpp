@@ -1,6 +1,9 @@
 #include "Vector2.h"
+#include "Edge.h"
 
 #include <cmath>
+
+#define EPSILON 0.00000001
 
 Vector2::Vector2(double x, double y) : x(x), y(y) {
 
@@ -52,7 +55,7 @@ Vector2 Vector2::operator/(double t) const {
 }
 
 bool Vector2::operator==(const Vector2 &rhs) const {
-    return x == rhs.x && y == rhs.y;
+    return fabs(x - rhs.x) < EPSILON && fabs(y - rhs.y) < EPSILON;
 }
 
 Vector2 Vector2::getOrthogonal() const {
@@ -93,7 +96,10 @@ bool Vector2::compXY(const Vector2 &lhs, const Vector2 &rhs){
 }
 
 bool collinear(Vector2 a, Vector2 b, Vector2 c) {
-    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y);
+    if (a.x == b.x && b.x == c.x)
+        return true;
+        
+    return fabs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) <= EPSILON;
 }
 
 bool within(double p, double q, double r) {
@@ -104,6 +110,10 @@ bool Vector2::isOn(Vector2 a, Vector2 b) const {
     Vector2 c = *this;
 
     return collinear(a, b, c) && (a.x != b.x ? within(a.x, c.x, b.x) : within(a.y, c.y, b.y));
+}
+
+bool Vector2::isOn(Edge edge) const {
+    return isOn(edge.start, edge.end);
 }
 
 size_t std::hash<Vector2>::operator()(const Vector2& v) const {
