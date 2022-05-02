@@ -1,16 +1,16 @@
 # Advanced Data Structures and Algorithms 🚕
 
+## Group
+
+- [Diogo Rodrigues](https://github.com/dmfrodrigues) ([diogo.rodrigues@fe.up.pt](mailto:diogo.rodrigues@fe.up.pt))
+- [Eduardo Correia](https://github.com/Educorreia932) ([up201806613@fe.up.pt](mailto:up201806613@fe.up.pt))
+- [João António Sousa](https://github.com/JoaoASousa) ([up201806613@fe.up.pt](mailto:up201806613@fe.up.pt))
+
 ## Taxi Trajectory Analysis
 
 Our project consists in analysing a set of taxi trips and their trajectories in the city of Porto.
 
 It was divided into two parts, the first one consisting in developing a map matching solution.
-
-## Group
-
-- Diogo Rodrigues (diogo.rodrigues@fe.up.pt)
-- Eduardo Correia (up201806613@fe.up.pt)
-- João António Sousa (up201806613@fe.up.pt)
 
 ## Installing
 
@@ -20,7 +20,7 @@ If you are cloning from GitHub, you should pull all submodules with:
 git submodule update --init --recursive
 ```
 
-In Ubuntu, you better install SFML from `apt`.
+In Ubuntu, you can install SFML from `apt` to accelerate compilation.
 
 ```sh
 sudo apt install libsfml-dev
@@ -28,25 +28,20 @@ sudo apt install libsfml-dev
 
 ## Build
 
-Retrieve `map.xml` and process it:
+Retrieve and process all data:
 
 ```sh
 cd res
 make
 ```
 
-Create build directory:
+To compile the project:
 
 ```sh
 mdkir build
-```
-
-Build project using CMAKE:
-
-```sh
 cd build 
-cmake ..
-cmake --build .
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j8
 ```
 
 ## Usage

@@ -78,7 +78,7 @@ void voronoi_display(const MapGraph& M) {
 
 void view_trips(const std::vector<Trip>& trips) {
     std::cout << "Building graph from trips..." << std::endl;
-    const size_t N = 100000;
+    const size_t N = 30000;
     std::set<size_t> s;
     while (s.size() < N) s.insert(rand() % trips.size());
     std::vector<Trip> tripsSmall;
