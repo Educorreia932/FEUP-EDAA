@@ -21,11 +21,11 @@ class Tree {
 private:
     Tree* left = nullptr;
     Tree* right = nullptr;
-
 public:
-    Tree();
+    double distance;
 
-    Tree(Tree* left, Tree* right);
+    Tree();
+    Tree(Tree* left, Tree* right, double distance);
 
     std::vector<Tree*> leaves();
 };

@@ -34,7 +34,7 @@ Tree::Tree() {
 
 }
 
-Tree::Tree(Tree* left, Tree* right) : left(left), right(right) {
+Tree::Tree(Tree* left, Tree* right, double distance) : left(left), right(right), distance(distance) {
 
 }
 
@@ -70,11 +70,12 @@ Tree UPGMA::calculate() {
 
     for (int k = iterations; k >= 1; k--) {
         // Find minimum distance
-        int indexes[2] = { 0, 0 };
+        int indexes[2] = { 1, 0 };
+        double minimum_distance;
 
-        for (int i = 0; i < distance_matrix.size(); i++)
-            for (int j = 0; j < distance_matrix[0].size(); j++) {
-                int minimum_distance = distance_matrix[indexes[0]][indexes[1]];
+        for (int i = 1; i < distance_matrix.size(); i++)
+            for (int j = 0; j < i; j++) {
+                minimum_distance = distance_matrix[indexes[0]][indexes[1]];
 
                 if (distance_matrix[i][j] < minimum_distance) {
                     indexes[0] = i;
@@ -86,7 +87,7 @@ Tree UPGMA::calculate() {
         int i = indexes[0];
         int j = indexes[1];
 
-        auto tree = new Tree(trees[i], trees[j]);
+        auto tree = new Tree(trees[i], trees[j], minimum_distance / 2.0);
 
         if (k > 2) {
             // Remove from the list of trees the joined branches
