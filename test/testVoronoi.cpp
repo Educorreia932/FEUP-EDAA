@@ -6,8 +6,6 @@
 #include <iostream>
 #include <iomanip>
 
-#define CATCH_CONFIG_MAIN
-
 VoronoiDiagram voronoi(std::vector<Site*> sites) {
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
 
