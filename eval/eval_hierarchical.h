@@ -8,29 +8,70 @@
 #include <vector>
 
 void evalHierarchical(const MapGraph& map_graph) {
-    auto distance_graph = map_graph.getDistanceGraph();
-    std::list<Coord> coordinate_list;
+    // Open output CSV
+    std::ofstream os("eval/hierarchical.csv");
 
-    for (auto node : distance_graph.getNodes())
-        coordinate_list.push_back(map_graph.nodeToCoord(node));
+    os << std::fixed;
 
-    std::vector<std::vector<double> > distance_matrix;
+    // Initialize list of coordinates
+    std::vector<Coord> coordinate_list;
 
-    std::list<Coord> sample;
+    for (std::pair<DWGraph::node_t, Coord> element : map_graph.getNodes())
+        coordinate_list.push_back(element.second);
 
-    int N = 100;
+    std::vector<size_t> sizes = {
+             1,
+            10,
+            20,
+            30,
+            40,
+            50,
+            60,
+            70,
+            80,
+            90,
+           100,
+           200,
+           300,
+           400,
+           500,
+           600,
+    };
 
-    // Get first 100 coordinates
-    for (auto i = coordinate_list.begin(); i != coordinate_list.end() && N > 0; ++i, --N)
-        sample.push_back(*i);
+    const size_t REPEAT = 5;
 
-    for (auto c1 : sample) {
-        distance_matrix.push_back(std::vector<double>());
+    for (const size_t& size : sizes) {
+        std::cout << "Size: " << size << std::endl;
+        os << size;
 
-        for (auto c2 : sample) 
-            distance_matrix[distance_matrix.size() - 1].push_back(Coord::getDistanceArc(c1, c2));
+        // Calculate distance matrix
+        std::vector<Coord> coordinates_sample(coordinate_list.begin(), coordinate_list.begin() + size);
+        std::vector<std::vector<double>> distance_matrix;
+
+        for (auto c1 : coordinates_sample) {
+            distance_matrix.push_back(std::vector<double>());
+
+            for (auto c2 : coordinates_sample)
+                distance_matrix[distance_matrix.size() - 1].push_back(Coord::getDistanceArc(c1, c2));
+        }
+
+
+        // Execute algorithm
+        for (size_t i = 0; i < REPEAT; ++i) {
+            auto begin = std::chrono::high_resolution_clock::now();
+
+            auto upgma = UPGMA(distance_matrix);
+            upgma.calculate();
+
+            // Measure time
+            auto end = std::chrono::high_resolution_clock::now();
+            double total_time = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / 1.0e9;
+
+            os << "," << total_time;
+        }
+
+        os << std::endl;
     }
 
-    auto upgma = UPGMA(distance_matrix);
-    auto tree = upgma.calculate();
+    os.close();
 }
