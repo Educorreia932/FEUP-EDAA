@@ -36,6 +36,14 @@ void evalHierarchical(const MapGraph& map_graph) {
            400,
            500,
            600,
+           700,
+           800,
+           900,
+          1000,
+          1250,
+          1500,
+          1750,
+          2000,
     };
 
     const size_t REPEAT = 5;
@@ -48,13 +56,21 @@ void evalHierarchical(const MapGraph& map_graph) {
         std::vector<Coord> coordinates_sample(coordinate_list.begin(), coordinate_list.begin() + size);
         std::vector<std::vector<double>> distance_matrix;
 
-        for (auto c1 : coordinates_sample) {
+        for (size_t i = 0; i < size; i++) {
             distance_matrix.push_back(std::vector<double>());
 
-            for (auto c2 : coordinates_sample)
-                distance_matrix[distance_matrix.size() - 1].push_back(Coord::getDistanceArc(c1, c2));
-        }
+            for (size_t j = 0; j < size; j++) {
+                if (j < i) {
+                    auto c1 = coordinates_sample[i];
+                    auto c2 = coordinates_sample[j];
 
+                    distance_matrix[distance_matrix.size() - 1].push_back(Coord::getDistanceArc(c1, c2));
+                }
+
+                else
+                    distance_matrix[distance_matrix.size() - 1].push_back(0);
+            }
+        }
 
         // Execute algorithm
         for (size_t i = 0; i < REPEAT; ++i) {
@@ -67,6 +83,7 @@ void evalHierarchical(const MapGraph& map_graph) {
             auto end = std::chrono::high_resolution_clock::now();
             double total_time = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / 1.0e9;
 
+            std::cout << "Time:" << total_time << std::endl;
             os << "," << total_time;
         }
 

@@ -1,15 +1,17 @@
 #include "HierarchicalClustering.h"
 
 Matrix::Matrix(std::vector<std::vector<double>> rows) : rows(rows) {
-
 };
 
 std::size_t Matrix::size() const {
     return rows.size();
 }
 
-std::vector<double> Matrix::operator[](int index) const {
-    return rows[index];
+double Matrix::at(int i, int j) const {
+    if (j > i)
+        return rows[j][i];
+
+    return rows[i][j];
 }
 
 void Matrix::add_row(std::vector<double> row) {
@@ -75,9 +77,9 @@ Tree UPGMA::calculate() {
 
         for (int i = 1; i < distance_matrix.size(); i++)
             for (int j = 0; j < i; j++) {
-                minimum_distance = distance_matrix[indexes[0]][indexes[1]];
+                minimum_distance = distance_matrix.at(indexes[0], indexes[1]);
 
-                if (distance_matrix[i][j] < minimum_distance) {
+                if (distance_matrix.at(i, j) < minimum_distance) {
                     indexes[0] = i;
                     indexes[1] = j;
                 }
@@ -100,13 +102,13 @@ Tree UPGMA::calculate() {
             // Calculate the distances for the new cluster
             std::vector<double> distances;
 
-            for (int x = 0; x <= distance_matrix.size(); x++)
+            for (int x = 0; x < distance_matrix.size(); x++)
                 if (x != i && x != j) {
                     double si = tree_i->leaves().size();
                     double sj = tree_j->leaves().size();
 
                     // Use the weighted average to calculate the distances between the clusters
-                    double distance = (si * distance_matrix[i][x] + sj * distance_matrix[j][x]) / (si + sj);
+                    double distance = (si * distance_matrix.at(i, x) + sj * distance_matrix.at(j, x)) / (si + sj);
                     distances.push_back(distance);
                 }
 
@@ -130,5 +132,4 @@ Tree UPGMA::calculate() {
         else
             return *tree;
     }
-
 }

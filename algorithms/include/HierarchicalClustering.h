@@ -14,7 +14,7 @@ public:
 
     std::size_t size() const;
 
-    std::vector<double> operator[](int index) const;
+    double at(int i, int j) const;
 };
 
 class Tree {
