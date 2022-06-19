@@ -31,6 +31,7 @@ const double NANOS_TO_SECONDS = 1.0 / 1000000000.0;
 #include "eval_hmm_precalc.h"
 #include "eval_error.h"
 #include "eval_hierarchical.h"
+#include "eval_kmeans.h"
 
 int main(int argc, char* argv[]) {
     srand(1234);
@@ -81,6 +82,8 @@ int main(int argc, char* argv[]) {
         // Clustering
         if (opt == "hierarchical")
             evalHierarchical(M);
+        if (opt == "kmeans")
+            evalKMeans(M);
     }
 
     catch (const std::invalid_argument& e) {
