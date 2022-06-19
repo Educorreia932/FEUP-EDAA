@@ -58,11 +58,14 @@ void evalKMeans(const MapGraph& map_graph) {
         40
     };
 
+    os << "num_clusters,";
+    for (const size_t& size : sizes) os << size << ",";
+    os << std::endl;
 
-    for (const size_t& size : sizes) {
-        for (const size_t& n_cluster : n_clusters) {
-            std::cout << "Size: " << size << " # Clusters: " << n_cluster << std::endl;
-            os << size << ", " << n_cluster;
+    for (const size_t& n_cluster : n_clusters) {
+        os << n_cluster;
+        for (const size_t& size : sizes) {
+            std::cout << "# Clusters: " << n_cluster << " Size: " << size << std::endl;
 
             int N = size;
             auto first = coords.begin();
@@ -79,9 +82,8 @@ void evalKMeans(const MapGraph& map_graph) {
             double total_time = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / 1.0e9;
 
             os << "," << total_time;
-
-            os << std::endl;
         }
+        os << std::endl;
     }
 
     os.close();
