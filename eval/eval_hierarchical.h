@@ -20,7 +20,6 @@ void evalHierarchical(const MapGraph& map_graph) {
         coordinate_list.push_back(element.second);
 
     std::vector<size_t> sizes = {
-             1,
             10,
             20,
             30,
@@ -54,23 +53,18 @@ void evalHierarchical(const MapGraph& map_graph) {
 
         // Calculate distance matrix
         std::vector<Coord> coordinates_sample(coordinate_list.begin(), coordinate_list.begin() + size);
-        std::vector<std::vector<double>> distance_matrix;
+        std::vector<std::vector<double>> distance_matrix(size, std::vector<double>(size, 0));
 
         for (size_t i = 0; i < size; i++) {
-            distance_matrix.push_back(std::vector<double>());
+            for (size_t j = 0; j < i; j++) {
+                auto c1 = coordinates_sample[i];
+                auto c2 = coordinates_sample[j];
 
-            for (size_t j = 0; j < size; j++) {
-                if (j < i) {
-                    auto c1 = coordinates_sample[i];
-                    auto c2 = coordinates_sample[j];
-
-                    distance_matrix[distance_matrix.size() - 1].push_back(Coord::getDistanceArc(c1, c2));
-                }
-
-                else
-                    distance_matrix[distance_matrix.size() - 1].push_back(0);
+                distance_matrix[i][j] = Coord::getDistanceArc(c1, c2);
             }
         }
+
+        double total_time = 0;
 
         // Execute algorithm
         for (size_t i = 0; i < REPEAT; ++i) {
@@ -81,11 +75,14 @@ void evalHierarchical(const MapGraph& map_graph) {
 
             // Measure time
             auto end = std::chrono::high_resolution_clock::now();
-            double total_time = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / 1.0e9;
+            double time = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / 1.0e9;
 
-            std::cout << "Time:" << total_time << std::endl;
-            os << "," << total_time;
+            total_time += time;
+
+            os << "," << time;
         }
+
+        std::cout << "Time:" << total_time / REPEAT << std::endl;
 
         os << std::endl;
     }
