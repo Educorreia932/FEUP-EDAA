@@ -1,42 +1,35 @@
+#include "MapGraph.h"
+
+#include <set>
 #include <vector>
 
-class Matrix {
+class Node {
 private:
-    std::vector<std::vector<double>> rows;
+    Coord point;
+    Node* left;
+    Node* right;
+    Node* nn = nullptr;    // Nearest neighbour
+
+    std::set<Node*> leaves();
+    double getDistance(Node* node);
 public:
-    Matrix(std::vector<std::vector<double>> rows);
+    friend class UPGMA;
 
-    void add_row(std::vector<double> row);
-    void add_column(std::vector<double> column);
+    double distance_to_nn; // Distance to nearest neighbour
 
-    void remove_row(int index);
-    void remove_column(int index);
+    Node(Coord point);
+    Node(Node* left, Node* right);
 
-    std::size_t size() const;
-
-    double at(int i, int j) const;
-};
-
-class Tree {
-private:
-    Tree* left = nullptr;
-    Tree* right = nullptr;
-public:
-    double distance;
-
-    Tree();
-    Tree(Tree* left, Tree* right, double distance);
-
-    std::vector<Tree*> leaves();
+    void updateDistances(std::set<Node*> clusters);
 };
 
 class UPGMA {
 private:
-    Matrix distance_matrix;
+    std::set<Node*> clusters;
 
+    void closestPair(Node* &c1, Node* &c2);
 public:
-    UPGMA(std::vector<std::vector<double>> distance_matrix);
+    UPGMA(std::vector<Coord> points);
 
-    Tree calculate();
-    double getSmallestDistance(int& min_i, int& min_j);
+    Node* buildTree();
 };

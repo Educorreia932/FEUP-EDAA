@@ -7,17 +7,15 @@
 #define CATCH_CONFIG_MAIN
 
 TEST_CASE("Hierarchical Clustering", "[hierarchical]") {
-    std::vector<std::vector<double>> distance_matrix = {
-        {0, 3, 4, 4, 2},
-        {3, 0, 6, 6, 5},
-        {4, 6, 0, 7, 7},
-        {4, 6, 7, 0, 9},
-        {2, 5, 7, 9, 0}
+    std::vector<Coord> points = {
+        Coord(0.0, 0.0),
+        Coord(3.0, 3.0),
+        Coord(10.0, 10.0),
     };
 
-    UPGMA clustering(distance_matrix);
+    UPGMA upgma(points);
 
-    auto result = clustering.calculate();
+    auto result = upgma.buildTree();
 
-    REQUIRE(result.distance == 3.25);
+    std::cout << result->distance_to_nn << std::endl;
 }
