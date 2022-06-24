@@ -60,34 +60,38 @@ UPGMA::UPGMA(std::vector<std::vector<double>> distance_matrix) : distance_matrix
 
 }
 
+double UPGMA::getSmallestDistance(int& min_i, int& min_j) {
+    double minimum_distance;
+
+    for (int i = 1; i < distance_matrix.size(); i++)
+        for (int j = 0; j < i; j++) {
+            minimum_distance = distance_matrix.at(min_i, min_j);
+
+            if (distance_matrix.at(i, j) < minimum_distance) {
+                min_i = i;
+                min_j = j;
+            }
+        }
+
+    return minimum_distance;
+}
+
 Tree UPGMA::calculate() {
     std::vector<Tree*> trees;
 
     // Create a tree for each entry
-    for (int i = 0; i < distance_matrix.size(); i++)
+    for (std::size_t i = 0; i < distance_matrix.size(); i++)
         trees.push_back(new Tree());
 
     // Execute the algorithm 
-    int iterations = trees.size();
+    auto iterations = trees.size();
 
     for (int k = iterations; k >= 1; k--) {
         // Find minimum distance
-        int indexes[2] = { 1, 0 };
-        double minimum_distance;
-
-        for (int i = 1; i < distance_matrix.size(); i++)
-            for (int j = 0; j < i; j++) {
-                minimum_distance = distance_matrix.at(indexes[0], indexes[1]);
-
-                if (distance_matrix.at(i, j) < minimum_distance) {
-                    indexes[0] = i;
-                    indexes[1] = j;
-                }
-            }
+        int i = 1, j = 0;
+        double minimum_distance = getSmallestDistance(i, j);
 
         // Create a new tree to join the clusters with minimum distance
-        int i = indexes[0];
-        int j = indexes[1];
 
         auto tree = new Tree(trees[i], trees[j], minimum_distance / 2.0);
 

@@ -38,4 +38,5 @@ public:
     UPGMA(std::vector<std::vector<double>> distance_matrix);
 
     Tree calculate();
+    double getSmallestDistance(int& min_i, int& min_j);
 };
