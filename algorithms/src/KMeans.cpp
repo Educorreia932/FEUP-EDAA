@@ -185,7 +185,7 @@ int KMeans::run() {
         }
         
         // clear clusters
-        for (Cluster c : clusters) {
+        for (Cluster &c : clusters) {
             std::cout << "Befor: " << c.getPoints().size() << std::endl;
             c.removePoints();
             std::cout << "After: " << c.getPoints().size() << " Centroid: " << c.getCentroid().getCoords().lat() << std::endl;
@@ -198,13 +198,19 @@ int KMeans::run() {
 
             if (clusters[points.at(i).getClusterId()].getCentroidId() == points[i].getId()) {
                 std::cout << "Found centroid (repeated)" << std::endl;
+                clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
             }
             else {
                 clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
+                std::cout << "Adding Point #" << points.at(i).getId() << " to Cluster #" << points.at(i).getClusterId()
+                << " | size: " << clusters.at(points.at(i).getClusterId()).getSize() << std::endl;
+                
             }
         }
 
         for (Cluster c : clusters) {
+            std::cout << "Befor: " << c.getPoints().size() << std::endl;
+            c.removePoints();
             std::cout << "After: " << c.getPoints().size() << " Centroid: " << c.getCentroid().getCoords().lat() << std::endl;
         }
 
