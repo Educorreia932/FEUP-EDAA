@@ -79,14 +79,14 @@ void evalKMeans(const MapGraph& map_graph) {
             auto first = coords.begin();
 
             // auto last  = coords.begin() + N;
-            auto last  = coords.begin() + 10;
+            auto last  = coords.begin() + 1000;
 
             std::vector<Coord> subCoords(first, last);
 
             auto begin = std::chrono::high_resolution_clock::now();
 
             // auto c = KMeans(subCoords, 20, n_cluster);
-            auto c = KMeans(subCoords, 3, 3);
+            auto c = KMeans(subCoords, 3, 4);
             c.run();
 
             // Measure time

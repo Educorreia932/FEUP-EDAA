@@ -197,8 +197,9 @@ int KMeans::run() {
             if (points.at(i).getClusterId() == -1) continue;
 
             if (clusters[points.at(i).getClusterId()].getCentroidId() == points[i].getId()) {
-                std::cout << "Found centroid (repeated)" << std::endl;
                 clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
+                std::cout << "Adding Point #" << points.at(i).getId() << " to Cluster #" << points.at(i).getClusterId()
+                << " | size: " << clusters.at(points.at(i).getClusterId()).getSize() << " Point also centroid!" << std::endl;
             }
             else {
                 clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
@@ -216,29 +217,41 @@ int KMeans::run() {
 
         // recalculate centroids
         for (int i = 0; i < k; i++) { // for each centroid
-            // std::cout << "Inner Loop #" + std::to_string(i) << std::endl;
+            std::cout << "Recalculating Centroid for Cluster #" << i << " | Current coords ("
+            << clusters[i].getCentroid().getCoords().lat() << ", "
+            << clusters[i].getCentroid().getCoords().lon() << ")"
+            << " with size " << clusters[i].getSize() << std::endl;
 
             double dists_lat = 0, dists_long = 0, new_lat, new_long;
 
             // for each point in cluster
             for (int j = 0; j < clusters.at(i).getSize(); j++) {
-                dists_lat += clusters.at(i).getPoint(j).getCoords().LatDegreesToMeters();
-                dists_long += clusters.at(i).getPoint(j).getCoords().LonDegreesToMeters();
+                std::cout << "Point coords (" << clusters.at(i).getPoint(j).getCoords().lat() << ", "
+                << clusters.at(i).getPoint(j).getCoords().lon() << ")" << std::endl;
+                dists_lat += clusters.at(i).getPoint(j).getCoords().lat();
+                dists_long += clusters.at(i).getPoint(j).getCoords().lon();
+                // std::cout << "curr dists: " << dists_lat << " " << dists_long << std::endl;
             }
 
+            std::cout << "Average coords: " << (dists_lat  / clusters.at(i).getSize()) << " " << (dists_long / clusters.at(i).getSize()) << std::endl;;
+
             // get mean of distance, converting back to coordinates
-            new_lat  = Coord::MetersToLatDegrees() * (dists_lat  / clusters.at(i).getSize());
-            new_long = Coord::MetersToLonDegrees() * (dists_long / clusters.at(i).getSize());
+            new_lat  = (dists_lat  / clusters.at(i).getSize());
+            new_long = (dists_long / clusters.at(i).getSize());
 
             // update centroid
             Coord c(new_lat, new_long);
             Point updated_centroid(i, c);
             clusters.at(i).setCentroid(updated_centroid);
+
+            std::cout << "Updated centroid for Cluster #" << i
+            << " coords (" << clusters.at(i).getCentroid().getCoords().lat() << ", "
+            << clusters.at(i).getCentroid().getCoords().lon() << ")" << std::endl;
         }
 
         std::cout << "Writing to File" << std::endl;
         std::ofstream pointsFile("eval/testing-iter" + std::to_string(curr_iter) + ".txt");
-        pointsFile << std::fixed << std::setprecision(3);
+        // pointsFile << std::fixed << std::setprecision(3);
 
         for (int i = 0; i < points.size(); i++) {
             pointsFile << "Point #" + std::to_string(i) + 
