@@ -8,7 +8,7 @@ class Point {
 public:
     Point();
     Point(int id, Coord coords);
-    
+
     int getId();
     int getClusterId();
     Coord getCoords();
@@ -20,9 +20,6 @@ private:
     int id, cluster_id;
     Coord coords;
 };
-
-
-
 
 class Cluster {
 public:
@@ -47,10 +44,21 @@ private:
 };
 
 class KMeans {
+private:
+    std::vector<Point> points;
+    int iters;
+    int k;
+
+    /**
+     * @brief Initializes clusters, assigning an initial random centroid to each
+     */
+    void initializeClusters();
 public:
+    std::vector<Cluster> clusters;
+
     /**
      * @brief Construct from list of points, and number of iterations and clusters
-     * 
+     *
      * @param points    Data Points to which apply clustering
      * @param iters     Number of iterations over which we will run k-means
      * @param k         Number of clusters to split data points into
@@ -59,25 +67,10 @@ public:
 
     /**
      * @brief Construct without arguments
-     * 
      */
     KMeans();
-    
-    /**
-     * @brief Initializes clusters, assigning an initial random centroid to each
-     * 
-     */
-    void initializeClusters();
 
     int findClosestCluster(Point point);
 
     int run();
-
-
-private:
-    std::vector<Cluster> clusters;
-    std::vector<Point> points;
-    int iters;
-    int k;
-
 };

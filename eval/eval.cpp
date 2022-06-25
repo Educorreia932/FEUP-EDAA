@@ -82,8 +82,12 @@ int main(int argc, char* argv[]) {
         // Clustering
         if (opt == "hierarchical")
             evalHierarchical(M);
+            
         if (opt == "kmeans")
             evalKMeans(M);
+
+        if (opt == "elbow")
+            elbowMethod(M);
     }
 
     catch (const std::invalid_argument& e) {
