@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <map>
+
 
 Point::Point() {}
 
@@ -41,6 +43,8 @@ int Cluster::getSize() { return pointsInCluster.size(); }
 
 Point Cluster::getPoint(int index) { return pointsInCluster.at(index); }
 
+std::vector<Point> Cluster::getPoints() { return pointsInCluster; }
+
 void Cluster::addPoint(Point point) {
     pointsInCluster.push_back(point);
     point.setClusterId(this->id);
@@ -67,24 +71,42 @@ KMeans::KMeans(const std::vector<Coord> points, int iters, int k) {
 KMeans::KMeans() {}
 
 void KMeans::initializeClusters() {
-    std::set<int> indexes = {};
+    // std::set<int> indexes = {};
 
-    for (int i = 0; i <= this->k; ++i) {
-        // std::cout << "Creating cluster #" + std::to_string(i) << std::endl;
-        // std::cout << "Size:" + std::to_string(points.size()) << std::endl;
-        int index = std::rand() % points.size(); // get random point index (centroid candidate)
-        if (indexes.find(index) != indexes.end()) { i--; continue; } // if point is already a centroid, skip
-        Cluster c(i, points.at(index));         // create cluster
-        points.at(index).setClusterId(i);   // point is associated with that cluster
-        indexes.insert(index);                  // index saved so as not to be repeated
-        clusters.push_back(c);                  // cluster added to clusters' vector
-        // std::cout << "Centroid is point ID: #" + std::to_string(points.at(index).getId()) << std::endl;
-    }
+    // for (int i = 0; i <= this->k; ++i) {
+    //     // std::cout << "Creating cluster #" + std::to_string(i) << std::endl;
+    //     // std::cout << "Size:" + std::to_string(points.size()) << std::endl;
+    //     int index = std::rand() % points.size(); // get random point index (centroid candidate)
+    //     if (indexes.find(index) != indexes.end()) { i--; continue; } // if point is already a centroid, skip
+    //     Cluster c(i, points.at(index));         // create cluster
+    //     points.at(index).setClusterId(i);       // point is associated with that cluster
+    //     indexes.insert(index);                  // index saved so as not to be repeated
+    //     clusters.push_back(c);                  // cluster added to clusters' vector
+    //     // std::cout << "Centroid is point ID: #" + std::to_string(points.at(index).getId()) << std::endl;
+    // }
 
     // for (int i = 0; i < k; i++) {
     //     std::cout << "Cluster Coords (" + std::to_string(clusters[i].getCentroid().getCoords().lat()) + ", "
     //     + std::to_string(clusters[i].getCentroid().getCoords().lon()) + ")" << std::endl;
     // }
+
+
+    std::vector<std::tuple<int, Point>> points_available;
+    for (int i = 0; i < points.size(); i++) {
+        points_available.push_back( std::tuple<int, Point> (i, points[i])); // save original position and point itself in tuple
+    }
+    
+    for (int i = 0; i < this->k; ++i) {
+        int index = std::rand() % points_available.size(); // get random point index (centroid candidate)
+
+        Cluster c(i, std::get<1>(points_available.at(index)));
+
+        clusters.push_back(c);
+
+        points.at(std::get<0>(points_available.at(index))).setClusterId(i);
+        std::vector<std::tuple<int,Point>>::iterator it = points_available.begin() + index;
+        points_available.erase(it);
+    }
 }
 
 
@@ -98,15 +120,11 @@ int KMeans::findClosestCluster(Point point) {
     if (point.getClusterId() == -1) { // cluster not yet allocated
         minDist = std::numeric_limits<double>::max();
     }
-    else {
-        // std::cout << "Here is the problem?" << std::endl;
-        // std::cout << "Cluster ID: " << std::to_string(point.getClusterId()) << std::endl;
+    else { // gets as default dist the dist to the current cluster centroid
         auto a = clusters.at(point.getClusterId()).getCentroid().getCoords();
         minDist = Coord::getDistanceArc(point.getCoords(), a);
-        // std::cout << "Min Distt: " << std::to_string(minDist) << std::endl;
+        // std::cout << "Min Dist: " << std::to_string(minDist) << std::endl;
     }
-    
-    // std::cout << "Got minDist " + std::to_string(minDist) << std::endl;
 
     // iterate over other cluster centroids to find new allocation
     for (int i = 0; i < k; i++) {
@@ -115,12 +133,12 @@ int KMeans::findClosestCluster(Point point) {
         // if found a closest centroid
         if (dist < minDist) {
             minDist = dist;
-            // point.setClusterId(i);
-            // std::cout << "i:" + std::to_string(i) << std::endl;
+            point.setClusterId(i);
+            std::cout << "Found new cluster for Point #" << point.getId() << " : " << i << " (dist: " <<
+            minDist << ")" << std::endl;
             closest = i;
         }
     }
-    // std::cout << "Closest:" + std::to_string(closest) << std::endl;
     return closest;
 }
 
@@ -130,49 +148,65 @@ int KMeans::run() {
     // Initialize Clusters
     initializeClusters();
 
-    // std::cout << "Init happened" << std::endl;
-
-    // std::cout << clusters.size() << std::endl;
-
     // Iterations Loop
-    int curr_iter = 1;
+    int curr_iter = 0;
 
-    while (curr_iter <= iters) {
-        // std::cout << "Iter Loop #" + std::to_string(curr_iter) << std::endl;
+    while (curr_iter < iters) {
+        std::cout << "Iter Loop #" + std::to_string(curr_iter) << std::endl;
         bool reached_stop_criteria = true;
         int curr_cluster, new_cluster;
+
+
+        for (int i = 0; i < clusters.size(); i++) {
+            std::cout <<  std::fixed << std::setprecision(6) << "Cluster #" << i << " (" << clusters[i].getCentroid().getCoords().lat() << ", "
+                << clusters[i].getCentroid().getCoords().lon() << ")" << std::endl;
+        }
+
+        std::cout << std::endl;
+        
 
         // set cluster for each point
         for (int i = 0; i < points.size(); i++) {
             curr_cluster = points.at(i).getClusterId();
             new_cluster = findClosestCluster(points.at(i));
-            // std::cout << "Point #" + std::to_string(i) +
-            //     " - curr:" + std::to_string(curr_cluster) +
-            //     " - new:" + std::to_string(new_cluster)
-            // << std::endl;
+            std::cout << "Point #" << i << " - curr:" << curr_cluster << " - new:" << new_cluster << std::endl;
 
-            points.at(i).setClusterId(new_cluster);
+            points.at(i).setClusterId(new_cluster);           
 
             if (curr_cluster != new_cluster) {
                 reached_stop_criteria = false; // stop criteria based on cluster stability
-                // std::cout << "\n--- HERE ---\n" << std::endl;
             }
-            // std::cout << "After update stop criteria bruh" << std::endl;
         }
-        // std::cout << "After find closest" << std::endl;
         
+        
+        for (Cluster c : clusters) {
+            std::cout << "Centroid #" << c.getCentroidId() << " "
+            << c.getCentroid().getCoords().lat() << " " << c.getCentroid().getCoords().lon() << std::endl;
+        }
         
         // clear clusters
-        for (Cluster c : clusters) c.removePoints();
-        // std::cout << "After clear clusters" << std::endl;
+        for (Cluster c : clusters) {
+            std::cout << "Befor: " << c.getPoints().size() << std::endl;
+            c.removePoints();
+            std::cout << "After: " << c.getPoints().size() << " Centroid: " << c.getCentroid().getCoords().lat() << std::endl;
+        }
+
 
         // reassign points to new cluster
         for (int i = 0; i < points.size(); i++) {
             if (points.at(i).getClusterId() == -1) continue;
-            clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
+
+            if (clusters[points.at(i).getClusterId()].getCentroidId() == points[i].getId()) {
+                std::cout << "Found centroid (repeated)" << std::endl;
+            }
+            else {
+                clusters.at(points.at(i).getClusterId()).addPoint(points.at(i));
+            }
         }
-            
-        // std::cout << "After reassign to clusters" << std::endl;
+
+        for (Cluster c : clusters) {
+            std::cout << "After: " << c.getPoints().size() << " Centroid: " << c.getCentroid().getCoords().lat() << std::endl;
+        }
 
         // recalculate centroids
         for (int i = 0; i < k; i++) { // for each centroid
@@ -196,32 +230,29 @@ int KMeans::run() {
             clusters.at(i).setCentroid(updated_centroid);
         }
 
-        // std::cout << "Writing to File" << std::endl;
-        // std::ofstream pointsFile("eval/testing-iter" + std::to_string(curr_iter) + ".txt");
-        // pointsFile << std::fixed << std::setprecision(3);
+        std::cout << "Writing to File" << std::endl;
+        std::ofstream pointsFile("eval/testing-iter" + std::to_string(curr_iter) + ".txt");
+        pointsFile << std::fixed << std::setprecision(3);
 
-        // for (int i = 0; i < points.size(); i++) {
-        //     pointsFile << "Point #" + std::to_string(i) + 
-        //         " (" + std::to_string(points[i].getCoords().lat()) + ", " 
-        //         + std::to_string(points[i].getCoords().lon()) + ") - cluster " 
-        //         + std::to_string(points.at(i).getClusterId()) << std::endl;
-        // }
+        for (int i = 0; i < points.size(); i++) {
+            pointsFile << "Point #" + std::to_string(i) + 
+                " (" + std::to_string(points[i].getCoords().lat()) + ", " 
+                + std::to_string(points[i].getCoords().lon()) + ") - cluster " 
+                + std::to_string(points.at(i).getClusterId()) << std::endl;
+        }
 
-        // pointsFile << "\n";
+        pointsFile << "\n";
 
-        // for (int i = 0; i < clusters.size(); i++) {
-        //     pointsFile << "Cluster #" + std::to_string(i) +
-        //         " (" + std::to_string(clusters[i].getCentroid().getCoords().lat()) + ", "
-        //         + std::to_string(clusters[i].getCentroid().getCoords().lon()) + ")"
-        //         << std::endl;
-        // }
+        for (int i = 0; i < clusters.size(); i++) {
+            pointsFile << "Cluster #" << i << " (" << clusters[i].getCentroid().getCoords().lat() << ", "
+                << clusters[i].getCentroid().getCoords().lon() << ")" << std::endl;
+        }
 
 
         if (reached_stop_criteria) break;
 
 
         ++curr_iter;
-        // std::cout << "Updated iters to: " + std::to_string(curr_iter) << std::endl;
     }
     
 

@@ -24,38 +24,40 @@ void evalKMeans(const MapGraph& map_graph) {
             // 30,
             // 40,
             50,
-            60,
-            70,
-            80,
-            90,
-           100,
-           200,
-           300,
-           400,
-           500,
-           600,
-           700,
-           800,
-           900,
-          1000,
-          2000,
-          3000,
-          4000,
-          5000,
-          6000,
-          7000,
-          8000,
-          9000,
-         10000,
-        100000,
-        300000
+        //     60,
+        //     70,
+        //     80,
+        //     90,
+        //    100,
+        //    200,
+        //    300,
+        //    400,
+        //    500,
+        //    600,
+        //    700,
+        //    800,
+        //    900,
+        //   1000,
+        //   2000,
+        //   3000,
+        //   4000,
+        //   5000,
+        //   6000,
+        //   7000,
+        //   8000,
+        //   9000,
+        //  10000,
+        // 100000,
+        // 300000
     };
 
     std::vector<size_t> n_clusters = {
-        10,
-        20,
-        30,
-        40
+        // 5,
+        // 10,
+        // 20,
+        // 30,
+        // 40,
+        50
     };
 
     os << "num_clusters,";
@@ -65,16 +67,26 @@ void evalKMeans(const MapGraph& map_graph) {
     for (const size_t& n_cluster : n_clusters) {
         os << n_cluster;
         for (const size_t& size : sizes) {
-            std::cout << "# Clusters: " << n_cluster << " Size: " << size << std::endl;
+
+            if (size < n_cluster) {
+                std::cout << "Size too small" << std::endl;
+                continue;
+            }
+
+            // std::cout << "# Clusters: " << n_cluster << " Size: " << size << std::endl;
 
             int N = size;
             auto first = coords.begin();
-            auto last  = coords.begin() + N;
+
+            // auto last  = coords.begin() + N;
+            auto last  = coords.begin() + 10;
+
             std::vector<Coord> subCoords(first, last);
 
             auto begin = std::chrono::high_resolution_clock::now();
 
-            auto c = KMeans(subCoords, 20, n_cluster);
+            // auto c = KMeans(subCoords, 20, n_cluster);
+            auto c = KMeans(subCoords, 3, 3);
             c.run();
 
             // Measure time

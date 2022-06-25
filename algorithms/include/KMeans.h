@@ -35,6 +35,7 @@ public:
     int getCentroidId();
     int getSize();
     Point getPoint(int index);
+    std::vector<Point> getPoints();
 
     void addPoint(Point point);
     void removePoints();
