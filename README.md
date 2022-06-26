@@ -1,5 +1,7 @@
 # Advanced Data Structures and Algorithms 🚕
 
+## M:EIC - 1<sup>st</sup> year / 2<sup>nd</sup> semester [🔗](https://sigarra.up.pt/feup/en/UCURR_GERAL.FICHA_UC_VIEW?pv_ocorrencia_id=486254)
+
 ## Group
 
 - [Diogo Rodrigues](https://github.com/dmfrodrigues) ([diogo.rodrigues@fe.up.pt](mailto:diogo.rodrigues@fe.up.pt))
@@ -10,7 +12,7 @@
 
 Our project consists in analysing a set of taxi trips and their trajectories in the city of Porto.
 
-It was divided into two parts, the first one consisting in developing a map matching solution.
+It was divided into two parts, the first one consisting in developing a map matching solution and the second one in clustering taxis positions.
 
 ## Installing
 
@@ -46,6 +48,23 @@ cmake --build . -j8
 
 ## Usage
 
+### Project
+
+To run the project:
+
 ```sh
-da_proj <view|view-trips|match-trip>
+./build/da_proj <view|view-trips|match-trip>
+```
+### Evaluation
+
+```sh
+./build/eval <option>
+```
+
+### Tests
+
+To run tests:
+
+```sh
+./build/tests <option>
 ```
