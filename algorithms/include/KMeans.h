@@ -44,6 +44,7 @@ public:
 };
 
 class KMeans {
+    friend class ClustersView;
 private:
     int iters;
     int k;
@@ -52,7 +53,9 @@ private:
      * @brief Initializes clusters, assigning an initial random centroid to each
      */
     void initializeClusters();
+
     int findClosestCluster(Point point);
+    bool step();
 public:
     std::vector<Point> points;
     std::vector<Cluster> clusters;
@@ -71,6 +74,5 @@ public:
      */
     KMeans();
 
-    bool step();
     int run();
 };

@@ -58,17 +58,25 @@ void HSVtoRGB(float* r, float* g, float* b, float h, float s, float v) {
     }
 }
 
-ClustersView::ClustersView(sf::RenderTarget& window_, std::vector<Cluster> clusters) : window(window_) {
+ClustersView::ClustersView(sf::RenderTarget& window_, KMeans& kmeans) : window(window_), kmeans(kmeans) {
+    // Initialize Clusters
+    kmeans.initializeClusters();   
+}
+
+void ClustersView::updateCircles() {
     int i = 0;
 
-    for (auto cluster : clusters) {
+    for (auto cluster : kmeans.clusters) {
+        
         for (auto point : cluster.pointsInCluster) {
             sf::CircleShape* circle = new sf::CircleShape();
 
             float r, g, b;
 
-            HSVtoRGB(&r, &g, &b, (i * 255.0) / clusters.size(), 1.0, 1.0);
+            // Get a linear scaled color on the rainbow pallette
+            HSVtoRGB(&r, &g, &b, (i * 255.0) / kmeans.clusters.size(), 1.0, 1.0);
 
+            // Set the color for this cluster's points
             sf::Color color(
                 r * 255,
                 g * 255,
@@ -94,7 +102,11 @@ ClustersView::ClustersView(sf::RenderTarget& window_, std::vector<Cluster> clust
 }
 
 void ClustersView::refresh() {
+    if (!reached_stop_criteria) {
+        reached_stop_criteria = kmeans.step();
 
+        updateCircles();
+    }
 }
 
 void ClustersView::draw() {

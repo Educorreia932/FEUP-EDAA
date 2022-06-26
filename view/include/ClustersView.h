@@ -9,12 +9,18 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-class ClustersView: public View {
+class ClustersView : public View {
 private:
-    sf::RenderTarget &window;
+    sf::RenderTarget& window;
     std::vector<sf::CircleShape*> circles;
+
+    KMeans& kmeans;
+    bool reached_stop_criteria = false;
+    int curr_iter = 0;
+
+    void updateCircles();
 public:
-    ClustersView(sf::RenderTarget &window_, std::vector<Cluster> clusters);
+    ClustersView(sf::RenderTarget& window_, KMeans& kmeans);
 
     virtual void refresh();
     virtual void draw();

@@ -27,6 +27,7 @@
 #include "KMeans.h"
 
 #include "WindowController.h"
+#include "WindowClustersController.h"
 #include "WindowTripController.h"
 
 #include <X11/Xlib.h>
@@ -224,16 +225,14 @@ void view_clusters(const MapGraph& map_graph) {
 
     auto kmeans = KMeans(coords, 1000, 10);
 
-    kmeans.run();
-
     // Visualization
     DraggableZoomableWindow window(sf::Vector2f(0, 0));
     window.setBackgroundColor(sf::Color(255, 255, 255));
-    
-    ClustersView clustersView(window, kmeans.clusters);
+
+    ClustersView clustersView(window, kmeans);
     window.setDrawView(&clustersView);
 
-    WindowController windowController(window);
+    WindowClustersController windowController(window, clustersView);
     windowController.run();
 }
 
