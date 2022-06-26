@@ -1,139 +1,103 @@
 #include "HierarchicalClustering.h"
 
-Matrix::Matrix(std::vector<std::vector<double>> rows) : rows(rows) {
-};
-
-std::size_t Matrix::size() const {
-    return rows.size();
-}
-
-double Matrix::at(int i, int j) const {
-    if (j > i)
-        return rows[j][i];
-
-    return rows[i][j];
-}
-
-void Matrix::add_row(std::vector<double> row) {
-    rows.push_back(row);
-}
-
-void Matrix::add_column(std::vector<double> column) {
-    for (int i = 0; i < size(); i++)
-        rows[i].push_back(column[i]);
-}
-
-void Matrix::remove_row(int index) {
-    rows.erase(rows.begin() + index);
-}
-
-void Matrix::remove_column(int index) {
-    for (int i = 0; i < size(); i++)
-        rows[i].erase(rows[i].begin() + index);
-}
-
-Tree::Tree() {
+Node::Node(Coord point) : point(point), left(nullptr), right(nullptr) {
 
 }
 
-Tree::Tree(Tree* left, Tree* right, double distance) : left(left), right(right), distance(distance) {
+Node::Node(Node* left, Node* right) : left(left), right(right) {
 
 }
 
-std::vector<Tree*> Tree::leaves() {
+std::set<Node*> Node::leaves() {
     // Leaf node
-    if (left == nullptr && right == nullptr)
+    if (this->left == nullptr && this->right == nullptr)
         return { this };
 
     else {
         auto leaves = left->leaves();
         auto right_leaves = right->leaves();
 
-        leaves.insert(leaves.end(), right_leaves.begin(), right_leaves.end());
+        leaves.insert(right_leaves.begin(), right_leaves.end());
 
         return leaves;
     }
 }
 
+double Node::getDistance(Node* node) {
+    // Get the arithmetic mean distance between the node and another
+    auto si = leaves().size();
+    auto sj = node->leaves().size();
+    double distance = 0;
 
-UPGMA::UPGMA(std::vector<std::vector<double>> distance_matrix) : distance_matrix(distance_matrix) {
+    for (auto n1 : leaves())
+        for (auto n2 : node->leaves())
+            distance += n1->point.getDistance(n2->point);
 
+    return distance / (si + sj);
 }
 
-double UPGMA::getSmallestDistance(int& min_i, int& min_j) {
-    double minimum_distance;
+void Node::updateDistances(std::set<Node*> clusters) {
+    nn = nullptr;
+    distance_to_nn = std::numeric_limits<double>::max();
 
-    for (int i = 1; i < distance_matrix.size(); i++)
-        for (int j = 0; j < i; j++) {
-            minimum_distance = distance_matrix.at(min_i, min_j);
+    for (auto node : clusters) {
+        if (node == this)
+            continue;
 
-            if (distance_matrix.at(i, j) < minimum_distance) {
-                min_i = i;
-                min_j = j;
-            }
+        double distance_to_node = this->getDistance(node);
+
+        bool no_nn = (nn == nullptr);
+
+        if (no_nn || (distance_to_node < distance_to_nn)) {
+            distance_to_nn = distance_to_node;
+            nn = node;
         }
-
-    return minimum_distance;
-}
-
-Tree UPGMA::calculate() {
-    std::vector<Tree*> trees;
-
-    // Create a tree for each entry
-    for (std::size_t i = 0; i < distance_matrix.size(); i++)
-        trees.push_back(new Tree());
-
-    // Execute the algorithm 
-    auto iterations = trees.size();
-
-    for (int k = iterations; k >= 1; k--) {
-        // Find minimum distance
-        int i = 1, j = 0;
-        double minimum_distance = getSmallestDistance(i, j);
-
-        // Create a new tree to join the clusters with minimum distance
-
-        auto tree = new Tree(trees[i], trees[j], minimum_distance / 2.0);
-
-        if (k > 2) {
-            // Remove from the list of trees the joined branches
-            Tree* tree_i = trees[i];
-            trees.erase(trees.begin() + i);
-
-            Tree* tree_j = trees[j];
-            trees.erase(trees.begin() + j);
-
-            // Calculate the distances for the new cluster
-            std::vector<double> distances;
-
-            for (int x = 0; x < distance_matrix.size(); x++)
-                if (x != i && x != j) {
-                    double si = tree_i->leaves().size();
-                    double sj = tree_j->leaves().size();
-
-                    // Use the weighted average to calculate the distances between the clusters
-                    double distance = (si * distance_matrix.at(i, x) + sj * distance_matrix.at(j, x)) / (si + sj);
-                    distances.push_back(distance);
-                }
-
-            // Remove column corresponding to j
-            distance_matrix.remove_column(i);
-            distance_matrix.remove_column(j);
-
-            // Remove row corresponding to i
-            distance_matrix.remove_row(i);
-            distance_matrix.remove_row(j);
-
-            // Add row with new distances
-            distance_matrix.add_row(distances);
-
-            // Add column with zero distances: of len (|dists| + 1)
-            distance_matrix.add_column(std::vector<double>(distances.size() + 1, 0));
-
-            trees.push_back(tree);
-        }
-
-        else
-            return *tree;
     }
+}
+
+UPGMA::UPGMA(std::vector<Coord> points) {
+    for (auto point : points)
+        clusters.insert(new Node(point));
+}
+
+void UPGMA::closestPair(Node*& c1, Node*& c2) {
+    double minimum_distance = std::numeric_limits<double>::max();
+
+    for (auto node : clusters)
+        if (node->distance_to_nn < minimum_distance) {
+            minimum_distance = node->distance_to_nn;
+            c1 = node;
+            c2 = node->nn;
+        }
+}
+
+Node* UPGMA::buildTree() {
+    for (auto node : clusters)
+        node->updateDistances(clusters);
+
+    std::size_t iterations = clusters.size();
+
+    for (std::size_t i = 0; i < iterations - 1; i++) {
+        // Find globally closest pair
+        Node* c1, *c2;
+
+        closestPair(c1, c2);
+
+        // Join the clusters
+        clusters.erase(c1);
+        clusters.erase(c2);
+
+        auto new_node = new Node(c1, c2);
+
+        clusters.insert(new_node);
+
+        new_node->updateDistances(clusters);
+
+        // Recalculate NN's for each cluster previously having one of the joined clusters as its NN
+        for (auto node : clusters)
+            if (node->nn == c1 or node->nn == c2)
+                node->updateDistances(clusters);
+    }
+
+    return *clusters.end();
 }

@@ -51,27 +51,11 @@ void evalHierarchical(const MapGraph& map_graph) {
         std::cout << "Size: " << size << std::endl;
         os << size;
 
-        // Calculate distance matrix
-        std::vector<Coord> coordinates_sample(coordinate_list.begin(), coordinate_list.begin() + size);
-        std::vector<std::vector<double>> distance_matrix(size, std::vector<double>(size, 0));
-
-        for (size_t i = 0; i < size; i++) {
-            for (size_t j = 0; j < i; j++) {
-                auto c1 = coordinates_sample[i];
-                auto c2 = coordinates_sample[j];
-
-                distance_matrix[i][j] = Coord::getDistanceArc(c1, c2);
-            }
-        }
-
         double total_time = 0;
 
         // Execute algorithm
         for (size_t i = 0; i < REPEAT; ++i) {
             auto begin = std::chrono::high_resolution_clock::now();
-
-            auto upgma = UPGMA(distance_matrix);
-            upgma.calculate();
 
             // Measure time
             auto end = std::chrono::high_resolution_clock::now();
