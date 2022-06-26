@@ -212,7 +212,7 @@ void match_all_trips(const MapGraph& M, std::vector<Trip>& trips) {
 void view_clusters(const MapGraph& map_graph) {
     std::vector<Coord> coords;
 
-    Box box = Box(Vector2(-8.68, 41.12), Vector2(-8.65, 41.16));
+    Box box = Box(Vector2(-8.68, 41.12), Vector2(-8.64, 41.18));
 
     for (std::pair<const DWGraph::node_t, Coord> node : map_graph.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
@@ -223,7 +223,7 @@ void view_clusters(const MapGraph& map_graph) {
 
     std::cout << "Running k-means..." << std::endl;
 
-    auto kmeans = KMeans(coords, 1000, 10);
+    auto kmeans = KMeans(coords, 50000, 20);
 
     // Visualization
     DraggableZoomableWindow window(sf::Vector2f(0, 0));

@@ -9,6 +9,9 @@ class WindowClustersController {
 private:
     DraggableZoomableWindow &window;
     ClustersView &view;
+    
+    sf::Time elapsed_time;
+    sf::Clock r;
 public:
     WindowClustersController(DraggableZoomableWindow &window, ClustersView &view);
 

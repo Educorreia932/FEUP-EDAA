@@ -14,7 +14,18 @@ void WindowClustersController::run() {
     window.recalculateView();
 
     while (window.isOpen()) {
-        view.refresh();
+        // Update/Refresh frequency
+        sf::Time delta_time = sf::milliseconds(100);
+
+        elapsed_time += r.restart();
+
+        if (elapsed_time >= delta_time){
+            // Refresh view
+            view.refresh();
+
+            // Substract the time consumed
+            elapsed_time -= delta_time;
+        }
 
         Event event{};
 

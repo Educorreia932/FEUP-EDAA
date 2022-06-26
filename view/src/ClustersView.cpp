@@ -105,6 +105,9 @@ void ClustersView::refresh() {
     if (!reached_stop_criteria) {
         reached_stop_criteria = kmeans.step();
 
+        if (reached_stop_criteria)
+            std::cout << "k-means finished" << std::endl;
+
         updateCircles();
     }
 }
