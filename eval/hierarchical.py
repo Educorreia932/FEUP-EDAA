@@ -40,7 +40,7 @@ ax.legend(["Median", "Mean", "IQR", "Minimum", "Maximum"])
 plt.xlabel("Number of points in set ($N$)")
 plt.ylabel("Execution time ($t$/s)")
 
-plt.savefig("hierarchical.png", dpi=600)
+# plt.savefig("hierarchical.png", dpi=600)
 
 plt.grid()
 plt.show()

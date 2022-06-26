@@ -25,12 +25,14 @@ std::set<Node*> Node::leaves() {
 
 double Node::getDistance(Node* node) {
     // Get the arithmetic mean distance between the node and another
-    auto si = leaves().size();
-    auto sj = node->leaves().size();
     double distance = 0;
+    auto left_leaves = leaves();
+    auto right_leaves = node->leaves();
+    auto si = left_leaves.size();
+    auto sj = right_leaves.size();
 
-    for (auto n1 : leaves())
-        for (auto n2 : node->leaves())
+    for (auto n1 : left_leaves) 
+        for (auto n2 : right_leaves) 
             distance += n1->point.getDistance(n2->point);
 
     return distance / (si + sj);
@@ -99,5 +101,5 @@ Node* UPGMA::buildTree() {
                 node->updateDistances(clusters);
     }
 
-    return *clusters.end();
+    return *(clusters.begin());
 }

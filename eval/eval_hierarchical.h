@@ -53,9 +53,12 @@ void evalHierarchical(const MapGraph& map_graph) {
 
         double total_time = 0;
 
-        // Execute algorithm
+        // Repeat
         for (size_t i = 0; i < REPEAT; ++i) {
             auto begin = std::chrono::high_resolution_clock::now();
+    
+            // Execute algorithm
+            UPGMA(std::vector(coordinate_list.begin(), coordinate_list.begin() + size)).buildTree();
 
             // Measure time
             auto end = std::chrono::high_resolution_clock::now();
