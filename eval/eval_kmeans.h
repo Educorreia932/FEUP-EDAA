@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Box.h"
 #include "Coord.h"
 #include "KMeans.h"
 
@@ -13,18 +14,30 @@ void elbowMethod(const MapGraph& map_graph) {
 
     os << "Number of clusters,Centroid (Latitude),Centroid (Longitude)\n";
 
+    // Get list of coordinates
     std::vector<Coord> coords;
 
-    for (std::pair<DWGraph::node_t, Coord> element : map_graph.getNodes())
-        coords.push_back(element.second);
+    Box box = Box(Vector2(-8.68, 41.12), Vector2(-8.62, 41.18));
+
+    for (std::pair<const DWGraph::node_t, Coord> node : map_graph.getNodes()) {
+        Vector2 point = Vector2(node.second.lon(), node.second.lat());
+
+        if (box.contains(point)) 
+            coords.push_back(node.second);
+    }
 
     std::vector<size_t> n_clusters = {
+         5,
+        10,
+        20,
+        30,
+        40,
         50,
-        100,
-        250,
-        500,
-        750,
-        1000
+        60,
+        70,
+        80,
+        90,
+       100
     };
 
     for (auto k : n_clusters) {

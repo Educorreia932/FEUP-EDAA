@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 
 points_df = pd.read_csv("../res/map/processed/AMP.nodes", delimiter=" ", skiprows=[0], index_col=0, header=None)
-clusters_df = pd.read_csv("kmeans-elbow.csv", index_col=0)
+clusters_df = pd.read_csv("kmeans-elbow.csv")
 
-K = [10, 50, 100, 250]
+K = clusters_df["Number of clusters"].unique()
 
 # Array of points
 X = np.array(list(zip(points_df[1], points_df[2])))
@@ -23,7 +23,7 @@ cIdx = [np.argmin(D, axis=1) for D in D_k]
 dist = [np.min(D, axis=1) for D in D_k]
 avgWithinSS = [sum(d) / X.shape[0] for d in dist]
 
-kIdx = 2
+kIdx = 4
 
 # Plot elbow curve
 fig = plt.figure()

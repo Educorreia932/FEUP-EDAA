@@ -65,9 +65,27 @@ ClustersView::ClustersView(sf::RenderTarget& window_, KMeans& kmeans) : window(w
 
 void ClustersView::updateCircles() {
     int i = 0;
-
+    
+    centroids.clear();
+    circles.clear();
+    
     for (auto cluster : kmeans.clusters) {
-        
+        sf::CircleShape* centroid = new sf::CircleShape();
+
+        sf::Color color(0, 0, 0, 255);
+
+        centroid->setFillColor(color);
+
+        auto coords = cluster.getCentroid().getCoords();
+
+        double x = (coords.lon() - (-8.65)) * SCALE;
+        double y = (coords.lat() - 41.15) * SCALE;
+
+        centroid->setRadius(RADIUS * 3);
+        centroid->setPosition(x - centroid->getRadius(), y - centroid->getRadius()); // Center circle
+
+        centroids.push_back(centroid);
+
         for (auto point : cluster.pointsInCluster) {
             sf::CircleShape* circle = new sf::CircleShape();
 
@@ -88,8 +106,8 @@ void ClustersView::updateCircles() {
 
             auto coords = point.getCoords();
 
-            double x = (coords.lon() - (-8.68)) * SCALE;
-            double y = (coords.lat() - 41.14) * SCALE;
+            double x = (coords.lon() - (-8.65)) * SCALE;
+            double y = (coords.lat() - 41.15) * SCALE;
 
             circle->setPosition(x - RADIUS, y - RADIUS); // Center circle
             circle->setRadius(RADIUS);
@@ -113,6 +131,11 @@ void ClustersView::refresh() {
 }
 
 void ClustersView::draw() {
+    // window.clear(sf::Color(255, 255, 255, 255) );
+
     for (sf::CircleShape* circle : circles)
         window.draw(*circle);
+
+    for (sf::CircleShape* centroid : centroids)
+        window.draw(*centroid);
 }

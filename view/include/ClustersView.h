@@ -13,6 +13,7 @@ class ClustersView : public View {
 private:
     sf::RenderTarget& window;
     std::vector<sf::CircleShape*> circles;
+    std::vector<sf::CircleShape*> centroids;
 
     KMeans& kmeans;
     bool reached_stop_criteria = false;
