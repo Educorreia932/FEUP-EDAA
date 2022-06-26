@@ -52,6 +52,7 @@ private:
      * @brief Initializes clusters, assigning an initial random centroid to each
      */
     void initializeClusters();
+    int findClosestCluster(Point point);
 public:
     std::vector<Point> points;
     std::vector<Cluster> clusters;
@@ -70,7 +71,6 @@ public:
      */
     KMeans();
 
-    int findClosestCluster(Point point);
-
+    bool step();
     int run();
 };
