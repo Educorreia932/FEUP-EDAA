@@ -11,7 +11,7 @@ void elbowMethod(const MapGraph& map_graph) {
     // Open output CSV
     std::ofstream os("eval/kmeans-elbow.csv");
 
-    os << "Number of clusters, Centroid (Latitude), Centroid (Longitude)\n";
+    os << "Number of clusters,Centroid (Latitude),Centroid (Longitude)\n";
 
     std::vector<Coord> coords;
 
@@ -19,12 +19,17 @@ void elbowMethod(const MapGraph& map_graph) {
         coords.push_back(element.second);
 
     std::vector<size_t> n_clusters = {
-        10,
-        20,
-        30,
+        50,
+        100,
+        250,
+        500,
+        750,
+        1000
     };
 
     for (auto k : n_clusters) {
+        std::cout << "No. clusters: " << k << std::endl;
+
         auto kmeans = KMeans(coords, 100, k);
 
         kmeans.run();

@@ -22,7 +22,12 @@ private:
 };
 
 class Cluster {
+private:
+    int id;
+    Point centroid;
 public:
+    std::vector<Point> pointsInCluster;
+
     Cluster();
     Cluster(int id, Point centroid);
 
@@ -36,16 +41,10 @@ public:
 
     void addPoint(Point point);
     void removePoints();
-
-private:
-    int id;
-    Point centroid;
-    std::vector<Point> pointsInCluster;
 };
 
 class KMeans {
 private:
-    std::vector<Point> points;
     int iters;
     int k;
 
@@ -54,6 +53,7 @@ private:
      */
     void initializeClusters();
 public:
+    std::vector<Point> points;
     std::vector<Cluster> clusters;
 
     /**
