@@ -22,8 +22,12 @@
 #include "MapView.h"
 #include "MapOsmView.h"
 #include "VoronoiView.h"
+#include "ClustersView.h"
+
+#include "KMeans.h"
 
 #include "WindowController.h"
+#include "WindowClustersController.h"
 #include "WindowTripController.h"
 
 #include <X11/Xlib.h>
@@ -33,7 +37,7 @@
 using hrc = std::chrono::high_resolution_clock;
 namespace fs = std::filesystem;
 
-const double NANOS_TO_SECS = 1.0/1000000000.0;
+const double NANOS_TO_SECS = 1.0 / 1000000000.0;
 const double METERS_TO_MILLIMS = 1000.0;
 
 void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
@@ -49,14 +53,13 @@ void view(const MapGraph& M, const std::vector<polygon_t>& polygons) {
 
 VoronoiDiagram voronoi(const MapGraph& M) {
     std::vector<Site*> sites;
-    // Box box = Box(Vector2(-8.67749, 41.164403), Vector2(-8.6768, 41.1649));
     Box box = Box(Vector2(-8.67188, 41.149), Vector2(-8.6715, 41.15));
 
     for (std::pair<const DWGraph::node_t, Coord> node : M.getNodes()) {
         Vector2 point = Vector2(node.second.lon(), node.second.lat());
 
-        if (box.contains(point)) 
-            sites.push_back(new Site{ point }); 
+        if (box.contains(point))
+            sites.push_back(new Site{ point });
     }
 
     VoronoiDiagram diagram = FortuneAlgorithm(sites).construct();
@@ -78,7 +81,7 @@ void voronoi_display(const MapGraph& M) {
 
 void view_trips(const std::vector<Trip>& trips) {
     std::cout << "Building graph from trips..." << std::endl;
-    const size_t N = 100000;
+    const size_t N = 30000;
     std::set<size_t> s;
     while (s.size() < N) s.insert(rand() % trips.size());
     std::vector<Trip> tripsSmall;
@@ -95,14 +98,14 @@ void view_trips(const std::vector<Trip>& trips) {
     windowController.run();
 }
 
-void match_trip_nn(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+void match_trip_nn(const MapGraph& M, const std::vector<polygon_t>& polygons, const std::vector<Trip>& trips) {
     auto begin = hrc::now();
     MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
-    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count())*double(NANOS_TO_SECS);
+    double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
     std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
-              << G.getNumberOfEdges() << " edges" << std::endl;
+        << G.getNumberOfEdges() << " edges" << std::endl;
 
     std::cout << "Generating time graph..." << std::endl;
     DWGraph::DWGraph dwG = G.getTimeGraph();
@@ -117,8 +120,8 @@ void match_trip_nn(const MapGraph &M, const std::vector<polygon_t> &polygons, co
     mapMatching.run();
     // std::cout << "Computed map matching..." << std::endl;
 
-    DraggableZoomableWindow window(sf::Vector2f(0,0)); window.setBackgroundColor(sf::Color(170, 211, 223));
-    MapView mapView(Coord(41.1594,-8.6199), 20000000);
+    DraggableZoomableWindow window(sf::Vector2f(0, 0)); window.setBackgroundColor(sf::Color(170, 211, 223));
+    MapView mapView(Coord(41.1594, -8.6199), 20000000);
     MapTerrainOsmView mapTerrainOsmView(window, mapView, polygons);
     MapGraphOsmView mapGraphOsmView(window, mapView, M);
     MapTripMatchView mapTripMatchView(window, mapView);
@@ -131,14 +134,14 @@ void match_trip_nn(const MapGraph &M, const std::vector<polygon_t> &polygons, co
     windowTripController.run();
 }
 
-void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const std::vector<Trip> &trips){
+void match_trip(const MapGraph& M, const std::vector<polygon_t>& polygons, const std::vector<Trip>& trips) {
     auto begin = hrc::now();
     MapGraph G = M.splitLongEdges(30.0);
     auto end = hrc::now();
     double dt = double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) * double(NANOS_TO_SECS);
     std::cout << "Took " << dt << "s to split long edges" << std::endl;
     std::cout << "Split graph has " << G.getNodes().size() << " nodes and "
-              << G.getNumberOfEdges() << " edges" << std::endl;
+        << G.getNumberOfEdges() << " edges" << std::endl;
 
     std::cout << "Generating time graph..." << std::endl;
     DWGraph::DWGraph dwG = G.getTimeGraph();
@@ -149,7 +152,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     double sigma_z = 4.07; // in meters
     double beta = 3; // From https://www.mapzen.com/blog/data-driven-map-matching/
     VStripesRadius closestPointsInRadius;
-    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS, 650*METERS_TO_MILLIMS);
+    AstarFew shortestPathFew(G.getNodes(), METERS_TO_MILLIMS, 650 * METERS_TO_MILLIMS);
     HiddenMarkovModel mapMatching(closestPointsInRadius, shortestPathFew, d, sigma_z, beta);
     mapMatching.initialize(&G);
     mapMatching.run();
@@ -169,7 +172,7 @@ void match_trip(const MapGraph &M, const std::vector<polygon_t> &polygons, const
     windowTripController.run();
 }
 
-void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
+void match_all_trips(const MapGraph& M, std::vector<Trip>& trips) {
     MapGraph G = M.splitLongEdges(30.0);
     VStripesRadius closestPointsInRadius;
 
@@ -182,27 +185,56 @@ void match_all_trips(const MapGraph &M, std::vector<Trip> &trips){
     hmm.initialize(&G, trips);
     hmm.run();
 
-    if(!fs::exists("res/matched"))
+    if (!fs::exists("res/matched"))
         fs::create_directories("res/matched");
 
     std::ofstream os("res/matched/matched.txt");
 
     size_t index = 0;
-    for(const Trip &trip: trips){
-        if(index%100000 == 0) std::cout << "Index: " << index << std::endl;
+    for (const Trip& trip : trips) {
+        if (index % 100000 == 0) std::cout << "Index: " << index << std::endl;
         ++index;
         try {
-            const std::vector<DWGraph::node_t> &matches = hmm.getMatches(trip.id);
+            const std::vector<DWGraph::node_t>& matches = hmm.getMatches(trip.id);
             os << trip.id << " " << matches.size() << "\n";
-            for(const DWGraph::node_t &u: matches){
+            for (const DWGraph::node_t& u : matches) {
                 os << u << "\n";
             }
-        } catch(const std::exception &e){
+        }
+        catch (const std::exception& e) {
 
         }
     }
 
     os.close();
+}
+
+void view_clusters(const MapGraph& map_graph) {
+    std::vector<Coord> coords;
+
+    Box box = Box(Vector2(-8.68, 41.12), Vector2(-8.62, 41.18));
+
+    for (std::pair<const DWGraph::node_t, Coord> node : map_graph.getNodes()) {
+        Vector2 point = Vector2(node.second.lon(), node.second.lat());
+
+        if (box.contains(point)) 
+            coords.push_back(node.second);
+    }
+
+    std::cout << "Running k-means..." << std::endl;
+
+    auto kmeans = KMeans(coords, 50000, 40);
+
+    // Visualization
+    DraggableZoomableWindow window(sf::Vector2f(0, 0));
+    window.onScroll(6); // Initial zoom
+    window.setBackgroundColor(sf::Color(255, 255, 255));
+
+    ClustersView clustersView(window, kmeans);
+    window.setDrawView(&clustersView);
+
+    WindowClustersController windowController(window, clustersView);
+    windowController.run();
 }
 
 int main(int argc, char* argv[]) {
@@ -246,7 +278,14 @@ int main(int argc, char* argv[]) {
 
         if (opt == "match-all-trips") { match_all_trips(M, trips); return 0; }
 
+        if (opt == "view-clusters") {
+            view_clusters(M);
+
+            return 0;
+        }
+
         std::cerr << "Invalid option" << std::endl;
+
         return -1;
     }
 
